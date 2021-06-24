@@ -8,4 +8,4 @@ def set_up_driver(url):
 	options.add_argument("--start-maximized")
 	driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 	driver.get(url)
-	return driver	
+	return driver
