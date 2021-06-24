@@ -1,0 +1,544 @@
+# https://www.premierleague.com/results
+
+from selenium.common.exceptions import TimeoutException
+
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+from selenium.webdriver.common.keys import Keys
+
+import time
+import re
+
+from set_up_driver import *
+
+urls = {
+	'url_1': 'https://www.premierleague.com/results?co=1&se=363&cl=-1',
+}
+
+# retrieve the team names, score, the stadium name, and its city
+def results_retrieve_1():
+	# set up the chrome driver
+	# options = webdriver.ChromeOptions()
+	# options.add_argument("--no-sandbox")
+	# options.add_experimental_option('excludeSwitches', ['enable-logging'])
+	# options.add_argument("--start-maximized")
+	# driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+	driver = set_up_driver(urls['url_1'])
+
+
+	
+	# Scroll down to load more results
+	driver.execute_script("window.scrollTo(0, 1080)")
+
+	try:
+		# Stadiums contains the following information:
+		# 	stadium_name
+		#	city
+		stadiums = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='stadiumName']"))
+		)
+
+		# Find the list of results on the page
+		# The results contains the following information:
+		# 	team_name_1 
+		# 	team_1_goals-team_2_goals
+		#	team_name_2
+		results = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
+		)
+
+		# Since the browser duplicates result rows when scrolling down, we need to use the ids
+		#	of the rows on the page
+		div_ids = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']"))
+		)
+
+		number_of_results = len(results)
+		number_of_stadiums = len(stadiums)
+		
+		counter = 1
+
+		unique_ids = []
+
+		number_of_results = len(div_ids)
+
+		# holds all the results
+		results_list_of_dicts = []
+		
+		# Iterating over the results to get the team names, scores, stadium names,
+		#	and then click at each result to get the details of the match
+		for i in range(0, number_of_results):			
+			# Since the page is updated (after clicking on a link and going back), we need to
+			#	find the result elements again
+			stadiums = WebDriverWait(driver, 10).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='stadiumName']"))
+			)
+			results = WebDriverWait(driver, 10).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
+			)
+			div_ids = WebDriverWait(driver, 10).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']"))
+			)
+
+			# id = div_id.get_attribute("data-matchid")
+			id = div_ids[i].get_attribute("data-matchid")
+			
+			# The rows of the page are being duplicated after the scrollTo
+			# So we check whether the row has already appeared on the page or not
+			if is_row_new(unique_ids, id) == True:
+				# holds a result information
+				result_dict = {}
+				result_dict['match id'] = id
+
+				unique_ids.append(id)
+				# truncated is an array of strings with the following format:
+				# ['team_name_1', 'team_1_goals-team_2_goals', 'team_name_2']
+				# truncated = result.text.splitlines()
+				truncated = results[i].text.splitlines()
+
+				team_name_1 = truncated[0]
+				scoresheet = truncated[1]
+				team_name_2 = truncated[2]
+
+				# scores is an array of 2 elements with the number of goals for each
+				# 	team. e.g. ['2-0']
+				scores = scoresheet.splitlines()
+				# scores now is an array with the number of goals as its elements
+				#	e.g. [2, 0]
+				scores = scores[0].split('-')
+				score_team_1 = scores[0]
+				score_team_2 = scores[1]
+
+				# Get the text from the stadium attribute
+				stadium = stadiums[i].text
+
+				# remove the newlines and trailing spaces and separate the name of the stadium
+				#	and the name of the city by comma
+				stadium = stadium.replace('\n', '')
+				stadium = stadium.strip()
+				stadium = stadium.split(',')
+				stadium[1] = stadium[1].strip()
+
+				stadium_name = stadium[0]
+				city = stadium[1]
+
+				print(team_name_1 + " " + score_team_1 + "-" + score_team_2 + " " + team_name_2 + " @ " + str(stadium_name) + ", " + str(city))
+				counter += 1
+
+
+				result_dict['home'] = team_name_1
+				result_dict['away'] = team_name_2
+				result_dict['home goals'] = score_team_1
+				result_dict['away goals'] = score_team_2
+				result_dict['stadium name'] = stadium_name
+				result_dict['city'] = city
+
+				results_list_of_dicts.append(result_dict)
+			
+			print(results_list_of_dicts)
+
+			# call results_retrieve_2 to get the match details, such as scorers and assists, 
+			#	red cards, penalty scorers, own goals, etc.
+			player_stats, match_date = results_retrieve_2(driver, div_ids[i])
+
+			print(match_date)
+			print(player_stats)
+
+			print('*****************************************************************')
+			print('*****************************************************************')
+
+	except RuntimeError as runtime_error:
+		print(runtime_error)
+
+# !!! put the team names, score, stadium, and city name into a dictionary
+
+# !!! count the clean sheets
+
+# retrieve the scorer names, and statistics after clicking on the result row
+# Returns the name of the goal scorers, assists ...
+def results_retrieve_2(driver, result_row):
+	# click on the result row to open the details of the match
+	driver.execute_script("arguments[0].click();", result_row)
+	stats = {}
+
+	try:
+		# retrieve the events of the home side, which include goals (by penalty), 
+		#	own goals, and red cards
+		events_home = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchEvents matchEventsContainer']/div[@class='home']/div[@class='event']"))
+		)
+		for event_home in events_home:
+			# Remove the space from the text
+			# 	event_home[0] = scorer name
+			#	event_home[1] = Goal/Red Card
+			event_home = event_home.text.splitlines()
+			stats.update(process_events_data(event_home, True))
+
+	except TimeoutException as ex:
+		print('')
+	
+
+	try:
+		# retrieve the events of the home side, which include goals (by penalty), 
+		#	own goals, and red cards
+		events_away = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchEvents matchEventsContainer']/div[@class='away']/div[@class='event']"))
+		)
+		for event_away in events_away:
+			event_away = event_away.text.splitlines()
+			stats.update(process_events_data(event_away, False))
+
+	except TimeoutException as ex:
+		print('')
+
+	try:
+		assists_home = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='assists']/div[@class='matchAssistsContainer']/div[@class='home']/div[@class='event']"))
+		)
+		for assist_home in assists_home:
+			assist_home = assist_home.text.splitlines()
+			stats.update(process_events_data(assist_home, True))
+
+	except TimeoutException as ex:
+		print('')
+
+
+	try:
+		assists_away = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='assists']/div[@class='matchAssistsContainer']/div[@class='away']/div[@class='event']"))
+		)
+		for assist_away in assists_away:
+			assist_away = assist_away.text.splitlines()
+			stats.update(process_events_data(assist_away, False))
+
+	except TimeoutException as ex:
+		print('')
+
+	
+	print('*****************************************************************')
+
+
+
+	match_date = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchDate renderMatchDateContainer']"))
+	)
+
+	match_date = match_date[0].text
+
+	match_date_list = match_date.split()
+
+	weekday = match_date_list[0]
+	if weekday == 'Mon':
+		weekday = 'Monday'
+	elif weekday == 'Tuesday':
+		weekday = 'Tuesday'
+	elif weekday == 'Wednesday':
+		weekday = 'Wednesday'
+	elif weekday == 'Thursday':
+		weekday = 'Thursday'
+	elif weekday == 'Friday':
+		weekday = 'Friday'
+	elif weekday == 'Saturday':
+		weekday = 'Saturday'
+	elif weekday == 'Sunday':
+		weekday = 'Sunday'
+	day = match_date_list[1]
+	month = match_date_list[2]
+	year = match_date_list[3]
+
+	match_date = {}
+	match_date['weekday'] = weekday
+	match_date['day'] = day
+	match_date['month'] = month
+	match_date['year'] = year
+
+
+
+	# header[@class='mcHeader']/div[@class='dropDown']/
+	matchweek = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//main[@id='mainContent']/div[@class='matchCentre']/header[@class='mcHeader']/div[@class='dropDown']/div[@class='current']/div[@class='long']"))
+	)
+
+	matchweek_list = matchweek[0].text.split()
+	matchweek = matchweek_list[0]
+
+	match_date['matchweek'] = matchweek
+
+	match_referee = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='referee']"))
+	)
+
+	match_referee = match_referee[0].text
+	match_date['referee'] = match_referee
+
+	# call the retrive_3 function to get the line_ups and player stats of the match
+	line_ups = results_retrieve_3(driver)
+	print(line_ups)
+
+	print('*****************************************************************')
+
+	# call results_retrieve_3 function to get the team stats of the match
+	team_stats = results_retrieve_4(driver)
+	print(team_stats)
+	print('*****************************************************************')	
+	
+
+	# go back to the previous page
+	driver.execute_script("window.history.go(-1)")
+
+	return stats, match_date
+	
+# get the line-ups, substitutes and player stats
+def results_retrieve_3(driver):
+	# get the line-ups tab on the screen
+	line_ups_tab = WebDriverWait(driver, 10).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchCentreSquadLabelContainer']"))
+	)
+
+	# click on the line-ups botton
+	driver.execute_script("arguments[0].click();", line_ups_tab[0])
+
+	# get the formation of the home team
+	formation_home = WebDriverWait(driver, 10).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='teamList mcLineUpContainter homeLineup active']/div[@class='col-4-m ']/header[@class='squadHeader']/div[@class='position']/strong[@class='matchTeamFormation']"))
+	)
+	formation_home = formation_home[0].text
+
+	# get the formation of the away team
+	formation_away = WebDriverWait(driver, 10).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='teamList mcLineUpContainter awayLineup']/div[@class='col-4-m right']/header[@class='squadHeader']/div[@class='position']/strong[@class='matchTeamFormation']"))
+	)
+
+	formation_away = formation_away[0].text
+
+	# get the squads of the hosts and the guests (shirt numbers and player info)
+	squad_home_number = WebDriverWait(driver, 10).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='teamList mcLineUpContainter homeLineup active']/div[@class='col-4-m ']/div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList home']/li[@class='player']/a/div[@class='number']"))
+	)
+
+	squad_home_info = WebDriverWait(driver, 10).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='teamList mcLineUpContainter homeLineup active']/div[@class='col-4-m ']/div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList home']/li[@class='player']/a/div[@class='info']"))
+	)
+
+	squad_away_number = WebDriverWait(driver, 10).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='teamList mcLineUpContainter awayLineup']/div[@class='col-4-m right']/div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList']/li[@class='player']/a/div[@class='number']"))
+	)
+
+	squad_away_info = WebDriverWait(driver, 10).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='teamList mcLineUpContainter awayLineup']/div[@class='col-4-m right']/div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList']/li[@class='player']/a/div[@class='info']"))
+	)
+
+	# !!! RETURN THE FORMATION TOO
+	print(formation_home + ' : ' + formation_away)
+
+	line_ups_home = extract_player_information(squad_home_number, squad_home_info, True)
+	line_ups_away = extract_player_information(squad_away_number, squad_away_info, False)
+
+	# extend the line_ups home with the line_ups_away to get both teams' line-ups of the match
+	line_ups_home.update(line_ups_away)
+
+	return line_ups_home
+
+# get the team stats
+def results_retrieve_4(driver):
+	# get the stats tab on the screen
+	stats_tab = WebDriverWait(driver, 10).until(
+		EC.presence_of_element_located((By.XPATH, "//div[@class='centralContent']/div[@class='mcTabsContainer']/div[@class='wrapper col-12']/div[@class='tabLinks matchNav']/div[@class='tabs']/ul[@class='tablist']/li[@data-tab-index='2']"))
+	)
+	# click on the stats botton
+	driver.execute_script("arguments[0].click();", stats_tab)
+
+	# get the stats table on the screen
+	teams_stats = WebDriverWait(driver, 10).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='mcStatsTab statsSection season-so-far wrapper col-12 active']/table/tbody[@class='matchCentreStatsContainer']/tr"))
+	)
+
+	# append the statistics into a list
+	stats_list = []
+
+	# The format of the stats is:
+	# 28.8 Possession % 71.2
+	# 3 Shots on target 7
+	# 		 ....
+	# 11 Fouls conceded 12
+	for team_stats in teams_stats:
+		stats_list.append(team_stats.text)
+	
+
+	stats_dict = {}
+
+	
+	# convert the stats_list into a dictionary, where the keys are the types of
+	#	the statistic along with home/away, and the values are the numbers
+	#	e.g. {... 'Shots on target home': '3', 'Shots on target away': '7'}
+	for i in range(0, len(stats_list)):
+		first_space = stats_list[i].index(' ')
+		if i == 0:
+			percent_sign = stats_list[i].rindex('%')	
+			type_of_stat = stats_list[i][first_space+1:percent_sign - 1]
+		else:
+			last_space = stats_list[i].rindex(' ')
+			type_of_stat = stats_list[i][first_space + 1:last_space]
+
+		stats_splitted = stats_list[i].split()
+		stats_dict[type_of_stat + ' home'] = stats_splitted[0]
+		stats_dict[type_of_stat + ' away'] = stats_splitted[len(stats_splitted) - 1]
+
+	return stats_dict
+
+# Helper function for results_retrieve_3()	
+# take in the rows of the squad, squad_number for the player's shirt number,
+#	squad_info for the player's information in the match
+# organize the data into a dictionary and return it
+def extract_player_information(squad_number, squad_info, is_home_side):
+	squad_dict = {}
+
+	starting_11_counter = 1
+	
+	# extract the player performance (such as substition on/off, yellow/red cards, etc)
+	#	from the line-ups table on the screen
+	for number, info in zip(squad_number, squad_info):
+		# Make a list out of the data by splitting the newlines that divide 
+		#	the information
+		number = number.text.splitlines()
+		info = info.text.splitlines()
+		
+		player_info_dict = {}
+		
+		# recreate the temporary dictionary to store another players information
+		temp_dict = {}
+
+		temp_dict['Is Home Side'] = is_home_side
+		
+		# get the player's number
+		player_number = number[1]
+		temp_dict['Shirt Number'] = player_number
+		
+		# get the player's name from the list
+		player_name = info[0]
+
+		# Fill in the dictionary to be added to squad_home_dict
+		if starting_11_counter <= 11:
+			temp_dict['Starting 11'] = True
+		else:
+			temp_dict['Starting 11'] = False
+
+		for k in range(1, len(info)):
+			# when there is an element with a 'substitution on/off', then the next
+			#	element has the minute at which the substition took place
+			if info[k] == 'Substitution On':
+				temp_dict['Substitution On'] = info[k + 1]
+			elif info[k] == 'Substitution Off':
+				temp_dict['Substitution Off'] = info[k + 1]
+			elif info[k] == 'Yellow Card':
+				temp_dict['Yellow Card'] = True
+			elif info[k] == 'Red Card':
+				temp_dict['Red Card'] = True
+			elif info[k] == 'Pen. Scored':
+				temp_dict['Pen. Scored'] = True
+
+		# set the fields not present for the player to null later to be added to
+		#	the database
+		if 'Substitution On' not in temp_dict:
+			temp_dict['Substitution On'] = None
+		if 'Substitution Off' not in temp_dict:
+			temp_dict['Substitution Off'] = None
+		if 'Yellow Card' not in temp_dict:
+			temp_dict['Yellow Card'] = None
+		if 'Red Card' not in temp_dict:
+			temp_dict['Red Card'] = None
+		if 'Pen. Scored' not in temp_dict:
+			temp_dict['Pen. Scored'] = None 
+
+		squad_dict[player_name] = temp_dict
+
+		starting_11_counter += 1
+
+	# print('printing squad dict')
+	# print(squad_dict)
+	return(squad_dict)
+
+
+# Check whether the row with the given id has already been appeared on the page
+def is_row_new(list_of_ids, id):
+	try:
+		x = list_of_ids.index(id)
+		return False
+	except ValueError:
+		return True
+
+# Find the space preceding the first digit (minute) in the string so that we can truncate 
+#	the name of the goal scorer from the string that contains the name of the scorer and
+#	the minute in which the goal was scored
+# Returns the index of the space after the name of the player
+def process_events_data(string_array, is_home):
+	# string_array[0] is the player name and the time of the event
+	#	which can also include (pen), (og)
+	# string_array[1] is the type of the event, such as Goal, Own Goal, 
+	#	label.penalty.scored
+	player_name_and_time = string_array[0]
+	is_assist = True
+
+	# The assist section does not have a second line
+	if len(string_array) == 2:
+		is_assist = False
+		event_type = string_array[1]
+	else:
+		event_type = 'Assist'
+
+	if is_home == True:
+		is_home = 'home'
+	else:
+		is_home = 'away'
+
+	length_of_string = len(player_name_and_time)
+
+	stats = {}
+
+	min_array = []
+
+	# Return a dictionary of goal scorers and assists
+	# 	the first element of the array determines home or away
+	#   the second element is the type of the event the followinig minutes represent
+	#	e.g. stats = {'Frank Lampard': ['home', 'goal', '53', '67', '90 +6']}
+	#   e.g. stats = {'Ryan Giggs': ['away', 'red card', '45 +2']}
+	for char_index in range(0, length_of_string):
+		if(player_name_and_time[char_index].isdigit() == True):
+			scorer_name = player_name_and_time[:char_index]
+			scorer_name = scorer_name.strip()
+			minutes = player_name_and_time[char_index:]
+			minutes = minutes.split(',')
+			
+			if event_type == 'Goal':
+				min_array = [is_home, 'goal']
+			elif event_type == 'Own Goal':
+				min_array = [is_home, 'own goal']
+			elif event_type == 'label.penalty.scored':
+				min_array = [is_home, 'goal penalty']
+			elif event_type == 'Red Card':
+				min_array = [is_home, 'red card']
+			elif event_type == 'Assist':
+				min_array = [is_home, 'assist']
+
+
+	
+			for minute in minutes:
+				minute = minute.replace('\'', '')
+				# Remove the (og), (pen)
+				own_goal = '(og)'
+				pen = '(pen)'
+				if own_goal in minute:
+					minute = minute.replace(own_goal, '')
+				elif pen in minute:
+					minute = minute.replace(pen, '')
+
+				minute = minute.strip()
+				min_array.append(minute)
+				
+			stats[scorer_name] = min_array
+
+			return stats
+
+results_retrieve_1()
