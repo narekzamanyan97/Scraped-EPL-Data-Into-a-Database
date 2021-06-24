@@ -90,7 +90,6 @@ def player_retrieve_1():
 	except TimeoutException as ex:
 		print('')
 
-		
 # get the player's club, date of birth, height
 def player_retrieve_2(driver, player_row_button):
 	dict_to_return = {}
