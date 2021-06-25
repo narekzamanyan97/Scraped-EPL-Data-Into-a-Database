@@ -1,4 +1,4 @@
-# !!! get the players of all the clubs from https://www.premierleague.com/players
+# !!! get the players of all the clubs from https://www.premierleague.com/players?se=363&cl=-1
 
 from selenium.common.exceptions import TimeoutException
 
@@ -15,7 +15,7 @@ import re
 from set_up_driver import *
 
 urls = {
-	'url_1': 'https://www.premierleague.com/players',
+	'url_1': 'https://www.premierleague.com/players?se=363&cl=-1',
 }
 
 # get the player's name, position, and country, then click on the row
@@ -40,7 +40,7 @@ def player_retrieve_1():
 		players_list_of_dicts = []
 
 		# get the basic player information from the rows
-		for i in range(18, len(player_rows)):
+		for i in range(0, len(player_rows)):
 			# scroll down to the bottom of the page to include all the players
 			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 			time.sleep(10)
@@ -72,7 +72,7 @@ def player_retrieve_1():
 			temp_dict['player name'] = player_name
 			temp_dict['position'] = player_position
 			temp_dict['country'] = player_country
-
+			print(player_name)
 			# add the player's detailed info to the temp_dict 
 			player_details_dict = player_retrieve_2(driver, player_row_buttons[i])
 			temp_dict.update(player_details_dict)
@@ -89,17 +89,32 @@ def player_retrieve_1():
 
 	except TimeoutException as ex:
 		print('')
-			
-# get the player's club, date of birth, height
+
+# get the player's shirt number, club, date of birth, height
 def player_retrieve_2(driver, player_row_button):
 	dict_to_return = {}
+
 
 	# click on the player row to get more detailed information about the player
 	driver.execute_script("arguments[0].click();", player_row_button)
 
+
+	# get the player's number first
+	try:
+		player_number = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='wrapper playerContainer']/div[@class='playerDetails']/div[@class='number t-colour']"))
+		)
+		player_number = player_number[0].text
+
+
+		dict_to_return['shirt number'] = player_number
+	except TimeoutException:
+		dict_to_return['shirt number'] = None
+
 	player_club = WebDriverWait(driver, 10).until(
 		EC.presence_of_all_elements_located((By.XPATH, "//nav[@class='fixedSidebar']/div[@class='playerOverviewAside u-hide-mob']/section//div[@class='info']"))
 	)
+
 	club = player_club[0].text
 	dict_to_return['club'] = club
 
@@ -108,11 +123,8 @@ def player_retrieve_2(driver, player_row_button):
 		personal_details = WebDriverWait(driver, 10).until(
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='personalLists']/ul"))
 		)
-
+		
 		# get the date of birth and height of the player
-		# nationality = personal_details[0].text.splitlines()
-		# nationality = nationality[1]
-		# print('Nationality: ' + str(nationality))
 		date_of_birth = personal_details[1].text.splitlines()
 		date_of_birth = date_of_birth[1].split()[0]
 		dict_to_return['date of birth'] = date_of_birth
