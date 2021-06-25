@@ -35,6 +35,8 @@ def manager_retrieve_1():
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table']/table/tbody[@class='dataContainer']/tr/td/a[@class='managerName']"))
 	)
 
+	managers_list_of_dicts = []
+
 	print('--------------------------------')
 	for i in range(0, len(managers)):
 		temp_dict = {}
@@ -57,13 +59,16 @@ def manager_retrieve_1():
 		manager_club = name_club_nation_list[1]
 
 		temp_dict['manager name'] = manager_name
+		temp_dict['manager club'] = manager_club
 
 		# call manager_retrieve_2() which clicks on the manager row
 		temp_dict.update(manager_retrieve_2(driver, managers_button[i]))
 
-		print(temp_dict)
+		managers_list_of_dicts.append(temp_dict)
+		
+		print(managers_list_of_dicts)
 
-		print('--------------------------------')
+	print('--------------------------------')
 
 # get the details of the manager
 def manager_retrieve_2(driver, button):

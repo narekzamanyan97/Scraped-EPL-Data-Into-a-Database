@@ -43,6 +43,11 @@ def club_retrieve_1():
 				EC.presence_of_all_elements_located((By.XPATH, "//img[@src='https://resources.premierleague.com/premierleague/badges/70/t54.png']"))
 			)
 
+			# again, get the player rows and links for the details
+			club_rows = WebDriverWait(driver, 10).until(
+					EC.presence_of_all_elements_located((By.XPATH, "//div[@class='indexSection']/div/ul[@class='block-list-5 block-list-3-m block-list-1-s block-list-1-xs block-list-padding dataContainer']/li/a"))
+			)
+
 			temp_dict = {}
 
 			# get the name of the club
@@ -55,11 +60,7 @@ def club_retrieve_1():
 
 			clubs_list_of_dicts.append(temp_dict)
 
-			# going back a page takes us to the 2021-2022 season.
-			# choose 2020-2021 season from the dropdown list, but it is not 
-			# 	clickable
-			# set up the driver as an alternative to choosing from the dropdown
-			# driver = set_up_driver(urls['url_1'])
+			print(clubs_list_of_dicts)
 		
 		for club_dict in clubs_list_of_dicts:
 			for key, value in club_dict.items():
@@ -82,7 +83,8 @@ def club_retrieve_2(driver, club_row):
 	stadium_name = WebDriverWait(driver, 10).until(
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='clubDetails']/div[@class='stadiumName']/a/span[@class='stadium']"))
 	)
-	stadium_name = stadium_name[0].text
+	stadium_name = stadium_name[0].text.strip()
+	
 	temp_dict['stadium name'] = stadium_name
 
 	# get the website name
@@ -142,6 +144,8 @@ def club_retrieve_3(driver):
 				type_ = 'Built'
 
 			detail = type_and_detail[1]
+
+			detail = detail.strip()
 
 			temp_dict[type_] = detail
 		except IndexError:
