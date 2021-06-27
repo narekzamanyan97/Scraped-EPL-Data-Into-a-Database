@@ -46,3 +46,25 @@ class database:
 		for manager in managers_list_of_dict:
 			print(manager['manager name'])
 			print(manager['Country of Birth'])
+
+
+
+# Have functions that do the queries to obtain the following player/club stats:
+# calculate the following:
+# points (league standings)
+# goals_scored
+# own goals conceded
+# goals conceded
+# clean sheats 
+# wins
+# losses
+# draws
+# passes
+# shots
+# shooting accuracy 
+# shots on target
+# penalties scored, 
+# offsides
+# yellow cards
+# red cards
+# fouls

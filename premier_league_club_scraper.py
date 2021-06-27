@@ -84,7 +84,7 @@ def club_retrieve_2(driver, club_row):
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='clubDetails']/div[@class='stadiumName']/a/span[@class='stadium']"))
 	)
 	stadium_name = stadium_name[0].text.strip()
-	
+
 	temp_dict['stadium name'] = stadium_name
 
 	# get the website name
@@ -157,23 +157,3 @@ def club_retrieve_3(driver):
 	return temp_dict
 
 club_retrieve_1()
-
-
-
-# calculate and add to the database:
-# goals
-# own goals
-# goals conceded
-# clean sheats 
-# wins
-# losses
-# draws
-# passes
-# shots
-# shooting accuracy 
-# shots on target
-# penalties scored, 
-# offsides
-# yellow cards
-# red cards
-# fouls

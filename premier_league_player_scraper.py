@@ -123,7 +123,7 @@ def player_retrieve_2(driver, player_row_button):
 		personal_details = WebDriverWait(driver, 10).until(
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='personalLists']/ul"))
 		)
-		
+
 		# get the date of birth and height of the player
 		date_of_birth = personal_details[1].text.splitlines()
 		date_of_birth = date_of_birth[1].split()[0]
@@ -153,7 +153,7 @@ def player_retrieve_2(driver, player_row_button):
 # height
 
 # calculate and add to the database the goals, own goals, yellow cards, red cards,
-# 	clean sheats, assists, appearances, wins, losses, draws
+# 	clean sheets, assists, appearances, wins, losses, draws
 
 
 player_retrieve_1()
