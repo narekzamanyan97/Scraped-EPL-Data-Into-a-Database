@@ -262,7 +262,7 @@ def results_retrieve_2(driver, result_row):
 	)
 
 	matchweek_list = matchweek[0].text.split()
-	matchweek = matchweek_list[0]
+	matchweek = matchweek_list[1]
 
 	match_date['matchweek'] = matchweek
 
