@@ -1,21 +1,21 @@
 create table stadium(
-	stadium_id int not null audo_increment,
+	stadium_id int(2) not null auto_increment,
 
 	stadium_name varchar(50),
 	city varchar(25),
 	capacity int(6),
 	record_pl_attendance varchar(100),
 	address varchar(100),
-	pitch_size_varchar(11),
+	pitch_size varchar(11),
 	built int(4),
 	phone varchar(25),
 
 	constraint STADIUM_ID_PK PRIMARY KEY (stadium_id)
-)
+);
 
 create table club(
-	club_id int not null audo_increment,
-	stadium_id int not null,
+	club_id int(2) not null auto_increment,
+	stadium_id int(2),
 
 	club_name varchar(50) not null,
 	website varchar(50) not null,
@@ -25,11 +25,12 @@ create table club(
 		references stadium(stadium_id) on delete set null
 			on update cascade
 
-)
+);
 
 create table player(
-	player_id int not null auto_increment,
-	club_id int not null,
+	player_id int(4) not null auto_increment,
+	
+	club_id int(2),
 
 	player_name varchar(50),
 	player_number int(2),
@@ -42,29 +43,32 @@ create table player(
 	constraint PLAYER_CLUB_ID_FK FOREIGN KEY (club_id)
 		references club(club_id) on delete set null
 			on update cascade
-)
+);
 
 create table manager(
-	manager_id int not null audo_increment,
-	club_id int not null,
+	manager_id int(2) not null auto_increment,
+	club_id int(2),
 
 	country varchar(40),
 	active boolean,
 	joined_club date,
 	date_of_birth date,
 	epl_seasons int(2),
-	epl_debut_match varchar(100)
+	epl_debut_match varchar(100),
 
 	constraint MANAGER_ID_PK PRIMARY KEY(manager_id),
 	constraint MANAGER_CLUB_ID_FK FOREIGN KEY (club_id)
 		references club(club_id) on delete set null
 			on update cascade
-)
+);
 
-create table match(
-	match_id int(5) int not null,
-	home_team_id int not null,
-	away_team_id int not null,
+
+create table match_(
+	match_id int(5) not null,
+	
+
+	home_team_id int(2) not null,
+	away_team_id int(2) not null,
 
 	home_team_goals int(2),
 	away_team_goals int(2),
@@ -75,7 +79,7 @@ create table match(
 	matchweek int(2),
 	referee varchar(50),
 
-	stadium_id int not null,
+	stadium_id int(2),
 
 	constraint MATCH_ID_PK PRIMARY KEY (match_id),
 	constraint MATCH_HOME_TEAM_ID FOREIGN KEY (home_team_id)
@@ -87,13 +91,13 @@ create table match(
 	constraint MATCH_STADIUM_ID FOREIGN KEY (stadium_id)
 		references stadium(stadium_id) on delete set null
 			on update cascade
-)
+);
 
 
 
 create table player_stats(
-	player_id int not null,
-	match_id int not null,
+	player_id int(4) not null,
+	match_id int(5) not null,
 
 	is_in_starting_11 boolean,
 
@@ -107,15 +111,15 @@ create table player_stats(
 		references player(player_id) on delete cascade
 			on update cascade,
 	constraint PLAYER_STATS_MATCH_ID foreign key (match_id)
-		references match(match_id) on delete cascade
+		references match_(match_id) on delete cascade
 			on update cascade
 
-)
+);
 
 create table player_performance(
 	player_performance_id int not null auto_increment,
-	player_id int not null,
-	match_id int not null,
+	player_id int(4) not null,
+	match_id int(5) not null,
 
 	type_of_stat int(2),
 	minute varchar(7),
@@ -125,13 +129,13 @@ create table player_performance(
 		references player(player_id) on delete cascade
 			on update cascade,
 	constraint PLAYER_PERFORMANCE_MATCH_ID foreign key (match_id)
-		references match(match_id) on delete cascade
+		references match_(match_id) on delete cascade
 			on update cascade
-)
+);
 
 create table club_stats(
-	match_id int not null,
-	club_id int not null,
+	match_id int(5) not null,
+	club_id int(2) not null,
 
 	possession dec(3, 1),
 	shots int(2),
@@ -147,11 +151,11 @@ create table club_stats(
 	red_cards int(1),
 
 	constraint CLUB_STATS_MATCH_ID_FK foreign key (match_id)
-		references match(match_id) on delete cascade
+		references match_(match_id) on delete cascade
 			on update cascade,
 	constraint CLUB_STATS_CLUB_ID_FK foreign key (club_id)
 		references club(club_id) on delete cascade
 			on update cascade
-)
+);
 
 
