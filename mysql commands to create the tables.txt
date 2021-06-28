@@ -23,8 +23,7 @@ create table club(
 	constraint CLUB_ID_PK PRIMARY KEY (club_id),
 	constraint CLUB_STADIUM_ID_FK FOREIGN KEY (stadium_id)
 		references stadium(stadium_id) on delete set null
-			on update cascade
-
+			on update cascade	
 );
 
 create table player(

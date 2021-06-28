@@ -68,6 +68,8 @@ def club_retrieve_1():
 
 			print('--------------------------------------')
 
+		return clubs_list_of_dicts
+
 	except TimeoutException as ex:
 		print(str(ex))
 
@@ -156,4 +158,4 @@ def club_retrieve_3(driver):
 
 	return temp_dict
 
-club_retrieve_1()
+clubs = club_retrieve_1()

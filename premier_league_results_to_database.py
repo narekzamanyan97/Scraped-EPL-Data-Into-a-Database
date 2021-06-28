@@ -47,6 +47,10 @@ class database:
 			print(manager['manager name'])
 			print(manager['Country of Birth'])
 
+	def insert_players(self, players_list_of_dict):
+		
+
+
 
 
 # Have functions that do the queries to obtain the following player/club stats:
