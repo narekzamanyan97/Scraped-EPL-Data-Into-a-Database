@@ -6,7 +6,7 @@ create table stadium(
 	capacity int(6),
 	record_pl_attendance varchar(100),
 	address varchar(100),
-	pitch_size varchar(11),
+	pitch_size varchar(15),
 	built int(4),
 	phone varchar(25),
 
@@ -48,6 +48,7 @@ create table manager(
 	manager_id int(2) not null auto_increment,
 	club_id int(2),
 
+	manager_name varchar(40),
 	country varchar(40),
 	active boolean,
 	joined_club date,
