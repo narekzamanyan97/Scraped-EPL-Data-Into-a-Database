@@ -60,14 +60,16 @@ def club_retrieve_1():
 
 			clubs_list_of_dicts.append(temp_dict)
 
-			print(clubs_list_of_dicts)
-		
-		for club_dict in clubs_list_of_dicts:
-			for key, value in club_dict.items():
-				print(key + '->' + value)
+			# print(clubs_list_of_dicts)
+			
+			# print the club info
+			for club_dict in clubs_list_of_dicts:
+				for key, value in club_dict.items():
+					print(key + '->' + value)
 
-			print('--------------------------------------')
+				print('--------------------------------------')
 
+		driver.close()
 		return clubs_list_of_dicts
 
 	except TimeoutException as ex:
@@ -140,14 +142,33 @@ def club_retrieve_3(driver):
 		type_and_detail = detail.text.split(':')
 		try:
 			type_ = type_and_detail[0]
-			
+			type_ = type_.strip()
 			# for consistency
 			if type_ == 'Opened':
 				type_ = 'Built'
+			elif type_ == 'Tottenham Hotspur Stadium capacity':
+				type_ = 'Capacity'
 
 			detail = type_and_detail[1]
 
+			# Fulham's stadium's capacity has text inside the parenthesis
+			#	following the actual capacity.
+			if '(due to' in detail:
+				detail = detail.partition('(')[0]
+			# Newcastle Utd's phone has exta info
+			elif '(calls cost 7p per' in detail:
+				detail = detail.partition('calls cost')[0]
+			# SHeffield Utd also has unnecessary info
+			elif 'John Street Stand' in detail:
+				continue
+
+
+				
+
 			detail = detail.strip()
+
+
+
 
 			temp_dict[type_] = detail
 		except IndexError:
@@ -158,4 +179,4 @@ def club_retrieve_3(driver):
 
 	return temp_dict
 
-clubs = club_retrieve_1()
+# clubs = club_retrieve_1()
