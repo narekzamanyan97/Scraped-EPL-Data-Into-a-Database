@@ -66,9 +66,10 @@ def manager_retrieve_1():
 
 		managers_list_of_dicts.append(temp_dict)
 		
-		print(managers_list_of_dicts)
+		# print(managers_list_of_dicts)
 
 	print('--------------------------------')
+	return managers_list_of_dicts
 
 # get the details of the manager
 def manager_retrieve_2(driver, button):
@@ -102,4 +103,4 @@ def manager_retrieve_2(driver, button):
 
 	return temp_dict
 
-manager_retrieve_1()
+# manager_retrieve_1()

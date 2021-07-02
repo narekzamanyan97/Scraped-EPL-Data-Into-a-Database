@@ -8,6 +8,7 @@ def connect_to_database():
 									user='root',
 									password='narekpassword',
 									auth_plugin='mysql_native_password')
+		
 	except Error as e:
 		print("An error has occured. Message: " + str(e))
 	else:
