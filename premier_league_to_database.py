@@ -41,11 +41,92 @@ class database:
 		self.cursor.execute(query_string)
 		tuple_list = self.cursor.fetchall()
 
-	def insert_managers(self, managers_list_of_dict):
-		insert_statement = "INSERT INTO managers()"
-		for manager in managers_list_of_dict:
-			print(manager['manager name'])
-			print(manager['Country of Birth'])
+	def insert_managers(self, managers_dict):
+		insert_statement = "INSERT INTO manager(club_id, manager_name, country, active, joined_club, date_of_birth, epl_seasons, epl_debut_match) "
+		
+		country = managers_dict['Country of Birth']
+		manager_name = managers_dict['manager name']
+		status = managers_dict['Status']
+		if status == 'Active':
+			active = True
+		else:
+			active = False
+		# some managers don't have 'Joined Club' date, so KeyError can 
+		#	be thrown
+		try:
+			joined_club = managers_dict['Joined Club']
+			splitted_joined_club = joined_club.split(' ')
+			joined_club_day = splitted_joined_club[0]
+			joined_club_month = splitted_joined_club[1]
+			joined_club_year = splitted_joined_club[2]
+
+			# convert the month name into number from 01 to 12
+			if joined_club_month == "January":
+				joined_club_month = '01'
+			elif joined_club_month == "February":
+				joined_club_month = '02'
+			elif joined_club_month == 'March':
+				joined_club_month = '03'
+			elif joined_club_month == 'April':
+				joined_club_month = '04'
+			elif joined_club_month == 'May':
+				joined_club_month = '05'
+			elif joined_club_month == 'June':
+				joined_club_month = '06'
+			elif joined_club_month == 'July':
+				joined_club_month = '07'
+			elif joined_club_month == 'August':
+				joined_club_month = '08'
+			elif joined_club_month == 'September':
+				joined_club_month = '09'
+			elif joined_club_month == 'October':
+				joined_club_month = '10'
+			elif joined_club_month == 'November':
+				joined_club_month = '11'
+			elif joined_club_month == 'December':
+				joined_club_month = '12'
+			joined_club_date = joined_club_year + '-' + joined_club_month + '-' + joined_club_day
+		except KeyError:
+			joined_club_date = '0000-00-00'
+	
+		# get the date_of_birth and change the format from DD/MM/YYYY into
+		#	MM-DD-YYYY 
+		date_of_birth = managers_dict['Date of Birth']
+		splitted_date_of_birth = date_of_birth.split('/')
+		dob_day = splitted_date_of_birth[0]
+		dob_month = splitted_date_of_birth[1]
+		dob_year = splitted_date_of_birth[2]
+
+		dob_date = dob_year + '-' + dob_month + '-' + dob_day	
+
+		epl_seasons = managers_dict['Premier League Seasons']
+		epl_debut_match = managers_dict['Premier League Debut Match']
+
+
+
+		# !!! get the club id
+		club_name = managers_dict['manager club']
+		club_id_query = "SELECT club_id "
+		club_id_query += "FROM club "
+		club_id_query += "WHERE club_name=\"" + club_name + "\";"
+
+		self.cursor.execute(club_id_query)
+		tuple_list = self.cursor.fetchall()
+		club_id = tuple_list[0][0]
+
+		insert_statement += "VALUES(" + str(club_id) + ", "
+		insert_statement += "\"" + str(manager_name) + "\", "
+		insert_statement += "\"" + str(country) + "\", "
+		insert_statement += str(active) + ", "
+		insert_statement += "\"" + joined_club_date + "\", "
+		insert_statement += "\"" + dob_date + "\", "
+		insert_statement += "\"" + epl_seasons + "\", "
+		insert_statement += "\"" + epl_debut_match + "\");"
+
+		self.cursor.execute(insert_statement)
+		self.conn.commit()
+
+
 
 	def insert_players(self, players_list_of_dict):
 		insert_statement = "INSERT INTO players"
@@ -82,7 +163,7 @@ class database:
 		except KeyError:
 			# West Brom's stadium has 'The Hawthorns capacity' as its capacity
 			capacity = stadium_dict['The Hawthorns capacity']
-		
+
 		capacity = capacity.replace(',', '')
 		try:
 			record_pl_attendance = stadium_dict['Record PL attendance']

@@ -38,7 +38,7 @@ def manager_retrieve_1():
 	managers_list_of_dicts = []
 
 	print('--------------------------------')
-	for i in range(0, len(managers) - 22):
+	for i in range(0, len(managers)):
 		temp_dict = {}
 
 		# get the manager rows and links for the details to avoid
@@ -103,4 +103,4 @@ def manager_retrieve_2(driver, button):
 
 	return temp_dict
 
-manager_retrieve_1()
+# manager_retrieve_1()

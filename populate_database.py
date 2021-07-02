@@ -29,6 +29,10 @@ def populate_stadium_and_club_tables():
 def populate_manager_table():
 	managers_list_of_dicts = manager_retrieve_1()
 	print(managers_list_of_dicts)
+	for managers_dict in managers_list_of_dicts:
+		db.insert_managers(managers_dict)
+
+	
 
 populate_manager_table()
 
