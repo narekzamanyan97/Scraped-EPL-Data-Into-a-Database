@@ -40,12 +40,14 @@ def player_retrieve_1():
 		players_list_of_dicts = []
 		print(len(player_rows))
 
+		counter = 0
 		# get the basic player information from the rows
-		for i in range(0, len(player_rows) - (len(player_rows) - 1)):
+		for i in range(0, len(player_rows) - (len(player_rows) - 20)):
 			# scroll down to the bottom of the page to include all the players
 			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 			time.sleep(10)
-			
+			print(counter)
+			counter += 1			
 			player_rows = WebDriverWait(driver, 10).until(
 					EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"))
 			)
@@ -67,20 +69,20 @@ def player_retrieve_1():
 			try:
 				player_country = player_row[1]
 			except IndexError:
-				player_country = None
+				player_country = 'Null'
 			
 			# add the player info to a dictionary
 			temp_dict['player name'] = player_name
 			temp_dict['position'] = player_position
 			temp_dict['country'] = player_country
-			print(player_name)
+			# print(player_name)
 			# add the player's detailed info to the temp_dict 
 			player_details_dict = player_retrieve_2(driver, player_row_buttons[i])
 			temp_dict.update(player_details_dict)
-			
+			print(temp_dict)
 			# add the temp_dict to the list later to be returned from the function
 			players_list_of_dicts.append(temp_dict)
-			print(players_list_of_dicts)
+			# print(players_list_of_dicts)
 			print('-----------------------------------------------------')
 
 
@@ -110,7 +112,7 @@ def player_retrieve_2(driver, player_row_button):
 
 		dict_to_return['shirt number'] = player_number
 	except TimeoutException:
-		dict_to_return['shirt number'] = None
+		dict_to_return['shirt number'] = 'Null'
 
 	player_club = WebDriverWait(driver, 10).until(
 		EC.presence_of_all_elements_located((By.XPATH, "//nav[@class='fixedSidebar']/div[@class='playerOverviewAside u-hide-mob']/section//div[@class='info']"))
@@ -135,7 +137,7 @@ def player_retrieve_2(driver, player_row_button):
 			height = personal_details[2].text.splitlines()
 			height = height[1]
 		except IndexError:
-			height = None
+			height = 'Null'
 		dict_to_return['height'] = height
 
 	except TimeoutException:

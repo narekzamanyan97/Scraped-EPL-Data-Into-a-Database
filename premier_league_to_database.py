@@ -133,6 +133,7 @@ class database:
 		insert_statement = "INSERT INTO player(club_id, player_name, player_number, position, country, date_of_birth, height) "
 
 		# !!! get the club_id
+
 		club_name = player_dict['club']
 
 		club_id_query = "SELECT club_id "
@@ -141,9 +142,13 @@ class database:
 
 		self.cursor.execute(club_id_query)
 		tuple_list = self.cursor.fetchall()
-		club_id = tuple_list[0][0]
+		print(tuple_list)
 		
-		print(club_id)
+		try:
+			club_id = tuple_list[0][0]
+			print(club_id)
+		except IndexError:
+			club_id = 'Null'
 
 		player_name = player_dict['player name']
 		position = player_dict['position']
@@ -151,8 +156,8 @@ class database:
 		shirt_number = player_dict['shirt number']
 		date_of_birth = player_dict['date of birth']
 		dob_list = date_of_birth.split('/')
-		dob_month = dob_list[0]
-		dob_day = dob_list[1]
+		dob_day = dob_list[0]
+		dob_month = dob_list[1]
 		dob_year = dob_list[2]
 
 		dob_date = dob_year + '-' + dob_month + '-' + dob_day
