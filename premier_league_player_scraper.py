@@ -38,9 +38,10 @@ def player_retrieve_1():
 		)
 
 		players_list_of_dicts = []
+		print(len(player_rows))
 
 		# get the basic player information from the rows
-		for i in range(0, len(player_rows)):
+		for i in range(0, len(player_rows) - (len(player_rows) - 1)):
 			# scroll down to the bottom of the page to include all the players
 			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 			time.sleep(10)
@@ -156,4 +157,4 @@ def player_retrieve_2(driver, player_row_button):
 # 	clean sheets, assists, appearances, wins, losses, draws
 
 
-player_retrieve_1()
+# player_retrieve_1()

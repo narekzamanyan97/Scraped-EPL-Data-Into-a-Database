@@ -4,6 +4,8 @@ from premier_league_club_scraper import *
 
 from premier_league_manager_scraper import *
 
+from premier_league_player_scraper import *
+
 
 # initialize the connection
 connection = connect_to_database()
@@ -31,10 +33,24 @@ def populate_manager_table():
 	print(managers_list_of_dicts)
 	for managers_dict in managers_list_of_dicts:
 		db.insert_managers(managers_dict)
+	# close the connection
+	connection.close()
 
-	
 
-populate_manager_table()
+def populate_player_table():
+	player_list_of_dicts = player_retrieve_1()
+	print(player_list_of_dicts)
+	for player_dict in player_list_of_dicts:
+		db.insert_players(player_dict)
+
+	# close the connection
+	connection.close()
+
+
+
 
 
 # populate_stadium_and_club_tables()
+# populate_manager_table()
+
+populate_player_table()

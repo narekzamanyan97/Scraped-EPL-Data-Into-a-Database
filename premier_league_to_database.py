@@ -97,6 +97,7 @@ class database:
 		dob_month = splitted_date_of_birth[1]
 		dob_year = splitted_date_of_birth[2]
 
+		# format date of birth into mysql date type
 		dob_date = dob_year + '-' + dob_month + '-' + dob_day	
 
 		epl_seasons = managers_dict['Premier League Seasons']
@@ -128,8 +129,50 @@ class database:
 
 
 
-	def insert_players(self, players_list_of_dict):
-		insert_statement = "INSERT INTO players"
+	def insert_players(self, player_dict):
+		insert_statement = "INSERT INTO player(club_id, player_name, player_number, position, country, date_of_birth, height) "
+
+		# !!! get the club_id
+		club_name = player_dict['club']
+
+		club_id_query = "SELECT club_id "
+		club_id_query += "FROM club "
+		club_id_query += "WHERE club_name=\"" + club_name + "\";"
+
+		self.cursor.execute(club_id_query)
+		tuple_list = self.cursor.fetchall()
+		club_id = tuple_list[0][0]
+		
+		print(club_id)
+
+		player_name = player_dict['player name']
+		position = player_dict['position']
+		country = player_dict['country']
+		shirt_number = player_dict['shirt number']
+		date_of_birth = player_dict['date of birth']
+		dob_list = date_of_birth.split('/')
+		dob_month = dob_list[0]
+		dob_day = dob_list[1]
+		dob_year = dob_list[2]
+
+		dob_date = dob_year + '-' + dob_month + '-' + dob_day
+
+		height = player_dict['height']
+		# remove the 'cm' from the height
+		height_list = height.split('c')
+		height = height_list[0]
+
+
+		insert_statement += "VALUES(" + str(club_id) + ", "
+		insert_statement += "\"" + player_name + "\", "
+		insert_statement += str(shirt_number) + ", "
+		insert_statement += "\"" + position + "\", "
+		insert_statement += "\"" + country + "\", "
+		insert_statement += "\"" + dob_date + "\", "
+		insert_statement += str(height) + ");"
+
+		self.cursor.execute(insert_statement)
+		self.conn.commit()
 
 	# get the stadium_name to obtain stadium_id from the stadium table
 	def insert_clubs(self, club_dict):
@@ -153,6 +196,7 @@ class database:
 		insert_statement += "\"" + str(club_name) + "\", "
 		insert_statement += "\"" + str(website) + "\");"
 
+		# run the insert statement on the database
 		self.cursor.execute(insert_statement)
 		self.conn.commit()
 
