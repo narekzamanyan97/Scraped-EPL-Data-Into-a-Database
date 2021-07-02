@@ -25,7 +25,12 @@ def player_retrieve_1():
 
 	# scroll down to the bottom of the page to include all the players
 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-	time.sleep(10)
+
+	# wait until the row of the last player on the list appears on the page
+	# 	in 2020/2021 season, it is Martin Ødegaard, with the data-player='p184029'
+	last_player = WebDriverWait(driver, 10).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p184029']"))
+	)
 
 	try:
 		# get the player rows and links for the details
@@ -45,7 +50,13 @@ def player_retrieve_1():
 		for i in range(0, len(player_rows) - (len(player_rows) - 20)):
 			# scroll down to the bottom of the page to include all the players
 			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-			time.sleep(10)
+			
+			# wait until the row of the last player on the list appears on the page
+			# 	in 2020/2021 season, it is Martin Ødegaard, with the data-player='p184029'
+			last_player = WebDriverWait(driver, 10).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p184029']"))
+			)
+			print(len(player_rows))
 			print(counter)
 			counter += 1			
 			player_rows = WebDriverWait(driver, 10).until(
@@ -86,6 +97,15 @@ def player_retrieve_1():
 			print('-----------------------------------------------------')
 
 
+			# make sure the 2020/2021 season table is loaded (instead of
+			#	2021/2022). check for the player Tosin Adarabioyo who 
+			#	appears in 2020/2021 but not in 2021/2022 with a unique
+			#	data-player id 'p109646'
+			# wait until this player is on the list
+			player_in_2020 = WebDriverWait(driver, 10).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p109646']"))
+			)
+
 
 		# print(players_list_of_dicts)
 		return players_list_of_dicts
@@ -93,7 +113,7 @@ def player_retrieve_1():
 	except TimeoutException as ex:
 		print('')
 
-# get the player's shirt number, club, date of birth, height
+# get the player's shirt number, club, date of birth, height, and club
 def player_retrieve_2(driver, player_row_button):
 	dict_to_return = {}
 
@@ -114,12 +134,36 @@ def player_retrieve_2(driver, player_row_button):
 	except TimeoutException:
 		dict_to_return['shirt number'] = 'Null'
 
-	player_club = WebDriverWait(driver, 10).until(
-		EC.presence_of_all_elements_located((By.XPATH, "//nav[@class='fixedSidebar']/div[@class='playerOverviewAside u-hide-mob']/section//div[@class='info']"))
+	# some player's have no club in the top left corner, so use the div in
+	#	the center of the page to get the club of the player in 2020-2021
+	#	season
+	player_career = WebDriverWait(driver, 10).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table playerClubHistory  true']/table/tbody/tr[@class='table']"))
 	)
 
-	club = player_club[0].text
-	dict_to_return['club'] = club
+	# get the top two rows on the table, either of which contain the 
+	#	2020/2021 and 2021/2022 seasons. 
+	season_1 = player_career[0]
+	# print(season_1.text)
+	season_1_list = season_1.text.splitlines()
+	season_years = season_1_list[0]
+	if season_years == '2020/2021':
+		season_club = season_1_list[1]
+	# if the top-most row is not 2020/2021, then the 2nd row should be 2020/2021
+	else:
+		# in case the player started in 2021/2022 season, he will not have
+		#	a second row in player_career, so the index 1 can be out of range
+		try:
+			season_2 = player_career[1]
+			# print(season_2.text)
+			season_2_list = season_2.text.splitlines()
+			season_years = season_2_list[0]
+			season_club = season_2_list[1]
+		except IndexError:
+			season_club = 'Null'
+
+
+	dict_to_return['club'] = season_club
 
 	# Some players have no nationality
 	try:
@@ -148,15 +192,4 @@ def player_retrieve_2(driver, player_row_button):
 
 	return dict_to_return
 
-# player 			+
-# position 			+
-# nationality		+
-# club
-# date of birth
-# height
-
-# calculate and add to the database the goals, own goals, yellow cards, red cards,
-# 	clean sheets, assists, appearances, wins, losses, draws
-
-
-# player_retrieve_1()
+player_retrieve_1()
