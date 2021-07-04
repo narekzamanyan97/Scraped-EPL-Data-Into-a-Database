@@ -142,6 +142,10 @@ class database:
 			# remove the '(loan)' from the club name
 			club_name = club_name.replace('(loan)', '')
 
+		# remove U21 from the club_name
+		if 'U21' in club_name:
+			club_name = club_name.replace('U21', '')
+			
 		# remove trailing spaces
 		club_name = club_name.strip()
 
