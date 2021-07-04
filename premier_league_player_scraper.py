@@ -19,6 +19,8 @@ urls = {
 	'url_1': 'https://www.premierleague.com/players?se=363&cl=-1',
 }
 
+SECONDS_TO_WAIT = 15
+
 # get the player's name, position, and country, then click on the row
 def player_retrieve_1():
 	# set up the driver
@@ -30,40 +32,46 @@ def player_retrieve_1():
 	# there is a full screen ad on the page when we try to access the data
 	#	with a webbot. close the ad before proceeding
 	# find the close button for the ad
-	advert = WebDriverWait(driver, 10).until(
-		EC.presence_of_all_elements_located((By.XPATH, "//a[@id='advertClose']"))
-	)
-	print(0)
+# 	advert = WebDriverWait(driver, 10).until(
+# 		EC.presence_of_all_elements_located((By.XPATH, "//a[@id='advertClose']"))
+# 	)
+	advert_xpath = "//a[@id='advertClose']"
+	advert = presence_of_all_el_located(driver, advert_xpath, SECONDS_TO_WAIT, -1)
 	ad_close_button = advert[0]
+		
 	# click on the close button
-	print(1)
 	driver.execute_script("arguments[0].click();", ad_close_button)
 
-	print(2)
-	
 	# wait until the row of the last player on the list appears on the page
 	# 	in 2020/2021 season, it is Martin Ødegaard, with the data-player='p184029'
-	last_player = WebDriverWait(driver, 15).until(
-		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p184029']"))
-	)
+#	last_player = WebDriverWait(driver, 15).until(
+#		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p184029']"))
+#	)
+	last_player_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p184029']"
+	last_player = presence_of_all_el_located(driver, last_player_xpath, SECONDS_TO_WAIT, -1)
 
 	try:
-		# get the player rows and links for the details
-		player_rows = WebDriverWait(driver, 15).until(
-				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"))
-		)
+		# get the player rows to start the for loop
+#		player_rows = WebDriverWait(driver, 15).until(
+#				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"))
+#		)
+		player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
+		player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
 
-		player_row_buttons = WebDriverWait(driver, 15).until(
-				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a"))
-		)
+#		player_row_buttons = WebDriverWait(driver, 15).until(
+#				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a"))
+#		)
+#		player_row_buttons_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a"
+#		player_row_buttons = presence_of_all_el_located(driver, player_row_buttons_xpath, SECONDS_TO_WAIT, -1)
 
 		players_list_of_dicts = []
 		print(len(player_rows))
-		print(len(player_row_buttons))
+#		print(len(player_row_buttons))
 
 		counter = 0
+
 		# get the basic player information from the rows
-		for i in range(29, len(player_rows) - (len(player_rows) - 50)):
+		for i in range(29, len(player_rows) - (len(player_rows) - 40)):
 			# scroll down to the bottom of the page to include all the players
 			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 			
@@ -76,36 +84,46 @@ def player_retrieve_1():
 			# 	EC.presence_of_element_located((By.XPATH, '//div[@class="dropDown active"]/div[text() == "2020/21"]'))
 			# )
 
-			try:
-				# find the close button for the ad after the page update
-				advert = WebDriverWait(driver, 15).until(
-					EC.presence_of_all_elements_located((By.XPATH, "//a[@id='advertClose']"))
-				)  
-				ad_close_button = advert[0]
-				# click on the close button
-				
-				driver.execute_script("arguments[0].click();", ad_close_button)
-			except TimeoutException:
-				# in case there is no ad blocking the screen, continue with the 
-				#	loop
-				print('There is no ad. Proceed with the page!')
-			print(2.5)
+#			try:
+#				# find the close button for the ad after the page update
+#				advert = WebDriverWait(driver, 15).until(
+#					EC.presence_of_all_elements_located((By.XPATH, "//a[@id='advertClose']"))
+#				)  
+#				ad_close_button = advert[0]
+#				# click on the close button
+#				
+#				driver.execute_script("arguments[0].click();", ad_close_button)
+#			except TimeoutException:
+#				# in case there is no ad blocking the screen, continue with the 
+#				#	loop
+#				print('There is no ad. Proceed with the page!')
+			# print('before advert')
+			# advert = presence_of_all_el_located(driver, advert_xpath, SECONDS_TO_WAIT, -1)
+			# ad_close_button = advert[0]
+			# print('after advert')
 			# wait until the row of the last player on the list appears on the page
 			# 	in 2020/2021 season, it is Martin Ødegaard, with the data-player='p184029'
-			last_player = WebDriverWait(driver, 15).until(
-				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p184029']"))
-			)
-			print(3)
+#			last_player = WebDriverWait(driver, 15).until(
+#				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p184029']"))
+#			)
+			last_player_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p184029']"
+			last_player = presence_of_all_el_located(driver, last_player_xpath, SECONDS_TO_WAIT, -1)			
+			print('after last player')
 			# get the player rows and links for the details after the page
 			#	update
-			player_rows = WebDriverWait(driver, 15).until(
-					EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"))
-			)
-			print(3.5)
-			player_row_buttons = WebDriverWait(driver, 15).until(
-					EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a"))
-			)
-			print(4)
+#			player_rows = WebDriverWait(driver, 15).until(
+#					EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"))
+#			)
+			player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
+			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i)
+			print('after player_row')
+
+#			player_row_buttons = WebDriverWait(driver, 15).until(
+#					EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a"))
+#			)
+			player_row_buttons_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a"
+			player_row_button = presence_of_all_el_located(driver, player_row_buttons_xpath, SECONDS_TO_WAIT, i)
+
 
 			temp_dict = {}
 
@@ -115,21 +133,19 @@ def player_retrieve_1():
 
 			# the player_rows frequently throws a stale element error.
 			#	keep looking for the element (3 tries)
-			tries = 0
-			el_found = False
-			while el_found == False or tries == 3:
-				print(tries)
-				try:
-					player_row = player_rows[i].text
-					el_found = True
-				except StaleElementReferenceException:
-					player_rows = WebDriverWait(driver, 10).until(
-						EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"))
-					)
-					tries += 1
-
-			player_row = player_rows[i].text
-
+#			tries = 0
+#			el_found = False
+#			while el_found == False or tries == 3:
+#				print(tries)
+#				try:
+#					player_row = player_rows[i].text
+#					el_found = True
+#				except StaleElementReferenceException:
+#					player_rows = WebDriverWait(driver, 10).until(
+#						EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"))
+#					)
+#					tries += 1
+			player_row = player_row.text
 			player_row = player_row.splitlines()
 			player_name = player_row[0]
 
@@ -149,7 +165,7 @@ def player_retrieve_1():
 			temp_dict['country'] = player_country
 			# print(player_name)
 			# add the player's detailed info to the temp_dict 
-			player_details_dict = player_retrieve_2(driver, player_row_buttons[i])
+			player_details_dict = player_retrieve_2(driver, player_row_button)
 			temp_dict.update(player_details_dict)
 			print(temp_dict)
 			# add the temp_dict to the list later to be returned from the function
@@ -243,11 +259,17 @@ def player_retrieve_2(driver, player_row_button):
 	return dict_to_return
 
 # try and catch both timeout and stale element exceptions
+# 	if index == -1, then don't handle stale element exception
+# @returns:
+#	if the index is not specified
+#		the entire web element
+#	if the index is specified
+#		the text of the specified element
 def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 	tries = 0
 	el_found = False
 	# handle TimeoutException
-	while el_found == False or tries == 3:
+	while el_found == False and tries < 3:
 		print('tries (TimeoutException loop): ' + str(tries))
 		try:
 			element = WebDriverWait(driver, seconds_to_wait).until(
@@ -259,21 +281,26 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 			tries += 1
 			print('Timeout Exception Occured')
 
-	tries = 0
-	# handle stale element exception. If the element 
-	el_not_stale = False
-	while el_not_stale == False:
-		print('tries (StaleElementException loop): ' + str(tries))
-		try:
-			el = element[index]
-			return element
-		except StaleElementReferenceException:
-			# in this case the element is stale, find it again
-			element = WebDriverWait(driver, seconds_to_wait).until(
-				EC.presence_of_all_elements_located((By.XPATH, xpath))
-			)
-			tries += 1
-			print('Stale Element Exception Occured')
+	if index != -1:
+		tries = 0
+		# handle stale element exception. If the element 
+		el_not_stale = False
+		while el_not_stale == False and tries < 3:
+			print('tries (StaleElementException loop): ' + str(tries))
+			try:
+				el = element[index]
+				print('return el')
+				return el
+			except StaleElementReferenceException:
+				# in this case the element is stale, find it again
+				element = WebDriverWait(driver, seconds_to_wait).until(
+					EC.presence_of_all_elements_located((By.XPATH, xpath))
+				)
+				tries += 1
+				print('Stale Element Exception Occured')
+	else:
+		print('return the element list')
+		return element
 
 
 
