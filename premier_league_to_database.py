@@ -141,11 +141,14 @@ class database:
 		if '(loan)' in club_name:
 			# remove the '(loan)' from the club name
 			club_name = club_name.replace('(loan)', '')
+		# the 'L' in loan can be capitalized
+		elif '(Loan)' in club_name:
+			club_name = club_name.replace('(Loan)', '')
 
 		# remove U21 from the club_name
 		if 'U21' in club_name:
 			club_name = club_name.replace('U21', '')
-			
+
 		# remove trailing spaces
 		club_name = club_name.strip()
 
