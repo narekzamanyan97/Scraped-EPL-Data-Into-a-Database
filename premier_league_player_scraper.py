@@ -242,4 +242,48 @@ def player_retrieve_2(driver, player_row_button):
 
 	return dict_to_return
 
+# try and catch both timeout and stale element exceptions
+def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
+	tries = 0
+	el_found = False
+	# handle TimeoutException
+	while el_found == False or tries == 3:
+		print('tries (TimeoutException loop): ' + str(tries))
+		try:
+			element = WebDriverWait(driver, seconds_to_wait).until(
+				EC.presence_of_all_elements_located((By.XPATH, xpath))
+			)
+			el_found = True
+		except TimeoutException:
+
+			tries += 1
+			print('Timeout Exception Occured')
+
+	tries = 0
+	# handle stale element exception. If the element 
+	el_not_stale = False
+	while el_not_stale == False:
+		print('tries (StaleElementException loop): ' + str(tries))
+		try:
+			el = element[index]
+			return element
+		except StaleElementReferenceException:
+			# in this case the element is stale, find it again
+			element = WebDriverWait(driver, seconds_to_wait).until(
+				EC.presence_of_all_elements_located((By.XPATH, xpath))
+			)
+			tries += 1
+			print('Stale Element Exception Occured')
+
+
+
+
+# try:
+# 	player_row = player_rows[i].text
+# 	el_found = True
+# except StaleElementReferenceException:
+# 	player_rows = WebDriverWait(driver, 10).until(
+# 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"))
+# 	)
+# 	tries += 1
 # player_retrieve_1()
