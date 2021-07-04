@@ -158,7 +158,6 @@ class database:
 
 		self.cursor.execute(club_id_query)
 		tuple_list = self.cursor.fetchall()
-		print(tuple_list)
 		
 		try:
 			club_id = tuple_list[0][0]
@@ -169,19 +168,27 @@ class database:
 		position = player_dict['position']
 		country = player_dict['country']
 		shirt_number = player_dict['shirt number']
-		date_of_birth = player_dict['date of birth']
-		dob_list = date_of_birth.split('/')
-		dob_day = dob_list[0]
-		dob_month = dob_list[1]
-		dob_year = dob_list[2]
+		# there is (are) players without specified date of birth
+		try:
+			date_of_birth = player_dict['date of birth']
+			dob_list = date_of_birth.split('/')
+			dob_day = dob_list[0]
+			dob_month = dob_list[1]
+			dob_year = dob_list[2]
+			dob_date = dob_year + '-' + dob_month + '-' + dob_day
+		except KeyError:
+			date_of_birth = 'Null'
+		
 
-		dob_date = dob_year + '-' + dob_month + '-' + dob_day
+		
 
-		height = player_dict['height']
-		# remove the 'cm' from the height
-		height_list = height.split('c')
-		height = height_list[0]
-
+		try:
+			height = player_dict['height']
+			# remove the 'cm' from the height
+			height_list = height.split('c')
+			height = height_list[0]
+		except KeyError:
+			height = 'Null'
 
 		insert_statement += "VALUES(" + str(club_id) + ", "
 		insert_statement += "\"" + player_name + "\", "
