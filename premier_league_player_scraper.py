@@ -1,6 +1,7 @@
 # !!! get the players of all the clubs from https://www.premierleague.com/players?se=363&cl=-1
 
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import StaleElementReferenceException
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -26,9 +27,22 @@ def player_retrieve_1():
 	# scroll down to the bottom of the page to include all the players
 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
+	# there is a full screen ad on the page when we try to access the data
+	#	with a webbot. close the ad before proceeding
+	# find the close button for the ad
+	advert = WebDriverWait(driver, 10).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//a[@id='advertClose']"))
+	)
+	print(0)
+	ad_close_button = advert[0]
+	# click on the close button
+	print(1)
+	driver.execute_script("arguments[0].click();", ad_close_button)
+
+	print(2)
 	# wait until the row of the last player on the list appears on the page
 	# 	in 2020/2021 season, it is Martin Ødegaard, with the data-player='p184029'
-	last_player = WebDriverWait(driver, 10).until(
+	last_player = WebDriverWait(driver, 15).until(
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p184029']"))
 	)
 
@@ -44,6 +58,7 @@ def player_retrieve_1():
 
 		players_list_of_dicts = []
 		print(len(player_rows))
+		print(len(player_row_buttons))
 
 		counter = 0
 		# get the basic player information from the rows
@@ -51,24 +66,67 @@ def player_retrieve_1():
 			# scroll down to the bottom of the page to include all the players
 			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 			
+			# make sure the 2020/2021 season table is loaded (instead of
+			#	2021/22). check for the 2020/21 to appear
+			# filter_2020_21 = WebDriverWait(driver, 20).until(
+			# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p109646']"))
+			# )
+			# filter_2020_21 = WebDriverWait(driver, 10).until(
+			# 	EC.presence_of_element_located((By.XPATH, '//div[@class="dropDown active"]/div[text() == "2020/21"]'))
+			# )
+
+			try:
+				# find the close button for the ad after the page update
+				advert = WebDriverWait(driver, 10).until(
+					EC.presence_of_all_elements_located((By.XPATH, "//a[@id='advertClose']"))
+				)  
+				ad_close_button = advert[0]
+				# click on the close button
+				
+				driver.execute_script("arguments[0].click();", ad_close_button)
+			except TimeoutException:
+				# in case there is no ad blocking the screen, continue with the 
+				#	loop
+				print('There is no ad. Proceed with the page!')
+			print(2.5)
 			# wait until the row of the last player on the list appears on the page
 			# 	in 2020/2021 season, it is Martin Ødegaard, with the data-player='p184029'
 			last_player = WebDriverWait(driver, 10).until(
 				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p184029']"))
 			)
-			print(len(player_rows))
-			print(counter)
-			counter += 1			
-			player_rows = WebDriverWait(driver, 10).until(
+			print(3)
+			# get the player rows and links for the details after the page
+			#	update
+			player_rows = WebDriverWait(driver, 15).until(
 					EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"))
 			)
-
+			print(3.5)
 			player_row_buttons = WebDriverWait(driver, 10).until(
 					EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a"))
 			)
+			print(4)
+
 			temp_dict = {}
 
+			print(len(player_rows))
+			print(counter)
+			counter += 1	
+
+			tries = 0
+			el_found = False
+			while el_found == False:
+				print(tries)
+				try:
+					player_row = player_rows[i].text
+					el_found = True
+				except StaleElementReferenceException:
+					player_rows = WebDriverWait(driver, 10).until(
+						EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"))
+					)
+					tries += 1
+
 			player_row = player_rows[i].text
+
 			player_row = player_row.splitlines()
 			player_name = player_row[0]
 
@@ -95,17 +153,6 @@ def player_retrieve_1():
 			players_list_of_dicts.append(temp_dict)
 			# print(players_list_of_dicts)
 			print('-----------------------------------------------------')
-
-
-			# make sure the 2020/2021 season table is loaded (instead of
-			#	2021/2022). check for the player Tosin Adarabioyo who 
-			#	appears in 2020/2021 but not in 2021/2022 with a unique
-			#	data-player id 'p109646'
-			# wait until this player is on the list
-			player_in_2020 = WebDriverWait(driver, 10).until(
-				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p109646']"))
-			)
-
 
 		# print(players_list_of_dicts)
 		return players_list_of_dicts
@@ -192,4 +239,4 @@ def player_retrieve_2(driver, player_row_button):
 
 	return dict_to_return
 
-player_retrieve_1()
+# player_retrieve_1()
