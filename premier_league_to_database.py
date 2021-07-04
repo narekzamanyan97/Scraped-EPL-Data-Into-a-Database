@@ -136,6 +136,15 @@ class database:
 
 		club_name = player_dict['club']
 
+		# some club names end with '(loan)'. If that is the case, then remove 
+		#	the 'loan' substring
+		if '(loan)' in club_name:
+			# remove the '(loan)' from the club name
+			club_name = club_name.replace('(loan)', '')
+
+		# remove trailing spaces
+		club_name = club_name.strip()
+
 		club_id_query = "SELECT club_id "
 		club_id_query += "FROM club "
 		club_id_query += "WHERE club_name=\"" + club_name + "\";"
@@ -146,7 +155,6 @@ class database:
 		
 		try:
 			club_id = tuple_list[0][0]
-			print(club_id)
 		except IndexError:
 			club_id = 'Null'
 
