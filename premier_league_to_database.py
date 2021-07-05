@@ -177,7 +177,7 @@ class database:
 			dob_year = dob_list[2]
 			dob_date = dob_year + '-' + dob_month + '-' + dob_day
 		except KeyError:
-			dob_date = 'Null'
+			dob_date = '0000-00-00'
 		
 
 		
