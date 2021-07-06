@@ -32,7 +32,7 @@ def player_retrieve_1():
 	#	with a webbot. close the ad before proceeding
 	# find the close button for the ad
 	advert_xpath = "//a[@id='advertClose']"
-	advert = presence_of_all_el_located(driver, advert_xpath, SECONDS_TO_WAIT, -1)
+	advert = presence_of_all_el_located(driver, advert_xpath, SECONDS_TO_WAIT, -2)
 	ad_close_button = advert[0]
 		
 	# click on the close button
@@ -81,7 +81,7 @@ def player_retrieve_1():
 		# exit the advertisement screen
 		try:
 			advert_xpath = "//a[@id='advertClose']"
-			advert = presence_of_all_el_located(driver, advert_xpath, SECONDS_TO_WAIT, -1)
+			advert = presence_of_all_el_located(driver, advert_xpath, SECONDS_TO_WAIT, -2)
 			ad_close_button = advert[0]
 		except TimeoutException:
 			print('There is no advertisement button. Moving on!')
@@ -148,31 +148,24 @@ def player_retrieve_2(driver, player_row_button):
 
 
 	# get the player's number first
-	player_number_xpath = "//div[@class='wrapper playerContainer']/div[@class='playerDetails']/div[@class='number t-colour']"
-	player_number = presence_of_all_el_located(driver, player_number_xpath, SECONDS_TO_WAIT, -1)
-	# try:
-	# 	player_number = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-	# 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='wrapper playerContainer']/div[@class='playerDetails']/div[@class='number t-colour']"))
-	# 	)
 	try:
+		player_number_xpath = "//div[@class='wrapper playerContainer']/div[@class='playerDetails']/div[@class='number t-colour']"
+		player_number = presence_of_all_el_located(driver, player_number_xpath, SECONDS_TO_WAIT, -2)
 		player_number = player_number[0].text
 		dict_to_return['shirt number'] = player_number
+	except TimeoutException:
+		print('Player has no specified shirt number.')
 	except IndexError:
 		dict_to_return['shirt number'] = 'Null'
-
-		# dict_to_return['shirt number'] = player_number
-	# except TimeoutException:
-	# 	dict_to_return['shirt number'] = 'Null'
 
 	# some player's have no club in the top left corner, so use the div in
 	#	the center of the page to get the club of the player in 2020-2021
 	#	season
-	player_career_xpath = "//div[@class='table playerClubHistory  true']/table/tbody/tr[@class='table']"
-	player_career = presence_of_all_el_located(driver, player_number_xpath, SECONDS_TO_WAIT, -1)
-
-	# player_career = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-	# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table playerClubHistory  true']/table/tbody/tr[@class='table']"))
-	# )
+	# player_career_xpath = "//div[@class='table playerClubHistory  true']/table/tbody/tr[@class='table']"
+	# player_career = presence_of_all_el_located(driver, player_number_xpath, SECONDS_TO_WAIT, -2)
+	player_career = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table playerClubHistory  true']/table/tbody/tr[@class='table']"))
+	)
 
 	# get the top two rows on the table, either of which contain the 
 	#	2020/2021 and 2021/2022 seasons. 
@@ -198,24 +191,47 @@ def player_retrieve_2(driver, player_row_button):
 	dict_to_return['club'] = season_club
 
 	# Some players have no nationality
-
-	personal_details_xpath = "//div[@class='personalLists']/ul"
-	personal_details = presence_of_all_el_located(driver, player_number_xpath, SECONDS_TO_WAIT, -1)
-	# personal_details = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-	# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='personalLists']/ul"))
-	# )
-
-	# get the date of birth and height of the player
-	date_of_birth = personal_details[1].text.splitlines()
-	date_of_birth = date_of_birth[1].split()[0]
-	dict_to_return['date of birth'] = date_of_birth
-
-	# Some players have no height field
 	try:
-		height = personal_details[2].text.splitlines()
-		height = height[1]
-	except IndexError:
+		personal_details_xpath = "//div[@class='personalLists']/ul"
+		personal_details = presence_of_all_el_located(driver, player_number_xpath, SECONDS_TO_WAIT, -2)
+		print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
+		for detail in personal_details:
+		 	print(detail.text)
+		print('vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv')
+
+		# get the date of birth and height of the player	
+		date_of_birth = personal_details[1].text.splitlines()
+		date_of_birth = date_of_birth[1].split()[0]
+		dict_to_return['date of birth'] = date_of_birth
+
+		# Some players have no height field
+		try:
+			height = personal_details[2].text.splitlines()
+			height = height[1]
+		except IndexError:
+			height = 'Null'
+	# catch the rethrown TimeoutException. Some players have no personal details
+	#	division on the screen
+	except TimeoutException:
+		print('No details division.')
+		date_of_birth = 'Null'
 		height = 'Null'
+
+	# try:
+	# 	personal_details = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+	# 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='personalLists']/ul"))
+	# 	)
+	#  	date_of_birth = personal_details[1].text.splitlines()
+	# 	date_of_birth = date_of_birth[1].split()[0]
+	# 	dict_to_return['date of birth'] = date_of_birth
+
+	# 	try:
+	# 		height = personal_details[2].text.splitlines()
+	# 		height = height[1]
+	# 	except IndexError:
+	# 		height = 'Null'
+	# except:
+
 
 	dict_to_return['height'] = height
 
@@ -232,10 +248,13 @@ def player_retrieve_2(driver, player_row_button):
 #	if the index is >= 0
 #		the specified row
 #   if the index is -2
-#		return either after the ad element is found, or when there is a 
+#		return either after the ad element is found, or rethrow an exception
+#		when there is a 
 #		TimeoutException, because the script finds the ad very quickly, and 
 #		since most of the time there is no ad, there is no need to try more than
 #		once to find it, as the chances are it is not there.
+#		Same with the shirt number, a lot of players don't have their
+#		shirt number specified
 def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 	tries = 0
 	el_found = False
@@ -253,7 +272,8 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 			# if we are looking for an ad element, then pass the exception to the
 			#	calling function so that we can move on
 			if index == -2:
-				pass
+				raise TimeoutException('')
+			
 			print('Timeout Exception Occured')
 
 	if index != -1 and index != -2:

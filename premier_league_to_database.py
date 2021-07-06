@@ -167,7 +167,10 @@ class database:
 		player_name = player_dict['player name']
 		position = player_dict['position']
 		country = player_dict['country']
-		shirt_number = player_dict['shirt number']
+		try:
+			shirt_number = player_dict['shirt number']
+		except KeyError:
+			shirt_number = 'Null'
 		# there is (are) players without specified date of birth
 		try:
 			date_of_birth = player_dict['date of birth']
