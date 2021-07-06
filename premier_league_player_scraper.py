@@ -193,7 +193,7 @@ def player_retrieve_2(driver, player_row_button):
 	# Some players have no nationality
 	try:
 		personal_details_xpath = "//div[@class='personalLists']/ul"
-		personal_details = presence_of_all_el_located(driver, player_number_xpath, SECONDS_TO_WAIT, -2)
+		personal_details = presence_of_all_el_located(driver, personal_details_xpath, SECONDS_TO_WAIT, -2)
 		print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
 		for detail in personal_details:
 		 	print(detail.text)
