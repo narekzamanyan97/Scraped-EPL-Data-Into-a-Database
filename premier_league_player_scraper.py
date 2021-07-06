@@ -18,7 +18,7 @@ urls = {
 	'url_1': 'https://www.premierleague.com/players?se=363&cl=-1',
 }
 
-SECONDS_TO_WAIT = 15
+SECONDS_TO_WAIT = 20
 
 # get the player's name, position, and country, then click on the row
 def player_retrieve_1():
@@ -43,86 +43,93 @@ def player_retrieve_1():
 	last_player_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p184029']"
 	last_player = presence_of_all_el_located(driver, last_player_xpath, SECONDS_TO_WAIT, -1)
 
-	try:
-		# get the player rows to start the for loop
-		player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
+	# get the player rows to start the for loop
+	player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
+	player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
+
+	players_list_of_dicts = []
+
+	counter = 0
+
+	# get the basic player information from the rows
+	for i in range(100, len(player_rows) - (len(player_rows) - 130)):
+		# scroll down to the bottom of the page to include all the players
+		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+		
+		# make sure the 2020/2021 season table is loaded (instead of
+		#	2021/22). check for the 2020/21 to appear
+		filter_2020_21 = WebDriverWait(driver, 20).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p109646']"))
+		)
+
+		# get the player_rows for the for loop, so we can count the
+		#	number of players
 		player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
 
-		players_list_of_dicts = []
+		# wait until the row of the last player on the list appears on the page
+		# 	in 2020/2021 season, it is Martin Ødegaard, with the data-player='p184029'
+		last_player_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@alt='Photo for Martin Ødegaard']"
+		last_player = presence_of_all_el_located(driver, last_player_xpath, SECONDS_TO_WAIT, -1)			
 
-		counter = 0
+		# get the player rows and links for the details after the page
+		#	update
+		print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+		player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
+		player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i)
+		print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
 
-		# get the basic player information from the rows
-		for i in range(60, len(player_rows) - (len(player_rows) - 70)):
-			# scroll down to the bottom of the page to include all the players
-			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-			
-			# make sure the 2020/2021 season table is loaded (instead of
-			#	2021/22). check for the 2020/21 to appear
-			filter_2020_21 = WebDriverWait(driver, 20).until(
-				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p109646']"))
-			)
+		
 
-			# get the player_rows for the for loop, so we can count the
-			#	number of players
-			player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
-
-			# wait until the row of the last player on the list appears on the page
-			# 	in 2020/2021 season, it is Martin Ødegaard, with the data-player='p184029'
-			last_player_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@alt='Photo for Martin Ødegaard']"
-			last_player = presence_of_all_el_located(driver, last_player_xpath, SECONDS_TO_WAIT, -1)			
-
-			# get the player rows and links for the details after the page
-			#	update
-			print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
-			player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
-			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i)
-			print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
-
-			player_row_buttons_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a"
-			player_row_button = presence_of_all_el_located(driver, player_row_buttons_xpath, SECONDS_TO_WAIT, i)
-
-
-			temp_dict = {}
-
-			print(counter)
-			counter += 1	
-
-			# the player_rows frequently throws a stale element error.
-			#	keep looking for the element (3 tries)
+		# the player_rows frequently throws a stale element error.
+		#	keep looking for the element (3 tries)
+		# Sometimes player_row.text throws a StaleElementReferenceException
+		#	even though it was tested in the function presence_of_all_el_located
+		#	above. So the returned element is stale, even though it was not
+		#	stale right before returing it from the function
+		# Try and catch the exception, and call the funciton in the catch (except) 
+		try:
 			player_row_text = player_row.text
-			print(player_row_text)
-			player_row_text_list = player_row_text.splitlines()
-			player_name = player_row_text_list[0]
+		except StaleElementReferenceException:
+			print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i)
 
-			player_position_and_country = player_row_text_list[1].split()
-			player_position = player_position_and_country[0]
-			
-			# get the country of the player: some player rows are missing the 
-			#	country column
-			try:
-				player_country = player_position_and_country[1]
-			except IndexError:
-				player_country = 'Null'
-			
-			# add the player info to a dictionary
-			temp_dict['player name'] = player_name
-			temp_dict['position'] = player_position
-			temp_dict['country'] = player_country
+		print(player_row_text)
+		player_row_text_list = player_row_text.splitlines()
+		player_name = player_row_text_list[0]
 
-			# add the player's detailed info to the temp_dict 
-			player_details_dict = player_retrieve_2(driver, player_row_button)
-			temp_dict.update(player_details_dict)
-			print(temp_dict)
-			# add the temp_dict to the list later to be returned from the function
-			players_list_of_dicts.append(temp_dict)
-			print('-----------------------------------------------------')
+		player_position_and_country = player_row_text_list[1].split()
+		player_position = player_position_and_country[0]
+		
+		# get the country of the player: some player rows are missing the 
+		#	country column
+		try:
+			player_country = player_position_and_country[1]
+		except IndexError:
+			player_country = 'Null'
+		
+		temp_dict = {}
 
-		# print(players_list_of_dicts)
-		return players_list_of_dicts
+		print(counter)
+		counter += 1
 
-	except TimeoutException as ex:
-		print('')
+		# add the player info to a dictionary
+		temp_dict['player name'] = player_name
+		temp_dict['position'] = player_position
+		temp_dict['country'] = player_country
+
+		player_row_buttons_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a"
+		player_row_button = presence_of_all_el_located(driver, player_row_buttons_xpath, SECONDS_TO_WAIT, i)
+
+		# add the player's detailed info to the temp_dict 
+		player_details_dict = player_retrieve_2(driver, player_row_button)
+		temp_dict.update(player_details_dict)
+		print(temp_dict)
+		# add the temp_dict to the list later to be returned from the function
+		players_list_of_dicts.append(temp_dict)
+		print('-----------------------------------------------------')
+
+	# print(players_list_of_dicts)
+	return players_list_of_dicts
 
 # get the player's shirt number, club, date of birth, height, and club
 def player_retrieve_2(driver, player_row_button):
@@ -135,7 +142,7 @@ def player_retrieve_2(driver, player_row_button):
 
 	# get the player's number first
 	try:
-		player_number = WebDriverWait(driver, 10).until(
+		player_number = WebDriverWait(driver, SECONDS_TO_WAIT).until(
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='wrapper playerContainer']/div[@class='playerDetails']/div[@class='number t-colour']"))
 		)
 		player_number = player_number[0].text
@@ -148,7 +155,7 @@ def player_retrieve_2(driver, player_row_button):
 	# some player's have no club in the top left corner, so use the div in
 	#	the center of the page to get the club of the player in 2020-2021
 	#	season
-	player_career = WebDriverWait(driver, 10).until(
+	player_career = WebDriverWait(driver, SECONDS_TO_WAIT).until(
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table playerClubHistory  true']/table/tbody/tr[@class='table']"))
 	)
 
@@ -177,7 +184,7 @@ def player_retrieve_2(driver, player_row_button):
 
 	# Some players have no nationality
 	try:
-		personal_details = WebDriverWait(driver, 10).until(
+		personal_details = WebDriverWait(driver, SECONDS_TO_WAIT).until(
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='personalLists']/ul"))
 		)
 
@@ -214,7 +221,7 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 	el_found = False
 	# handle TimeoutException
 	while el_found == False and tries < 3:
-		print('tries (TimeoutException loop): ' + str(tries))
+		print('# of tries (TimeoutException loop): ' + str(tries))
 		try:
 			element = WebDriverWait(driver, seconds_to_wait).until(
 				EC.presence_of_all_elements_located((By.XPATH, xpath))
@@ -229,7 +236,7 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 		# handle stale element exception. If the element 
 		el_not_stale = False
 		while el_not_stale == False and tries < 3:
-			print('tries (StaleElementException loop): ' + str(tries))
+			print('# of tries (StaleElementException loop): ' + str(tries))
 			try:
 				el = element[index]
 				print(el.text)
