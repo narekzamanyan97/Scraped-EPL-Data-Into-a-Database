@@ -52,7 +52,7 @@ def player_retrieve_1():
 	counter = 0
 
 	# get the basic player information from the rows
-	for i in range(100, len(player_rows) - (len(player_rows) - 130)):
+	for i in range(130, len(player_rows) - (len(player_rows) - 140)):
 		# scroll down to the bottom of the page to include all the players
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 		
@@ -78,7 +78,14 @@ def player_retrieve_1():
 		player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i)
 		print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
 
-		
+		# exit the advertisement screen
+		try:
+			advert_xpath = "//a[@id='advertClose']"
+			advert = presence_of_all_el_located(driver, advert_xpath, SECONDS_TO_WAIT, -1)
+			ad_close_button = advert[0]
+		except TimeoutException:
+			print('There is no advertisement button. Moving on!')
+
 
 		# the player_rows frequently throws a stale element error.
 		#	keep looking for the element (3 tries)
@@ -141,23 +148,31 @@ def player_retrieve_2(driver, player_row_button):
 
 
 	# get the player's number first
+	player_number_xpath = "//div[@class='wrapper playerContainer']/div[@class='playerDetails']/div[@class='number t-colour']"
+	player_number = presence_of_all_el_located(driver, player_number_xpath, SECONDS_TO_WAIT, -1)
+	# try:
+	# 	player_number = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+	# 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='wrapper playerContainer']/div[@class='playerDetails']/div[@class='number t-colour']"))
+	# 	)
 	try:
-		player_number = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='wrapper playerContainer']/div[@class='playerDetails']/div[@class='number t-colour']"))
-		)
 		player_number = player_number[0].text
-
-
 		dict_to_return['shirt number'] = player_number
-	except TimeoutException:
+	except IndexError:
 		dict_to_return['shirt number'] = 'Null'
+
+		# dict_to_return['shirt number'] = player_number
+	# except TimeoutException:
+	# 	dict_to_return['shirt number'] = 'Null'
 
 	# some player's have no club in the top left corner, so use the div in
 	#	the center of the page to get the club of the player in 2020-2021
 	#	season
-	player_career = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table playerClubHistory  true']/table/tbody/tr[@class='table']"))
-	)
+	player_career_xpath = "//div[@class='table playerClubHistory  true']/table/tbody/tr[@class='table']"
+	player_career = presence_of_all_el_located(driver, player_number_xpath, SECONDS_TO_WAIT, -1)
+
+	# player_career = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+	# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table playerClubHistory  true']/table/tbody/tr[@class='table']"))
+	# )
 
 	# get the top two rows on the table, either of which contain the 
 	#	2020/2021 and 2021/2022 seasons. 
@@ -183,26 +198,26 @@ def player_retrieve_2(driver, player_row_button):
 	dict_to_return['club'] = season_club
 
 	# Some players have no nationality
+
+	personal_details_xpath = "//div[@class='personalLists']/ul"
+	personal_details = presence_of_all_el_located(driver, player_number_xpath, SECONDS_TO_WAIT, -1)
+	# personal_details = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+	# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='personalLists']/ul"))
+	# )
+
+	# get the date of birth and height of the player
+	date_of_birth = personal_details[1].text.splitlines()
+	date_of_birth = date_of_birth[1].split()[0]
+	dict_to_return['date of birth'] = date_of_birth
+
+	# Some players have no height field
 	try:
-		personal_details = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='personalLists']/ul"))
-		)
+		height = personal_details[2].text.splitlines()
+		height = height[1]
+	except IndexError:
+		height = 'Null'
 
-		# get the date of birth and height of the player
-		date_of_birth = personal_details[1].text.splitlines()
-		date_of_birth = date_of_birth[1].split()[0]
-		dict_to_return['date of birth'] = date_of_birth
-
-		# Some players have no height field
-		try:
-			height = personal_details[2].text.splitlines()
-			height = height[1]
-		except IndexError:
-			height = 'Null'
-		dict_to_return['height'] = height
-
-	except TimeoutException:
-		print('')
+	dict_to_return['height'] = height
 
 	# go back to the previous page
 	driver.execute_script("window.history.go(-1)")
@@ -214,8 +229,13 @@ def player_retrieve_2(driver, player_row_button):
 # @returns:
 #	if the index is -1
 #		the entire web element
-#	if the index is specified
+#	if the index is >= 0
 #		the specified row
+#   if the index is -2
+#		return either after the ad element is found, or when there is a 
+#		TimeoutException, because the script finds the ad very quickly, and 
+#		since most of the time there is no ad, there is no need to try more than
+#		once to find it, as the chances are it is not there.
 def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 	tries = 0
 	el_found = False
@@ -229,9 +249,14 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 			el_found = True
 		except TimeoutException:
 			tries += 1
+
+			# if we are looking for an ad element, then pass the exception to the
+			#	calling function so that we can move on
+			if index == -2:
+				pass
 			print('Timeout Exception Occured')
 
-	if index != -1:
+	if index != -1 and index != -2:
 		tries = 0
 		# handle stale element exception. If the element 
 		el_not_stale = False
