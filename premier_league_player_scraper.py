@@ -52,7 +52,7 @@ def player_retrieve_1():
 	counter = 0
 
 	# get the basic player information from the rows
-	for i in range(130, len(player_rows) - (len(player_rows) - 140)):
+	for i in range(200, len(player_rows) - (len(player_rows) - 250)):
 		# scroll down to the bottom of the page to include all the players
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 		
@@ -162,7 +162,7 @@ def player_retrieve_2(driver, player_row_button):
 	#	the center of the page to get the club of the player in 2020-2021
 	#	season
 	# player_career_xpath = "//div[@class='table playerClubHistory  true']/table/tbody/tr[@class='table']"
-	# player_career = presence_of_all_el_located(driver, player_number_xpath, SECONDS_TO_WAIT, -2)
+	# player_career = presence_of_all_el_located(driver, player_number_xpath, SECONDS_TO_WAIT, -1)
 	player_career = WebDriverWait(driver, SECONDS_TO_WAIT).until(
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table playerClubHistory  true']/table/tbody/tr[@class='table']"))
 	)
@@ -299,3 +299,6 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 		return element
 
 # player_retrieve_1()
+
+
+# Jan Bednarek plays in Southampton
