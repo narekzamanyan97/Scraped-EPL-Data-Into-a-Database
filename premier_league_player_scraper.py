@@ -52,7 +52,7 @@ def player_retrieve_1():
 	counter = 0
 
 	# get the basic player information from the rows
-	for i in range(200, len(player_rows) - (len(player_rows) - 250)):
+	for i in range(487, len(player_rows) - (len(player_rows) - 500)):
 		# scroll down to the bottom of the page to include all the players
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 		
@@ -199,10 +199,13 @@ def player_retrieve_2(driver, player_row_button):
 		 	print(detail.text)
 		print('vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv')
 
-		# get the date of birth and height of the player	
-		date_of_birth = personal_details[1].text.splitlines()
-		date_of_birth = date_of_birth[1].split()[0]
-		dict_to_return['date of birth'] = date_of_birth
+		# get the date of birth and height of the player
+		try:
+			date_of_birth = personal_details[1].text.splitlines()
+			date_of_birth = date_of_birth[1].split()[0]
+			dict_to_return['date of birth'] = date_of_birth
+		except IndexError:
+			dict_to_return['date of birth'] = '0000-00-00'
 
 		# Some players have no height field
 		try:

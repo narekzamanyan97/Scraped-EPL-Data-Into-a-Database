@@ -107,6 +107,11 @@ class database:
 
 		# !!! get the club id
 		club_name = managers_dict['manager club']
+		# For the player Lars Dendoncker, the club name has the '&' instead of
+		#	'and for Brighton and Hove Albion'
+		if club_name == 'Brighton & Hove Albion':
+			club_name = 'Brighton and Hove Albion'
+
 		club_id_query = "SELECT club_id "
 		club_id_query += "FROM club "
 		club_id_query += "WHERE club_name=\"" + club_name + "\";"
@@ -172,15 +177,18 @@ class database:
 		except KeyError:
 			shirt_number = 'Null'
 		# there is (are) players without specified date of birth
-		try:
-			date_of_birth = player_dict['date of birth']
-			dob_list = date_of_birth.split('/')
-			dob_day = dob_list[0]
-			dob_month = dob_list[1]
-			dob_year = dob_list[2]
-			dob_date = dob_year + '-' + dob_month + '-' + dob_day
-		except KeyError:
-			dob_date = '0000-00-00'
+		if date_of_birth != '0000-00-00':
+			try:
+				date_of_birth = player_dict['date of birth']
+				dob_list = date_of_birth.split('/')
+				dob_day = dob_list[0]
+				dob_month = dob_list[1]
+				dob_year = dob_list[2]
+				dob_date = dob_year + '-' + dob_month + '-' + dob_day
+			except KeyError:
+				dob_date = '0000-00-00'
+		else:
+			dob_date = date_of_birth
 		
 
 		
