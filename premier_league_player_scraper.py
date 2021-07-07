@@ -52,13 +52,13 @@ def player_retrieve_1():
 	counter = 0
 
 	# get the basic player information from the rows
-	for i in range(487, len(player_rows) - (len(player_rows) - 500)):
+	for i in range(506, len(player_rows) - (len(player_rows) - 520)):
 		# scroll down to the bottom of the page to include all the players
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 		
 		# make sure the 2020/2021 season table is loaded (instead of
 		#	2021/22). check for the 2020/21 to appear
-		filter_2020_21 = WebDriverWait(driver, 20).until(
+		filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p109646']"))
 		)
 
@@ -217,7 +217,7 @@ def player_retrieve_2(driver, player_row_button):
 	#	division on the screen
 	except TimeoutException:
 		print('No details division.')
-		date_of_birth = 'Null'
+		dict_to_return['date of birth'] = '0000-00-00'
 		height = 'Null'
 
 	# try:
