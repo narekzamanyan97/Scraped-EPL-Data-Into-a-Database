@@ -137,14 +137,31 @@ def results_retrieve_1():
 
 				results_list_of_dicts.append(result_dict)
 			
-			print(results_list_of_dicts)
+			# print(results_list_of_dicts)
 
 			# call results_retrieve_2 to get the match details, such as scorers and assists, 
 			#	red cards, penalty scorers, own goals, etc.
-			player_stats, match_date = results_retrieve_2(driver, div_ids[i])
+			player_stats, match_date, line_ups, team_stats = results_retrieve_2(driver, div_ids[i])
 
-			print(match_date)
-			print(player_stats)
+			# print(match_date)
+			# print(player_stats)
+			results_list_of_dicts.append(match_date)
+			results_list_of_dicts.append(player_stats)
+			results_list_of_dicts.append(line_ups)
+			results_list_of_dicts.append(team_stats)
+
+			print('*****************************************************************')
+			print('*****************************************************************')
+			# results_list_of_dicts's elements are:
+			#	[0] = basic match info (match_id, sides, goals, stadium)
+			#	[1] = date information, including matchweek, and referee
+			#	[2] = player events, including goal scorers with times,
+			#			red cards, penalty, own goal info.
+			# 	[3] = line_ups and player performances
+			#	[4] = club performances
+			for dict_ in results_list_of_dicts:
+				print(dict_)
+				print('--------------------------------------------')
 
 			print('*****************************************************************')
 			print('*****************************************************************')
@@ -157,7 +174,9 @@ def results_retrieve_1():
 # !!! count the clean sheets
 
 # retrieve the scorer names, and statistics after clicking on the result row
-# Returns the name of the goal scorers, assists ...
+# Returns the name of the goal scorers, assists ... Also returns the
+#	dictionaries returned by results_retrieve_3/4, so that results_retrieve_1
+#	can access them
 def results_retrieve_2(driver, result_row):
 	# click on the result row to open the details of the match
 	driver.execute_script("arguments[0].click();", result_row)
@@ -217,7 +236,7 @@ def results_retrieve_2(driver, result_row):
 		print('')
 
 	
-	print('*****************************************************************')
+	# print('*****************************************************************')
 
 
 
@@ -275,20 +294,20 @@ def results_retrieve_2(driver, result_row):
 
 	# call the retrive_3 function to get the line_ups and player stats of the match
 	line_ups = results_retrieve_3(driver)
-	print(line_ups)
+	# print(line_ups)
 
-	print('*****************************************************************')
+	# print('*****************************************************************')
 
 	# call results_retrieve_3 function to get the team stats of the match
 	team_stats = results_retrieve_4(driver)
-	print(team_stats)
-	print('*****************************************************************')	
+	# print(team_stats)
+	# print('*****************************************************************')	
 	
 
 	# go back to the previous page
 	driver.execute_script("window.history.go(-1)")
 
-	return stats, match_date
+	return stats, match_date, line_ups, team_stats
 	
 # get the line-ups, substitutes and player stats
 def results_retrieve_3(driver):
@@ -456,8 +475,6 @@ def extract_player_information(squad_number, squad_info, is_home_side):
 
 		starting_11_counter += 1
 
-	# print('printing squad dict')
-	# print(squad_dict)
 	return(squad_dict)
 
 

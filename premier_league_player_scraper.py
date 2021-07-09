@@ -27,6 +27,7 @@ def player_retrieve_1():
 
 	# scroll down to the bottom of the page to include all the players
 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+	time.sleep(5)
 
 	# there is a full screen ad on the page when we try to access the data
 	#	with a webbot. close the ad before proceeding
@@ -62,11 +63,13 @@ def player_retrieve_1():
 	counter = 0
 
 	print(len(player_rows))
+	original_row_amount = len(player_rows)
+
 	# get the basic player information from the rows
-	for i in range(830, len(player_rows) - (len(player_rows) - 860)):
+	for i in range(836, len(player_rows) - (len(player_rows) - 860)):
 		# scroll down to the bottom of the page to include all the players
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-		
+		time.sleep(5)
 
 		# make sure the 2020/2021 season table is loaded (instead of
 		#	2021/22). check for the 2020/21 to appear
@@ -166,6 +169,8 @@ def player_retrieve_1():
 		try:
 			player_rows[i]
 		except IndexError:
+			print('i = ' + str(i))
+			print('original = ' + str(original_row_amount))
 			break
 
 	# print(players_list_of_dicts)
