@@ -47,8 +47,15 @@ def player_retrieve_1():
 	player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
 	player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
 
-	while len(player_rows) != 894:
-		player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
+	# while len(player_rows) != 894:
+	# 	# scroll down to the bottom of the page to include all the players
+	# 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+	# 	time.sleep(5)
+	# 	last_player = presence_of_all_el_located(driver, last_player_xpath, SECONDS_TO_WAIT, -1)
+	# 	time.sleep(5)
+
+	# 	player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
+	# 	print(len(player_rows))
 
 	players_list_of_dicts = []
 
@@ -60,6 +67,7 @@ def player_retrieve_1():
 		# scroll down to the bottom of the page to include all the players
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 		
+
 		# make sure the 2020/2021 season table is loaded (instead of
 		#	2021/22). check for the 2020/21 to appear
 		filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
@@ -70,9 +78,17 @@ def player_retrieve_1():
 		#	number of players
 		player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
 
-		while len(player_rows) != 894:
-			player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
-		
+		# while len(player_rows) != 894:
+		# 	# scroll down to the bottom of the page to include all the players
+		# 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+		# 	time.sleep(5)
+
+		# 	last_player = presence_of_all_el_located(driver, last_player_xpath, SECONDS_TO_WAIT, -1)
+		# 	time.sleep(5)
+
+		# 	player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
+		# 	print(len(player_rows))
+
 		# wait until the row of the last player on the list appears on the page
 		# 	in 2020/2021 season, it is Martin Ødegaard, with the data-player='p184029'
 		last_player_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@alt='Photo for Martin Ødegaard']"
@@ -141,6 +157,16 @@ def player_retrieve_1():
 		# add the temp_dict to the list later to be returned from the function
 		players_list_of_dicts.append(temp_dict)
 		print('-----------------------------------------------------')
+
+		# Since the driver returns player elements with varying number of rows
+		#	the for loop encounters an IndexError. It is impossible to get
+		# 	identical number of rows at every iteration, because the browser
+		#	duplicates (probably randomly) the rows, which ranges between the 
+		#	three values of 834/864/894
+		try:
+			player_rows[i]
+		except IndexError:
+			break
 
 	# print(players_list_of_dicts)
 	return players_list_of_dicts
