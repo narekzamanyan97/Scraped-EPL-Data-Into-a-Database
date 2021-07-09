@@ -29,8 +29,9 @@ def results_retrieve_1():
 
 
 	
-	# Scroll down to load more results
-	driver.execute_script("window.scrollTo(0, 1080)")
+	# Scroll down to load more results to include all the results
+	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+	time.sleep(5)
 
 	try:
 		# Stadiums contains the following information:
@@ -57,6 +58,7 @@ def results_retrieve_1():
 
 		number_of_results = len(results)
 		number_of_stadiums = len(stadiums)
+		print(number_of_results)
 		
 		counter = 1
 

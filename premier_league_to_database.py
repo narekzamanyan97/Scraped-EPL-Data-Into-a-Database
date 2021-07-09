@@ -272,6 +272,33 @@ class database:
 		self.cursor.execute(insert_statement)
 		self.conn.commit()
 
+	def insert_match_basic_info(self, match_basic_info_dict, date_dict):
+		match_id = match_basic_info_dict['match id']
+		home_team_name = match_basic_info_dict['home']
+		away_team_name = match_basic_info_dict['away']
+
+		# get the home and away team ids
+		home_club_id_query = "SELECT club_id FROM club "
+		home_club_id_query += "WHERE club_name=" + home_team_name + ";"
+		
+		# execute the query to get the id of the home club
+		self.cursor.execute(home_club_id_query)
+		tuple_list = self.cursor.fetchall()
+		home_team_id = tuple_list[0][0]
+
+		away_club_id_query = "SELECT club_id FROM club "
+		away_club_id_query += "WHERE club_name=" + away_club_name + ";"
+
+		# execute the query to get the id of the away club
+		self.cursor.execute(away_club_id_query)
+		tuple_list = self.cursor.fetchall()
+		away_club_id = tuple_list[0][0]
+
+		home_goals = match_basic_info_dict['home goals']
+		away_goals = match_basic_info_dict['away goals']
+		stadium_name = match_basic_info_dict['stadium name']
+		city = match_basic_info_dict['city']
+
 	# this function helps us clear all the rows of a table in case the 
 	#	after we do test insert statements
 	def delete_all_rows(self, table_name):

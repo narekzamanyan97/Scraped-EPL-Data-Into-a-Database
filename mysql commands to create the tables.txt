@@ -72,10 +72,7 @@ create table match_(
 
 	home_team_goals int(2),
 	away_team_goals int(2),
-	weekday varchar(10),
-	day varchar(2),
-	month varchar(9),
-	year int(4),
+	match_date date,
 	matchweek int(2),
 	referee varchar(50),
 
