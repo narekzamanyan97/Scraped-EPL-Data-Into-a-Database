@@ -107,11 +107,6 @@ class database:
 
 		# !!! get the club id
 		club_name = managers_dict['manager club']
-		# For the player Lars Dendoncker, the club name has the '&' instead of
-		#	'and for Brighton and Hove Albion'
-		if club_name == 'Brighton & Hove Albion':
-			print('Changing the Brighton name')
-			club_name = 'Brighton and Hove Albion'
 
 		club_id_query = "SELECT club_id "
 		club_id_query += "FROM club "
@@ -157,6 +152,13 @@ class database:
 
 		# remove trailing spaces
 		club_name = club_name.strip()
+
+		# For the player Lars Dendoncker, the club name has the '&' instead of
+		#	'and for Brighton and Hove Albion'
+		if club_name == 'Brighton & Hove Albion':
+			print('Changing the Brighton name')
+			club_name = 'Brighton and Hove Albion'
+
 
 		club_id_query = "SELECT club_id "
 		club_id_query += "FROM club "

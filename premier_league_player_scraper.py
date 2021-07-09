@@ -47,12 +47,16 @@ def player_retrieve_1():
 	player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
 	player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
 
+	while len(player_rows) != 894:
+		player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
+
 	players_list_of_dicts = []
 
 	counter = 0
 
+	print(len(player_rows))
 	# get the basic player information from the rows
-	for i in range(506, len(player_rows) - (len(player_rows) - 520)):
+	for i in range(830, len(player_rows) - (len(player_rows) - 860)):
 		# scroll down to the bottom of the page to include all the players
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 		
@@ -66,6 +70,9 @@ def player_retrieve_1():
 		#	number of players
 		player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
 
+		while len(player_rows) != 894:
+			player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
+		
 		# wait until the row of the last player on the list appears on the page
 		# 	in 2020/2021 season, it is Martin Ødegaard, with the data-player='p184029'
 		last_player_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@alt='Photo for Martin Ødegaard']"
