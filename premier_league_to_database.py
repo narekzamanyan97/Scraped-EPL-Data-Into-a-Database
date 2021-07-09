@@ -61,30 +61,8 @@ class database:
 			joined_club_year = splitted_joined_club[2]
 
 			# convert the month name into number from 01 to 12
-			if joined_club_month == "January":
-				joined_club_month = '01'
-			elif joined_club_month == "February":
-				joined_club_month = '02'
-			elif joined_club_month == 'March':
-				joined_club_month = '03'
-			elif joined_club_month == 'April':
-				joined_club_month = '04'
-			elif joined_club_month == 'May':
-				joined_club_month = '05'
-			elif joined_club_month == 'June':
-				joined_club_month = '06'
-			elif joined_club_month == 'July':
-				joined_club_month = '07'
-			elif joined_club_month == 'August':
-				joined_club_month = '08'
-			elif joined_club_month == 'September':
-				joined_club_month = '09'
-			elif joined_club_month == 'October':
-				joined_club_month = '10'
-			elif joined_club_month == 'November':
-				joined_club_month = '11'
-			elif joined_club_month == 'December':
-				joined_club_month = '12'
+			joined_club_month = convert_month_to_number(joined_club_month)
+
 			joined_club_date = joined_club_year + '-' + joined_club_month + '-' + joined_club_day
 		except KeyError:
 			joined_club_date = '0000-00-00'
@@ -298,6 +276,38 @@ class database:
 		away_goals = match_basic_info_dict['away goals']
 		stadium_name = match_basic_info_dict['stadium name']
 		city = match_basic_info_dict['city']
+
+		weekday = date_dict['weekday']
+
+	# convert the month name into number from 01 to 12
+	def convert_month_to_number(self, month):
+		if month == "January" or month == "Jan":
+			month = '01'
+		elif month == "February" or month = "Feb":
+			month = '02'
+		elif month == 'March' or month == "Mar":
+			month = '03'
+		elif month == 'April' or month = "Apr":
+			month = '04'
+		elif month == 'May' or month = "May":
+			month = '05'
+		elif month == 'June' or month = "Jun":
+			month = '06'
+		elif month == 'July' or month = "Jul":
+			month = '07'
+		elif month == 'August' or month = "Aug":
+			month = '08'
+		elif month == 'September' or month = "Sep":
+			month = '09'
+		elif month == 'October' or month = "Oct":
+			month = '10'
+		elif month == 'November' or month = "Nov":
+			month = '11'
+		elif month == 'December' or month = "Dec":
+			month = '12'
+		
+		return month
+
 
 	# this function helps us clear all the rows of a table in case the 
 	#	after we do test insert statements
