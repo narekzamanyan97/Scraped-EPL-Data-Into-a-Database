@@ -319,13 +319,16 @@ class database:
 		self.conn.commit()
 
 	# receives the stats of both teams, the match id, and the id of both
-	#	clubs match_and_club_id[0] = match_id 
-	#		  match_and_club_id[1] = home club_id
-	#		  match_and_club_id[2] = away club_id
-	def insert_club_stats(self, club_stats_dict, match_and_club_id):
-		match_id = match_and_club_id[0]
-		club_home_id = match_and_club_id[1]
-		club_away_id = match_and_club_id[2]
+	#	clubs match_id_and_club_names[0] = match_id 
+	#		  match_id_and_club_names[1] = home club_id
+	#		  match_id_and_club_names[2] = away club_id
+	def insert_club_stats(self, club_stats_dict, match_id_and_club_names):
+		match_id = match_id_and_club_names[0]
+		club_home_name = match_id_and_club_names[1]
+		club_away_name = match_id_and_club_names[2]
+
+		club_home_id = self.get_club_id(club_home_name)
+		club_away_id = self.get_club_id(club_away_name)
 
 		possession_home = club_stats_dict['Possession home']
 		possession_away = club_stats_dict['Possession away']
@@ -414,7 +417,7 @@ class database:
 		insert_statement += str(yellow_cards_home) + ", "
 		insert_statement += str(red_cards_home) + ");"
 
-		
+
 		self.cursor.execute(insert_statement)
 		self.conn.commit()
 
@@ -447,6 +450,16 @@ class database:
 		
 		return month
 
+	# gets the club_name, and returns the club_id
+	def get_club_id(self, club_name):
+		club_id_query = "SELECT club_id FROM club "
+		club_id_query += "WHERE club_name=\"" + club_name + "\";"
+
+		self.cursor.execute(club_id_query)
+		tuple_list = self.cursor.fetchall()
+		club_id = tuple_list[0][0]
+
+		return club_id
 
 	# this function helps us clear all the rows of a table in case the 
 	#	after we do test insert statements
