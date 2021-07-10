@@ -68,6 +68,7 @@ def results_retrieve_1():
 
 		# holds all the results
 		results_list_of_dicts = []
+		results_list_of_list_of_dicts = []
 		
 		# Iterating over the results to get the team names, scores, stadium names,
 		#	and then click at each result to get the details of the match
@@ -168,7 +169,10 @@ def results_retrieve_1():
 				print('*****************************************************************')
 				print('*****************************************************************')
 
-		return results_list_of_dicts
+				results_list_of_list_of_dicts.append(results_list_of_dicts)
+				results_list_of_dicts = []
+
+		return results_list_of_list_of_dicts
 
 	except RuntimeError as runtime_error:
 		print(runtime_error)

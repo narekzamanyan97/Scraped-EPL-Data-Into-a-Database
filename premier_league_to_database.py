@@ -250,6 +250,9 @@ class database:
 		self.cursor.execute(insert_statement)
 		self.conn.commit()
 
+	# takes in the match information and date of the match (including
+	#	the referee's name), and inserts the information into the match_
+	#	table
 	def insert_match_basic_info(self, match_basic_info_dict, date_dict):
 		match_id = match_basic_info_dict['match id']
 		home_club_name = match_basic_info_dict['home']
@@ -284,6 +287,7 @@ class database:
 
 		self.cursor.execute(stadium_id_query)
 		tuple_list = self.cursor.fetchall()
+		stadium_id = tuple_list[0][0]
 
 		city = match_basic_info_dict['city']
 
@@ -307,13 +311,112 @@ class database:
 		insert_statement_match_ += str(away_goals) + ", "
 		insert_statement_match_ += "\"" + str(match_date) + "\", "
 		insert_statement_match_ += str(matchweek) + ", "
-		insert_statement_match_ += "\"" + str(referee) + "\", "
+		insert_statement_match_ += "\"" + str(referee_name) + "\", "
 		insert_statement_match_ += str(stadium_id) + ");"
 
 		print(insert_statement_match_)
 		self.cursor.execute(insert_statement_match_)
 		self.conn.commit()
 
+	# receives the stats of both teams, the match id, and the id of both
+	#	clubs match_and_club_id[0] = match_id 
+	#		  match_and_club_id[1] = home club_id
+	#		  match_and_club_id[2] = away club_id
+	def insert_club_stats(self, club_stats_dict, match_and_club_id):
+		match_id = match_and_club_id[0]
+		club_home_id = match_and_club_id[1]
+		club_away_id = match_and_club_id[2]
+
+		possession_home = club_stats_dict['Possession home']
+		possession_away = club_stats_dict['Possession away']
+		shots_on_target_home = club_stats_dict['Shots on target home']
+		shots_on_target_away = club_stats_dict['Shots on target away']
+		shots_home = club_stats_dict['Shots home']
+		shots_away = club_stats_dict['Shots away']
+		touches_home = club_stats_dict['Touches home']
+		touches_away = club_stats_dict['Touches away']
+		passes_home = club_stats_dict['Passes home']
+		passes_away = club_stats_dict['Passes away']
+		tackles_home = club_stats_dict['Tackles home']
+		tackles_away = club_stats_dict['Tackles away']
+		clearances_home = club_stats_dict['Clearances home']
+		clearances_away = club_stats_dict['Clearances away']
+
+		try:
+			corners_home = club_stats_dict['Corners home']
+			corners_away = club_stats_dict['Corners away']
+		except KeyError:
+			corners_home = 0
+			corners_away = 0
+		
+		try:
+			offsides_home = club_stats_dict['Offsides home']
+			offsides_away = club_stats_dict['Offsides away']
+		except KeyError:
+			offsides_home = 0
+			offsides_away = 0
+
+		try:
+			fouls_conceded_home = club_stats_dict['Fouls conceded home']
+			fouls_conceded_away = club_stats_dict['Fouls conceded away']
+		except KeyError:
+			fouls_conceded_home = 0
+			fouls_conceded_away = 0
+
+		try:
+			yellow_cards_home = club_stats_dict['Yellow cards home']
+			yellow_cards_away = club_stats_dict['Yellow cards away']
+		except KeyError:
+			yellow_cards_home = 0
+			yellow_cards_away = 0
+
+		try:
+			red_cards_home = club_stats_dict['Red cards home']
+			red_cards_away = club_stats_dict['Red cards away']
+		except KeyError:
+			red_cards_home = 0
+			red_cards_away = 0
+
+		# insert statement for the home side
+		insert_statement = "INSERT INTO club_stats(match_id, club_id, possession, shots, shots_on_target, touches, passes, tackles, clearances, corners, offsides, fouls_conceded, yellow_cards, red_cards) "
+		insert_statement += "VALUES(" + str(match_id) + ", "
+		insert_statement += str(club_home_id) + ", "
+		insert_statement += str(possession_home) + ", "
+		insert_statement += str(shots_home) + ", "
+		insert_statement += str(shots_on_target_home) + ", "
+		insert_statement += str(touches_home) + ", "
+		insert_statement += str(passes_home) + ", "
+		insert_statement += str(tackles_home) + ", "
+		insert_statement += str(clearances_home) + ", "
+		insert_statement += str(corners_home) + ", "
+		insert_statement += str(offsides_home) + ", "
+		insert_statement += str(fouls_conceded_home) + ", "
+		insert_statement += str(yellow_cards_home) + ", "
+		insert_statement += str(red_cards_home) + ");"
+
+		self.cursor.execute(insert_statement)
+		self.conn.commit()
+
+		# insert statement for the away side
+		insert_statement = "INSERT INTO club_stats(match_id, club_id, possession, shots, shots_on_target, touches, passes, tackles, clearances, corners, offsides, fouls_conceded, yellow_cards, red_cards) "
+		insert_statement += "VALUES(" + str(match_id) + ", "
+		insert_statement += str(club_home_id) + ", "
+		insert_statement += str(possession_home) + ", "
+		insert_statement += str(shots_home) + ", "
+		insert_statement += str(shots_on_target_home) + ", "
+		insert_statement += str(touches_home) + ", "
+		insert_statement += str(passes_home) + ", "
+		insert_statement += str(tackles_home) + ", "
+		insert_statement += str(clearances_home) + ", "
+		insert_statement += str(corners_home) + ", "
+		insert_statement += str(offsides_home) + ", "
+		insert_statement += str(fouls_conceded_home) + ", "
+		insert_statement += str(yellow_cards_home) + ", "
+		insert_statement += str(red_cards_home) + ");"
+
+		
+		self.cursor.execute(insert_statement)
+		self.conn.commit()
 
 	# convert the month name into number from 01 to 12
 	def convert_month_to_number(self, month):
