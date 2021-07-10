@@ -71,7 +71,7 @@ def results_retrieve_1():
 		
 		# Iterating over the results to get the team names, scores, stadium names,
 		#	and then click at each result to get the details of the match
-		for i in range(0, number_of_results):			
+		for i in range(0, number_of_results - (number_of_results - 1)):			
 			# Since the page is updated (after clicking on a link and going back), we need to
 			#	find the result elements again
 			stadiums = WebDriverWait(driver, 10).until(
@@ -100,9 +100,9 @@ def results_retrieve_1():
 				# truncated = result.text.splitlines()
 				truncated = results[i].text.splitlines()
 
-				team_name_1 = truncated[0]
+				# since the team names are the short versions, ignore them
+				#	on the scoresheet. Only retrieve the scores
 				scoresheet = truncated[1]
-				team_name_2 = truncated[2]
 
 				# scores is an array of 2 elements with the number of goals for each
 				# 	team. e.g. ['2-0']
@@ -126,12 +126,9 @@ def results_retrieve_1():
 				stadium_name = stadium[0]
 				city = stadium[1]
 
-				print(team_name_1 + " " + score_team_1 + "-" + score_team_2 + " " + team_name_2 + " @ " + str(stadium_name) + ", " + str(city))
+				
 				counter += 1
 
-
-				result_dict['home'] = team_name_1
-				result_dict['away'] = team_name_2
 				result_dict['home goals'] = score_team_1
 				result_dict['away goals'] = score_team_2
 				result_dict['stadium name'] = stadium_name
@@ -139,51 +136,77 @@ def results_retrieve_1():
 
 				results_list_of_dicts.append(result_dict)
 			
-			# print(results_list_of_dicts)
+				# print(results_list_of_dicts)
 
-			# call results_retrieve_2 to get the match details, such as scorers and assists, 
-			#	red cards, penalty scorers, own goals, etc.
-			player_stats, match_date, line_ups, team_stats = results_retrieve_2(driver, div_ids[i])
+				# call results_retrieve_2 to get the match details, such as scorers and assists, 
+				#	red cards, penalty scorers, own goals, etc.
+				team_names, player_stats, match_date, line_ups, team_stats = results_retrieve_2(driver, div_ids[i])
 
-			# print(match_date)
-			# print(player_stats)
-			results_list_of_dicts.append(match_date)
-			results_list_of_dicts.append(player_stats)
-			results_list_of_dicts.append(line_ups)
-			results_list_of_dicts.append(team_stats)
+				result_dict['home'] = team_names[0]
+				result_dict['away'] = team_names[1]
 
-			print('*****************************************************************')
-			print('*****************************************************************')
-			# results_list_of_dicts's elements are:
-			#	[0] = basic match info (match_id, sides, goals, stadium)
-			#	[1] = date information, including matchweek, and referee
-			#	[2] = player events, including goal scorers with times,
-			#			red cards, penalty, own goal info.
-			# 	[3] = line_ups and player performances
-			#	[4] = club performances
-			for dict_ in results_list_of_dicts:
-				print(dict_)
-				print('--------------------------------------------')
+				results_list_of_dicts.append(match_date)
+				results_list_of_dicts.append(player_stats)
+				results_list_of_dicts.append(line_ups)
+				results_list_of_dicts.append(team_stats)
 
-			print('*****************************************************************')
-			print('*****************************************************************')
+				print(team_names[0] + " " + score_team_1 + "-" + score_team_2 + " " + team_names[1] + " @ " + str(stadium_name) + ", " + str(city))
+
+				print('*****************************************************************')
+				print('*****************************************************************')
+				# results_list_of_dicts's elements are:
+				#	[0] = basic match info (match_id, sides, goals, stadium)
+				#	[1] = date information, including matchweek, and referee
+				#	[2] = player events, including goal scorers with times,
+				#			red cards, penalty, own goal info.
+				# 	[3] = line_ups and player performances
+				#	[4] = club performances
+				for dict_ in results_list_of_dicts:
+					print(dict_)
+					print('--------------------------------------------')
+
+				print('*****************************************************************')
+				print('*****************************************************************')
+
+		return results_list_of_dicts
 
 	except RuntimeError as runtime_error:
 		print(runtime_error)
 
-# !!! put the team names, score, stadium, and city name into a dictionary
-
-# !!! count the clean sheets
-
 # retrieve the scorer names, and statistics after clicking on the result row
-# Returns the name of the goal scorers, assists ... Also returns the
-#	dictionaries returned by results_retrieve_3/4, so that results_retrieve_1
-#	can access them
+# @returns 
+#	the full names of home and away sides (the previous page has the short
+#		names of teams, such as 'Newcastle for Newcastle United, etc.')
+#		We need the full names so that the database can recognize them
+#	the name of the goal scorers, assists ...
+#	the dictionaries returned by results_retrieve_3/4, so that
+#	results_retrieve_1 can access them
 def results_retrieve_2(driver, result_row):
 	# click on the result row to open the details of the match
 	driver.execute_script("arguments[0].click();", result_row)
 	stats = {}
 
+	print('###########################################################')
+
+	# Get the full name of the teams:
+	home_club_name = WebDriverWait(driver, 10).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='teamsContainer']/div[@class='team home']/a[@class='teamName']/span[@class='long']"))
+	)
+
+	home_club_name = home_club_name[0].text
+
+	away_club_name = WebDriverWait(driver, 10).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='teamsContainer']/div[@class='team away']/a[@class='teamName']/span[@class='long']"))
+	)
+
+	away_club_name = away_club_name[0].text
+
+	club_names = []
+	club_names.append(home_club_name)
+	club_names.append(away_club_name)
+
+	print('###########################################################')
+	
 	try:
 		# retrieve the events of the home side, which include goals (by penalty), 
 		#	own goals, and red cards
@@ -309,7 +332,7 @@ def results_retrieve_2(driver, result_row):
 	# go back to the previous page
 	driver.execute_script("window.history.go(-1)")
 
-	return stats, match_date, line_ups, team_stats
+	return club_names, stats, match_date, line_ups, team_stats
 	
 # get the line-ups, substitutes and player stats
 def results_retrieve_3(driver):
@@ -560,4 +583,4 @@ def process_events_data(string_array, is_home):
 
 			return stats
 
-results_retrieve_1()
+# results_retrieve_1()

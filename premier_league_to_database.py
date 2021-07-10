@@ -61,7 +61,7 @@ class database:
 			joined_club_year = splitted_joined_club[2]
 
 			# convert the month name into number from 01 to 12
-			joined_club_month = convert_month_to_number(joined_club_month)
+			joined_club_month = self.convert_month_to_number(joined_club_month)
 
 			joined_club_date = joined_club_year + '-' + joined_club_month + '-' + joined_club_day
 		except KeyError:
@@ -252,24 +252,26 @@ class database:
 
 	def insert_match_basic_info(self, match_basic_info_dict, date_dict):
 		match_id = match_basic_info_dict['match id']
-		home_team_name = match_basic_info_dict['home']
-		away_team_name = match_basic_info_dict['away']
+		home_club_name = match_basic_info_dict['home']
+		away_club_name = match_basic_info_dict['away']
 
 		# get the home and away team ids
 		home_club_id_query = "SELECT club_id FROM club "
-		home_club_id_query += "WHERE club_name=" + home_team_name + ";"
+		home_club_id_query += "WHERE club_name=\"" + home_club_name + "\";"
 		
 		# execute the query to get the id of the home club
 		self.cursor.execute(home_club_id_query)
 		tuple_list = self.cursor.fetchall()
+		print(tuple_list)
 		home_club_id = tuple_list[0][0]
 
 		away_club_id_query = "SELECT club_id FROM club "
-		away_club_id_query += "WHERE club_name=" + away_club_name + ";"
+		away_club_id_query += "WHERE club_name=\"" + away_club_name + "\";"
 
 		# execute the query to get the id of the away club
 		self.cursor.execute(away_club_id_query)
 		tuple_list = self.cursor.fetchall()
+		print(tuple_list)
 		away_club_id = tuple_list[0][0]
 
 		home_goals = match_basic_info_dict['home goals']
@@ -286,7 +288,7 @@ class database:
 		city = match_basic_info_dict['city']
 
 		month_name = date_dict['month']
-		month = convert_month_to_number(month_name)
+		month = self.convert_month_to_number(month_name)
 		day = date_dict['day']
 		year = date_dict['year']
 
@@ -308,35 +310,36 @@ class database:
 		insert_statement_match_ += "\"" + str(referee) + "\", "
 		insert_statement_match_ += str(stadium_id) + ");"
 
+		print(insert_statement_match_)
 		self.cursor.execute(insert_statement_match_)
 		self.conn.commit()
-		
+
 
 	# convert the month name into number from 01 to 12
 	def convert_month_to_number(self, month):
 		if month == "January" or month == "Jan":
 			month = '01'
-		elif month == "February" or month = "Feb":
+		elif month == "February" or month == "Feb":
 			month = '02'
 		elif month == 'March' or month == "Mar":
 			month = '03'
-		elif month == 'April' or month = "Apr":
+		elif month == 'April' or month == "Apr":
 			month = '04'
-		elif month == 'May' or month = "May":
+		elif month == 'May' or month == "May":
 			month = '05'
-		elif month == 'June' or month = "Jun":
+		elif month == 'June' or month == "Jun":
 			month = '06'
-		elif month == 'July' or month = "Jul":
+		elif month == 'July' or month == "Jul":
 			month = '07'
-		elif month == 'August' or month = "Aug":
+		elif month == 'August' or month == "Aug":
 			month = '08'
-		elif month == 'September' or month = "Sep":
+		elif month == 'September' or month == "Sep":
 			month = '09'
-		elif month == 'October' or month = "Oct":
+		elif month == 'October' or month == "Oct":
 			month = '10'
-		elif month == 'November' or month = "Nov":
+		elif month == 'November' or month == "Nov":
 			month = '11'
-		elif month == 'December' or month = "Dec":
+		elif month == 'December' or month == "Dec":
 			month = '12'
 		
 		return month
