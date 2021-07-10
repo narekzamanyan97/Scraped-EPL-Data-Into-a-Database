@@ -262,7 +262,7 @@ class database:
 		# execute the query to get the id of the home club
 		self.cursor.execute(home_club_id_query)
 		tuple_list = self.cursor.fetchall()
-		home_team_id = tuple_list[0][0]
+		home_club_id = tuple_list[0][0]
 
 		away_club_id_query = "SELECT club_id FROM club "
 		away_club_id_query += "WHERE club_name=" + away_club_name + ";"
@@ -275,9 +275,42 @@ class database:
 		home_goals = match_basic_info_dict['home goals']
 		away_goals = match_basic_info_dict['away goals']
 		stadium_name = match_basic_info_dict['stadium name']
+
+		# get the stadium_id from stadium_name
+		stadium_id_query = "SELECT stadium_id FROM stadium "
+		stadium_id_query += "WHERE stadium_name=\"" + stadium_name + "\";"
+
+		self.cursor.execute(stadium_id_query)
+		tuple_list = self.cursor.fetchall()
+
 		city = match_basic_info_dict['city']
 
-		weekday = date_dict['weekday']
+		month_name = date_dict['month']
+		month = convert_month_to_number(month_name)
+		day = date_dict['day']
+		year = date_dict['year']
+
+		match_date = year + '-' + month + '-' + day
+
+		referee_name = date_dict['referee']
+
+		matchweek = date_dict['matchweek']
+
+		insert_statement_match_ = "INSERT INTO match_(match_id, home_team_id, away_team_id, home_team_goals, away_team_goals, match_date, matchweek, referee, stadium_id) "
+		insert_statement_match_ += "VALUES("
+		insert_statement_match_ += str(match_id) + ", "
+		insert_statement_match_ += str(home_club_id) + ", "
+		insert_statement_match_ += str(away_club_id) + ", "
+		insert_statement_match_ += str(home_goals) + ", "
+		insert_statement_match_ += str(away_goals) + ", "
+		insert_statement_match_ += "\"" + str(match_date) + "\", "
+		insert_statement_match_ += str(matchweek) + ", "
+		insert_statement_match_ += "\"" + str(referee) + "\", "
+		insert_statement_match_ += str(stadium_id) + ");"
+
+		self.cursor.execute(insert_statement_match_)
+		self.conn.commit()
+		
 
 	# convert the month name into number from 01 to 12
 	def convert_month_to_number(self, month):
