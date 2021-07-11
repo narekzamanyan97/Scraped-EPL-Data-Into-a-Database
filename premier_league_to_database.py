@@ -137,18 +137,8 @@ class database:
 			print('Changing the Brighton name')
 			club_name = 'Brighton and Hove Albion'
 
-
-		club_id_query = "SELECT club_id "
-		club_id_query += "FROM club "
-		club_id_query += "WHERE club_name=\"" + club_name + "\";"
-
-		self.cursor.execute(club_id_query)
-		tuple_list = self.cursor.fetchall()
-		
-		try:
-			club_id = tuple_list[0][0]
-		except IndexError:
-			club_id = 'Null'
+		# get the club id of the player
+		club_id = self.get_club_id(club_name)
 
 		player_name = player_dict['player name']
 		position = player_dict['position']
@@ -257,25 +247,10 @@ class database:
 		match_id = match_basic_info_dict['match id']
 		home_club_name = match_basic_info_dict['home']
 		away_club_name = match_basic_info_dict['away']
-
-		# get the home and away team ids
-		home_club_id_query = "SELECT club_id FROM club "
-		home_club_id_query += "WHERE club_name=\"" + home_club_name + "\";"
 		
-		# execute the query to get the id of the home club
-		self.cursor.execute(home_club_id_query)
-		tuple_list = self.cursor.fetchall()
-		print(tuple_list)
-		home_club_id = tuple_list[0][0]
-
-		away_club_id_query = "SELECT club_id FROM club "
-		away_club_id_query += "WHERE club_name=\"" + away_club_name + "\";"
-
-		# execute the query to get the id of the away club
-		self.cursor.execute(away_club_id_query)
-		tuple_list = self.cursor.fetchall()
-		print(tuple_list)
-		away_club_id = tuple_list[0][0]
+		# get the home and away team ids
+		home_club_id = self.get_club_id(home_club_name)
+		away_club_id = self.get_club_id(away_club_name)
 
 		home_goals = match_basic_info_dict['home goals']
 		away_goals = match_basic_info_dict['away goals']
@@ -403,7 +378,7 @@ class database:
 		# insert statement for the away side
 		insert_statement = "INSERT INTO club_stats(match_id, club_id, possession, shots, shots_on_target, touches, passes, tackles, clearances, corners, offsides, fouls_conceded, yellow_cards, red_cards) "
 		insert_statement += "VALUES(" + str(match_id) + ", "
-		insert_statement += str(club_home_id) + ", "
+		insert_statement += str(club_away_id) + ", "
 		insert_statement += str(possession_away) + ", "
 		insert_statement += str(shots_away) + ", "
 		insert_statement += str(shots_on_target_away) + ", "
@@ -457,8 +432,12 @@ class database:
 
 		self.cursor.execute(club_id_query)
 		tuple_list = self.cursor.fetchall()
-		club_id = tuple_list[0][0]
-
+		
+		try:
+			club_id = tuple_list[0][0]
+		except IndexError:
+			club_id = 'Null'
+			
 		return club_id
 
 	# this function helps us clear all the rows of a table in case the 
