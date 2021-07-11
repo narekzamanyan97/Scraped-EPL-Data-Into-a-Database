@@ -266,6 +266,10 @@ class database:
 
 		city = match_basic_info_dict['city']
 
+		# !!! add the city name to the stadium in stadium table and
+		#	the name of the stadium for:
+		#		Fullham
+
 		month_name = date_dict['month']
 		month = self.convert_month_to_number(month_name)
 		day = date_dict['day']
@@ -437,7 +441,7 @@ class database:
 			club_id = tuple_list[0][0]
 		except IndexError:
 			club_id = 'Null'
-			
+
 		return club_id
 
 	# this function helps us clear all the rows of a table in case the 

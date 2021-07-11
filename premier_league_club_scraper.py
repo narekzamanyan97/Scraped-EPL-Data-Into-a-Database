@@ -52,8 +52,12 @@ def club_retrieve_1():
 
 			# get the name of the club
 			club_name = club_rows[i].text.splitlines()[0]
+
+			# get the name of the stadium
+			stadium_name = club_rows[i].text.splitlines()[1]
 			
 			temp_dict['club name'] = club_name			
+			temp_dict['stadium name'] = stadium_name
 
 			# call club_retrieve_2() to get the website of the team
 			temp_dict.update(club_retrieve_2(driver, club_rows[i]))
@@ -76,20 +80,20 @@ def club_retrieve_1():
 		print(str(ex))
 
 
-# retrieve website and stadium names
+# retrieve website name
 def club_retrieve_2(driver, club_row):
 	temp_dict = {}
 
 	# click on the club row
 	driver.execute_script("arguments[0].click();", club_row)
 
-	# get the stadium name
-	stadium_name = WebDriverWait(driver, 10).until(
-		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='clubDetails']/div[@class='stadiumName']/a/span[@class='stadium']"))
-	)
-	stadium_name = stadium_name[0].text.strip()
+	# # get the stadium name
+	# stadium_name = WebDriverWait(driver, 10).until(
+	# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='clubDetails']/div[@class='stadiumName']/a/span[@class='stadium']"))
+	# )
+	# stadium_name = stadium_name[0].text.strip()
 
-	temp_dict['stadium name'] = stadium_name
+	# temp_dict['stadium name'] = stadium_name
 
 	# get the website name
 	website = WebDriverWait(driver, 10).until(
@@ -162,13 +166,7 @@ def club_retrieve_3(driver):
 			elif 'John Street Stand' in detail:
 				continue
 
-
-				
-
 			detail = detail.strip()
-
-
-
 
 			temp_dict[type_] = detail
 		except IndexError:
