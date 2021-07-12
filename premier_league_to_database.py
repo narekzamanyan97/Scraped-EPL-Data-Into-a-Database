@@ -86,7 +86,7 @@ class database:
 		# !!! get the club id
 		club_name = managers_dict['manager club']
 
-		club_id = get_id(club_name, 'club')
+		club_id = self.get_id(club_name, 'club')
 
 		insert_statement += "VALUES(" + str(club_id) + ", "
 		insert_statement += "\"" + str(manager_name) + "\", "
@@ -180,7 +180,7 @@ class database:
 
 		# get the stadium id from the stadium table using get_id function
 		stadium_name = club_dict['stadium name']
-		stadium_id = get_id(stadium_name, 'stadium')
+		stadium_id = self.get_id(stadium_name, 'stadium')
 
 		insert_statement += "VALUES(" + str(stadium_id) + ", "
 		insert_statement += "\"" + str(club_name) + "\", "
@@ -244,7 +244,7 @@ class database:
 		stadium_name = match_basic_info_dict['stadium name']
 
 		# get the stadium_id from stadium_name using get_id() function
-		stadium_id = get_id(stadium_name, 'stadium')
+		stadium_id = self.get_id(stadium_name, 'stadium')
 
 		city = match_basic_info_dict['city']
 
@@ -382,8 +382,45 @@ class database:
 		self.cursor.execute(insert_statement)
 		self.conn.commit()
 
+	# @arguments:
+	#	a dictionary with player name as the key, and the performance
+	#		of the minute as an array value
+	def insert_player_performance(self, player_performance_dict, match_id):
 
-	def insert_player_performance(self, player_performance_dict):
+		# iterate through the player performances
+		for player_name, performance in player_performance_dict.items():
+			print(player_name)
+			player_id = self.get_id(player_name, 'player')
+
+			# goal (goal) = 1
+			# goal penalty = 2
+			# assist (assist) = 3
+			# own goal = 4
+			# red card = 5
+			if performance[1] == 'goal':
+				type_of_stat = 1
+			elif performance[1] == 'goal penalty':
+				type_of_stat = 2
+			elif performance[1] == 'assist':
+				type_of_stat = 3
+			elif performance[1] == 'own goal':
+				type_of_stat = 4
+			elif performance[1] == 'red card':
+				type_of_stat = 5
+
+			minutes = []
+			for i in range(2, len(performance)):
+				minutes.append(performance[i])
+
+			for minute in minutes:
+				insert_statement = "INSERT INTO player_performance(player_id, match_id, type_of_stat, minute) "
+				insert_statement += "VALUES(" + player_id + ", "
+				insert_statement += str(match_id) + ", "
+				insert_statement += str(type_of_stat) + ", "
+				insert_statement += "\"" + minute + "\");"
+
+				self.cursor.execute(insert_statement)
+				self.conn.commit()
 
 
 	# convert the month name into number from 01 to 12
@@ -429,7 +466,7 @@ class database:
 		# name_str = player_name/club_name/stadium_name
 		name_str = table_name + '_name'
 
-		club_id_query = "SELECT " + id_str + " FROM " table_name + " "
+		club_id_query = "SELECT " + id_str + " FROM " + table_name + " "
 		club_id_query += "WHERE " + name_str + "=\"" + name + "\";"
 
 		self.cursor.execute(club_id_query)
