@@ -18,7 +18,7 @@ urls = {
 	'url_1': 'https://www.premierleague.com/players?se=363&cl=-1',
 }
 
-SECONDS_TO_WAIT = 20
+SECONDS_TO_WAIT = 15
 
 # get the player's name, position, and country, then click on the row
 def player_retrieve_1():
@@ -27,7 +27,14 @@ def player_retrieve_1():
 
 	# scroll down to the bottom of the page to include all the players
 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-	time.sleep(5)
+	# time.sleep(5)
+
+
+	filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
+	)
+
+	print(filter_2020_21[0].text)
 
 	# there is a full screen ad on the page when we try to access the data
 	#	with a webbot. close the ad before proceeding
@@ -48,34 +55,26 @@ def player_retrieve_1():
 	player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
 	player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
 
-	# while len(player_rows) != 894:
-	# 	# scroll down to the bottom of the page to include all the players
-	# 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-	# 	time.sleep(5)
-	# 	last_player = presence_of_all_el_located(driver, last_player_xpath, SECONDS_TO_WAIT, -1)
-	# 	time.sleep(5)
-
-	# 	player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
-	# 	print(len(player_rows))
-
 	players_list_of_dicts = []
 
 	counter = 0
+
+	# Use this list to make sure no duplicate names are inserted into the 
+	#	player table, as the scraper sometimes clicks on the same player row
+	unique_player_names = []
 
 	print(len(player_rows))
 	original_row_amount = len(player_rows)
 
 	# get the basic player information from the rows
-	for i in range(100, len(player_rows) - (len(player_rows) - 200)):
+	for i in range(20, len(player_rows) - (len(player_rows) - 30)):
+		print(counter)
 		# scroll down to the bottom of the page to include all the players
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-		time.sleep(5)
+		# time.sleep(5)
 
 		# make sure the 2020/2021 season table is loaded (instead of
 		#	2021/22). check for the 2020/21 to appear
-		# filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-		# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p109646']"))
-		# )
 		filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
 		)
@@ -119,6 +118,10 @@ def player_retrieve_1():
 		except TimeoutException:
 			print('There is no advertisement button. Moving on!')
 
+		# !!! The scraper jumps on players, or counts the same player twice.
+		#	check whether the name of the player has aleary appeared or not
+		#	if it did, go to the start of the loop and try again, 
+		#	decrementing the counter by 1.
 
 		# the player_rows frequently throws a stale element error.
 		#	keep looking for the element (3 tries)
@@ -137,48 +140,57 @@ def player_retrieve_1():
 		player_row_text_list = player_row_text.splitlines()
 		player_name = player_row_text_list[0]
 
-		player_position_and_country = player_row_text_list[1].split()
-		player_position = player_position_and_country[0]
+		# if the player is a duplicate, then the scraper is clicking on the
+		#	wrong row. So let the scraper try again by decrementing i
+		if player_name in unique_player_names:
+			i -= 1
+			print('Duplicate Plaeyer!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+			continue
+		else:
+			unique_player_names.append(player_name)
+
+			player_position_and_country = player_row_text_list[1].split()
+			player_position = player_position_and_country[0]
+			
+			# get the country of the player: some player rows are missing the 
+			#	country column
+			try:
+				player_country = player_position_and_country[1]
+			except IndexError:
+				player_country = 'Null'
+			
+			temp_dict = {}
+
 		
-		# get the country of the player: some player rows are missing the 
-		#	country column
-		try:
-			player_country = player_position_and_country[1]
-		except IndexError:
-			player_country = 'Null'
-		
-		temp_dict = {}
+			counter += 1
 
-		print(counter)
-		counter += 1
+			# add the player info to a dictionary
+			temp_dict['player name'] = player_name
+			temp_dict['position'] = player_position
+			temp_dict['country'] = player_country
 
-		# add the player info to a dictionary
-		temp_dict['player name'] = player_name
-		temp_dict['position'] = player_position
-		temp_dict['country'] = player_country
+			player_row_buttons_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a"
+			player_row_button = presence_of_all_el_located(driver, player_row_buttons_xpath, SECONDS_TO_WAIT, i)
 
-		player_row_buttons_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a"
-		player_row_button = presence_of_all_el_located(driver, player_row_buttons_xpath, SECONDS_TO_WAIT, i)
+			# add the player's detailed info to the temp_dict 
+			player_details_dict = player_retrieve_2(driver, player_row_button)
+			temp_dict.update(player_details_dict)
+			print(temp_dict)
+			# add the temp_dict to the list later to be returned from the function
+			players_list_of_dicts.append(temp_dict)
+			print('-----------------------------------------------------')
 
-		# add the player's detailed info to the temp_dict 
-		player_details_dict = player_retrieve_2(driver, player_row_button)
-		temp_dict.update(player_details_dict)
-		print(temp_dict)
-		# add the temp_dict to the list later to be returned from the function
-		players_list_of_dicts.append(temp_dict)
-		print('-----------------------------------------------------')
-
-		# Since the driver returns player elements with varying number of rows
-		#	the for loop encounters an IndexError. It is impossible to get
-		# 	identical number of rows at every iteration, because the browser
-		#	duplicates (probably randomly) the rows, which ranges between the 
-		#	three values of 834/864/894
-		try:
-			player_rows[i]
-		except IndexError:
-			print('i = ' + str(i))
-			print('original = ' + str(original_row_amount))
-			break
+			# Since the driver returns player elements with varying number of rows
+			#	the for loop encounters an IndexError. It is impossible to get
+			# 	identical number of rows at every iteration, because the browser
+			#	duplicates (probably randomly) the rows, which ranges between the 
+			#	three values of 834/864/894
+			try:
+				player_rows[i]
+			except IndexError:
+				print('i = ' + str(i))
+				print('original = ' + str(original_row_amount))
+				break
 
 	# print(players_list_of_dicts)
 	return players_list_of_dicts
@@ -346,7 +358,7 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 		print('return the element list')
 		return element
 
-player_retrieve_1()
+# player_retrieve_1()
 
 
 # Jan Bednarek plays in Southampton
