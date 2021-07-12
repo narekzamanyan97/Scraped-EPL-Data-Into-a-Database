@@ -86,13 +86,7 @@ class database:
 		# !!! get the club id
 		club_name = managers_dict['manager club']
 
-		club_id_query = "SELECT club_id "
-		club_id_query += "FROM club "
-		club_id_query += "WHERE club_name=\"" + club_name + "\";"
-
-		self.cursor.execute(club_id_query)
-		tuple_list = self.cursor.fetchall()
-		club_id = tuple_list[0][0]
+		club_id = get_id(club_name, 'club')
 
 		insert_statement += "VALUES(" + str(club_id) + ", "
 		insert_statement += "\"" + str(manager_name) + "\", "
@@ -138,7 +132,7 @@ class database:
 			club_name = 'Brighton and Hove Albion'
 
 		# get the club id of the player
-		club_id = self.get_club_id(club_name)
+		club_id = self.get_id(club_name, 'club')
 
 		player_name = player_dict['player name']
 		position = player_dict['position']
@@ -184,16 +178,9 @@ class database:
 		club_name = club_dict['club name']
 		website = club_dict['website']
 
-		# get the stadium id from the stadium table
+		# get the stadium id from the stadium table using get_id function
 		stadium_name = club_dict['stadium name']
-
-		stadium_id_query = "SELECT stadium_id "
-		stadium_id_query += "FROM stadium "
-		stadium_id_query += "WHERE stadium_name=\"" + stadium_name + "\";"
-
-		self.cursor.execute(stadium_id_query)
-		tuple_list = self.cursor.fetchall()
-		stadium_id = tuple_list[0][0]
+		stadium_id = get_id(stadium_name, 'stadium')
 
 		insert_statement += "VALUES(" + str(stadium_id) + ", "
 		insert_statement += "\"" + str(club_name) + "\", "
@@ -249,20 +236,15 @@ class database:
 		away_club_name = match_basic_info_dict['away']
 		
 		# get the home and away team ids
-		home_club_id = self.get_club_id(home_club_name)
-		away_club_id = self.get_club_id(away_club_name)
+		home_club_id = self.get_id(home_club_name, 'club')
+		away_club_id = self.get_id(away_club_name, 'club')
 
 		home_goals = match_basic_info_dict['home goals']
 		away_goals = match_basic_info_dict['away goals']
 		stadium_name = match_basic_info_dict['stadium name']
 
-		# get the stadium_id from stadium_name
-		stadium_id_query = "SELECT stadium_id FROM stadium "
-		stadium_id_query += "WHERE stadium_name=\"" + stadium_name + "\";"
-
-		self.cursor.execute(stadium_id_query)
-		tuple_list = self.cursor.fetchall()
-		stadium_id = tuple_list[0][0]
+		# get the stadium_id from stadium_name using get_id() function
+		stadium_id = get_id(stadium_name, 'stadium')
 
 		city = match_basic_info_dict['city']
 
@@ -306,8 +288,8 @@ class database:
 		club_home_name = match_id_and_club_names[1]
 		club_away_name = match_id_and_club_names[2]
 
-		club_home_id = self.get_club_id(club_home_name)
-		club_away_id = self.get_club_id(club_away_name)
+		club_home_id = self.get_id(club_home_name, 'club')
+		club_away_id = self.get_id(club_away_name, 'club')
 
 		possession_home = club_stats_dict['Possession home']
 		possession_away = club_stats_dict['Possession away']
@@ -400,6 +382,10 @@ class database:
 		self.cursor.execute(insert_statement)
 		self.conn.commit()
 
+
+	def insert_player_performance(self, player_performance_dict):
+
+
 	# convert the month name into number from 01 to 12
 	def convert_month_to_number(self, month):
 		if month == "January" or month == "Jan":
@@ -429,10 +415,22 @@ class database:
 		
 		return month
 
-	# gets the club_name, and returns the club_id
-	def get_club_id(self, club_name):
-		club_id_query = "SELECT club_id FROM club "
-		club_id_query += "WHERE club_name=\"" + club_name + "\";"
+	# @arguments:
+	#	the name of the entity, such as club_name, player_name, stadium_name
+	#	the name of the table
+	# @returns:
+	#	depending on the table name:
+	#	if table_name == player: return player_id
+	#	if table_name == club: return club_id
+	#	if table_name == stadium: return stadium_id
+	def get_id(self, name, table_name):
+		# id_string = player_id/club_id/stadium_id
+		id_str = table_name + '_id'
+		# name_str = player_name/club_name/stadium_name
+		name_str = table_name + '_name'
+
+		club_id_query = "SELECT " + id_str + " FROM " table_name + " "
+		club_id_query += "WHERE " + name_str + "=\"" + name + "\";"
 
 		self.cursor.execute(club_id_query)
 		tuple_list = self.cursor.fetchall()
