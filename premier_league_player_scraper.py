@@ -66,16 +66,23 @@ def player_retrieve_1():
 	original_row_amount = len(player_rows)
 
 	# get the basic player information from the rows
-	for i in range(836, len(player_rows) - (len(player_rows) - 860)):
+	for i in range(100, len(player_rows) - (len(player_rows) - 200)):
 		# scroll down to the bottom of the page to include all the players
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 		time.sleep(5)
 
 		# make sure the 2020/2021 season table is loaded (instead of
 		#	2021/22). check for the 2020/21 to appear
+		# filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+		# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p109646']"))
+		# )
 		filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p109646']"))
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
 		)
+
+		print(filter_2020_21[0].text)
+
+
 
 		# get the player_rows for the for loop, so we can count the
 		#	number of players
@@ -339,7 +346,7 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 		print('return the element list')
 		return element
 
-# player_retrieve_1()
+player_retrieve_1()
 
 
 # Jan Bednarek plays in Southampton
