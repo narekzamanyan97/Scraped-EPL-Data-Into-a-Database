@@ -25,16 +25,18 @@ def player_retrieve_1():
 	# set up the driver
 	driver = set_up_driver(urls['url_1'])
 
-	# scroll down to the bottom of the page to include all the players
-	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-	# time.sleep(5)
-
 
 	filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
 	)
 
 	print(filter_2020_21[0].text)
+	
+	# scroll down to the bottom of the page to include all the players
+	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+	# time.sleep(5)
+
+
 
 	# there is a full screen ad on the page when we try to access the data
 	#	with a webbot. close the ad before proceeding
