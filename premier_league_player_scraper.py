@@ -67,12 +67,8 @@ def player_retrieve_1():
 	original_row_amount = len(player_rows)
 
 	# get the basic player information from the rows
-	for i in range(20, len(player_rows) - (len(player_rows) - 30)):
+	for i in range(85, len(player_rows) - (len(player_rows) - 150)):
 		print(counter)
-		# scroll down to the bottom of the page to include all the players
-		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-		# time.sleep(5)
-
 		# make sure the 2020/2021 season table is loaded (instead of
 		#	2021/22). check for the 2020/21 to appear
 		filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
@@ -81,7 +77,9 @@ def player_retrieve_1():
 
 		print(filter_2020_21[0].text)
 
-
+		# scroll down to the bottom of the page to include all the players
+		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+		time.sleep(5)
 
 		# get the player_rows for the for loop, so we can count the
 		#	number of players
@@ -185,12 +183,12 @@ def player_retrieve_1():
 			# 	identical number of rows at every iteration, because the browser
 			#	duplicates (probably randomly) the rows, which ranges between the 
 			#	three values of 834/864/894
-			try:
-				player_rows[i]
-			except IndexError:
-				print('i = ' + str(i))
-				print('original = ' + str(original_row_amount))
-				break
+			# try:
+			# 	player_rows[i]
+			# except IndexError:
+			# 	print('i = ' + str(i))
+			# 	print('original = ' + str(original_row_amount))
+			# 	break
 
 	# print(players_list_of_dicts)
 	return players_list_of_dicts
@@ -221,7 +219,7 @@ def player_retrieve_2(driver, player_row_button):
 	# player_career_xpath = "//div[@class='table playerClubHistory  true']/table/tbody/tr[@class='table']"
 	# player_career = presence_of_all_el_located(driver, player_number_xpath, SECONDS_TO_WAIT, -1)
 	player_career = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table playerClubHistory  true']/table/tbody/tr[@class='table']"))
+		EC.presence_of_all_elements_located((By.XPATH, "//div[@data-script='pl_player']/table/tbody/tr[@class='table']"))
 	)
 
 	# get the top two rows on the table, either of which contain the 
