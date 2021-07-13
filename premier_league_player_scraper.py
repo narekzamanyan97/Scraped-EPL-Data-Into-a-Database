@@ -137,6 +137,16 @@ def player_retrieve_1():
 			print(player_name)
 			print(list_of_all_players_in_order[i])
 			print('Index Pointing to Wrong Player. Try Again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+			driver.refresh()
+			# make sure the 2020/2021 season table is loaded (instead of
+			#	2021/22). check for the 2020/21 to appear
+			filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
+			)
+
+			# scroll down to the bottom of the page to include all the players
+			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+			time.sleep(5)
 			continue
 		else:
 			unique_player_names.append(player_name)
