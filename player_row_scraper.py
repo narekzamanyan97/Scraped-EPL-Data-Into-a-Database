@@ -33,8 +33,6 @@ def get_all_the_player_rows():
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
 	)
 
-	print(filter_2020_21[0].text)
-
 	# scroll down to the bottom of the page to include all the players
 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 	time.sleep(5)
@@ -62,17 +60,21 @@ def get_all_the_player_rows():
 		player_row_list = player_row.text.splitlines()
 		player_name = player_row_list[0]
 
-		player_position_and_country = player_row_list[1].split()
-		try:
-			player_position = player_position_and_country[0]
-		except IndexError:
-			player_position = '--------------------'
+		# player_position_and_country = player_row_list[1].split()
+		# try:
+		# 	player_position = player_position_and_country[0]
+		# except IndexError:
+		# 	player_position = '--------------------'
 		
-		try:
-			player_country = player_position_and_country[1]
-		except IndexError:
-			player_country = '--------------------'
+		# try:
+		# 	player_country = player_position_and_country[1]
+		# except IndexError:
+		# 	player_country = '--------------------'
 
-		print(player_name + '                  ' + player_position + '                   ' + player_country)
+		# print(player_name + '                  ' + player_position + '                   ' + player_country)
+		
+		list_of_all_players_in_order.append(player_name)
 
-get_all_the_player_rows()
+	return list_of_all_players_in_order
+
+# get_all_the_player_rows()

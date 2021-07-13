@@ -14,6 +14,8 @@ import re
 
 from set_up_driver import *
 
+from player_row_scraper import *
+
 urls = {
 	'url_1': 'https://www.premierleague.com/players?se=363&cl=-1',
 }
@@ -22,6 +24,12 @@ SECONDS_TO_WAIT = 15
 
 # get the player's name, position, and country, then click on the row
 def player_retrieve_1():
+
+	# call the get_all_the_player_rows() from player_row_scraper to
+	#	get the correct order of all the players and check this scraper
+	#	to match the correct order.
+	list_of_all_players_in_order = get_all_the_player_rows()
+
 	# set up the driver
 	driver = set_up_driver(urls['url_1'])
 
@@ -30,8 +38,6 @@ def player_retrieve_1():
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
 	)
 
-	print(filter_2020_21[0].text)
-	
 	# scroll down to the bottom of the page to include all the players
 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 	# time.sleep(5)
@@ -68,16 +74,15 @@ def player_retrieve_1():
 	print(len(player_rows))
 	original_row_amount = len(player_rows)
 
+	i = 134
 	# get the basic player information from the rows
-	for i in range(85, len(player_rows) - (len(player_rows) - 150)):
+	while i < len(player_rows) - (len(player_rows) - 160):
 		print(counter)
 		# make sure the 2020/2021 season table is loaded (instead of
 		#	2021/22). check for the 2020/21 to appear
 		filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
 		)
-
-		print(filter_2020_21[0].text)
 
 		# scroll down to the bottom of the page to include all the players
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -87,17 +92,6 @@ def player_retrieve_1():
 		#	number of players
 		player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
 
-		# while len(player_rows) != 894:
-		# 	# scroll down to the bottom of the page to include all the players
-		# 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-		# 	time.sleep(5)
-
-		# 	last_player = presence_of_all_el_located(driver, last_player_xpath, SECONDS_TO_WAIT, -1)
-		# 	time.sleep(5)
-
-		# 	player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
-		# 	print(len(player_rows))
-
 		# wait until the row of the last player on the list appears on the page
 		# 	in 2020/2021 season, it is Martin Ødegaard, with the data-player='p184029'
 		last_player_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@alt='Photo for Martin Ødegaard']"
@@ -105,10 +99,8 @@ def player_retrieve_1():
 
 		# get the player rows and links for the details after the page
 		#	update
-		print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
 		player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
 		player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i)
-		print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
 
 		# exit the advertisement screen
 		try:
@@ -133,18 +125,18 @@ def player_retrieve_1():
 		try:
 			player_row_text = player_row.text
 		except StaleElementReferenceException:
-			print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
 			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i)
 
-		print(player_row_text)
+		# print(player_row_text)
 		player_row_text_list = player_row_text.splitlines()
 		player_name = player_row_text_list[0]
 
 		# if the player is a duplicate, then the scraper is clicking on the
 		#	wrong row. So let the scraper try again by decrementing i
-		if player_name in unique_player_names:
-			i -= 1
-			print('Duplicate Plaeyer!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+		if player_name != list_of_all_players_in_order[i]:
+			print(player_name)
+			print(list_of_all_players_in_order[i])
+			print('Index Pointing to Wrong Player. Try Again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 			continue
 		else:
 			unique_player_names.append(player_name)
@@ -191,7 +183,7 @@ def player_retrieve_1():
 			# 	print('i = ' + str(i))
 			# 	print('original = ' + str(original_row_amount))
 			# 	break
-
+		i += 1
 	# print(players_list_of_dicts)
 	return players_list_of_dicts
 
@@ -251,10 +243,8 @@ def player_retrieve_2(driver, player_row_button):
 	try:
 		personal_details_xpath = "//div[@class='personalLists']/ul"
 		personal_details = presence_of_all_el_located(driver, personal_details_xpath, SECONDS_TO_WAIT, -2)
-		print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
 		for detail in personal_details:
 		 	print(detail.text)
-		print('vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv')
 
 		# get the date of birth and height of the player
 		try:
@@ -320,7 +310,6 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 	el_found = False
 	# handle TimeoutException
 	while el_found == False and tries < 3:
-		print('# of tries (TimeoutException loop): ' + str(tries))
 		try:
 			element = WebDriverWait(driver, seconds_to_wait).until(
 				EC.presence_of_all_elements_located((By.XPATH, xpath))
@@ -333,19 +322,15 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 			#	calling function so that we can move on
 			if index == -2:
 				raise TimeoutException('')
-			
-			print('Timeout Exception Occured')
 
 	if index != -1 and index != -2:
 		tries = 0
 		# handle stale element exception. If the element 
 		el_not_stale = False
 		while el_not_stale == False and tries < 3:
-			print('# of tries (StaleElementException loop): ' + str(tries))
 			try:
 				el = element[index]
 				print(el.text)
-				print('return el')
 				return el
 			except StaleElementReferenceException:
 				# in this case the element is stale, find it again
@@ -353,9 +338,7 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 					EC.presence_of_all_elements_located((By.XPATH, xpath))
 				)
 				tries += 1
-				print('Stale Element Exception Occured')
 	else:
-		print('return the element list')
 		return element
 
 # player_retrieve_1()
