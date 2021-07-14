@@ -29,6 +29,16 @@ def get_all_the_player_rows():
 	# set up the driver
 	driver = set_up_driver(urls['url_1'])
 
+	advert_xpath = "//a[@id='advertClose']"
+	advert = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+		EC.presence_of_all_elements_located((By.XPATH, advert_xpath))
+	)
+	ad_close_button = advert[0]
+
+	# click on the close button
+	driver.execute_script("arguments[0].click();", ad_close_button)
+	time.sleep(5)
+
 	filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
 	)
@@ -37,27 +47,18 @@ def get_all_the_player_rows():
 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 	time.sleep(5)
 
-	advert_xpath = "//a[@id='advertClose']"
-	advert = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-		EC.presence_of_all_elements_located((By.XPATH, advert_xpath))
-	)
-	ad_close_button = advert[0]
-		
 
 	list_of_all_players_in_order = []
 
-	# click on the close button
-	driver.execute_script("arguments[0].click();", ad_close_button)
-	time.sleep(5)
 
 	# get the player rows to start the for loop
 	player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
 	player_rows = WebDriverWait(driver, SECONDS_TO_WAIT).until(
 		EC.presence_of_all_elements_located((By.XPATH, player_rows_xpath))
 	)
-
-	for player_row in player_rows:
-		player_row_list = player_row.text.splitlines()
+	print(len(player_rows))
+	for i in range(0, len(player_rows)):
+		player_row_list = player_rows[i].text.splitlines()
 		player_name = player_row_list[0]
 
 		# player_position_and_country = player_row_list[1].split()

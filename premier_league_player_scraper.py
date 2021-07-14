@@ -74,9 +74,11 @@ def player_retrieve_1():
 	print(len(player_rows))
 	original_row_amount = len(player_rows)
 
-	i = 134
+	i = 800
 	# get the basic player information from the rows
-	while i < len(player_rows) - (len(player_rows) - 160):
+	while i < len(player_rows) - (len(player_rows) - 850):
+		driver.refresh()
+
 		print(counter)
 		# make sure the 2020/2021 season table is loaded (instead of
 		#	2021/22). check for the 2020/21 to appear
@@ -100,8 +102,15 @@ def player_retrieve_1():
 		# get the player rows and links for the details after the page
 		#	update
 		player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
-		player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i)
-
+		# often the number of rows found varies. The actual number is 863
+		#	if the presence_of_all_el_located throws an IndexError
+		#	(list index out of range), then we should refresh the page and
+		#	try to scrape again to find the correct number of player rows
+		try:
+			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i)
+		except IndexError:
+			continue
+		
 		# exit the advertisement screen
 		try:
 			advert_xpath = "//a[@id='advertClose']"
@@ -134,9 +143,10 @@ def player_retrieve_1():
 		# if the player is a duplicate, then the scraper is clicking on the
 		#	wrong row. So let the scraper try again by decrementing i
 		if player_name != list_of_all_players_in_order[i]:
+			print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 			print(player_name)
 			print(list_of_all_players_in_order[i])
-			print('Index Pointing to Wrong Player. Try Again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+			print('Index Pointing to Wrong Player. Try Again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 			driver.refresh()
 			# make sure the 2020/2021 season table is loaded (instead of
 			#	2021/22). check for the 2020/21 to appear
@@ -182,17 +192,6 @@ def player_retrieve_1():
 			players_list_of_dicts.append(temp_dict)
 			print('-----------------------------------------------------')
 
-			# Since the driver returns player elements with varying number of rows
-			#	the for loop encounters an IndexError. It is impossible to get
-			# 	identical number of rows at every iteration, because the browser
-			#	duplicates (probably randomly) the rows, which ranges between the 
-			#	three values of 834/864/894
-			# try:
-			# 	player_rows[i]
-			# except IndexError:
-			# 	print('i = ' + str(i))
-			# 	print('original = ' + str(original_row_amount))
-			# 	break
 		i += 1
 	# print(players_list_of_dicts)
 	return players_list_of_dicts
@@ -276,22 +275,6 @@ def player_retrieve_2(driver, player_row_button):
 		print('No details division.')
 		dict_to_return['date of birth'] = '0000-00-00'
 		height = 'Null'
-
-	# try:
-	# 	personal_details = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-	# 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='personalLists']/ul"))
-	# 	)
-	#  	date_of_birth = personal_details[1].text.splitlines()
-	# 	date_of_birth = date_of_birth[1].split()[0]
-	# 	dict_to_return['date of birth'] = date_of_birth
-
-	# 	try:
-	# 		height = personal_details[2].text.splitlines()
-	# 		height = height[1]
-	# 	except IndexError:
-	# 		height = 'Null'
-	# except:
-
 
 	dict_to_return['height'] = height
 
