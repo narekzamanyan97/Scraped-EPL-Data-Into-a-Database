@@ -63,6 +63,10 @@ def get_all_the_player_rows():
 	while len(player_rows) != 863:
 		print(len(player_rows))
 		print('Wrong number of player rows. Try Again!')
+		
+		# scroll down to the bottom of the page to include all the players
+		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+		time.sleep(5)
 		player_rows = premier_league_player_scraper.presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
 
 	time.sleep(5)

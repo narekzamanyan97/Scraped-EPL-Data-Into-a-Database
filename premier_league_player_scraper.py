@@ -74,9 +74,9 @@ def player_retrieve_1():
 	print(len(player_rows))
 	original_row_amount = len(player_rows)
 
-	i = 800
+	i = 833
 	# get the basic player information from the rows
-	while i < len(player_rows) - (len(player_rows) - 830):
+	while i < len(player_rows):
 		driver.refresh()
 
 		print(counter)
@@ -102,6 +102,7 @@ def player_retrieve_1():
 		# get the player rows and links for the details after the page
 		#	update
 		player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
+		
 		# often the number of rows found varies. The actual number is 863
 		#	if the presence_of_all_el_located throws an IndexError
 		#	(list index out of range), then we should refresh the page and
@@ -307,7 +308,9 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 			element = WebDriverWait(driver, seconds_to_wait).until(
 				EC.presence_of_all_elements_located((By.XPATH, xpath))
 			)
-			el_found = True
+			# make sure there are the right number of player rows before continuing
+			if index >= 0 and len(element) == 863:
+				el_found = True
 		except TimeoutException:
 			tries += 1
 
