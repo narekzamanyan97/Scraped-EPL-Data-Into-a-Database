@@ -76,7 +76,7 @@ def player_retrieve_1():
 
 	i = 800
 	# get the basic player information from the rows
-	while i < len(player_rows) - (len(player_rows) - 850):
+	while i < len(player_rows) - (len(player_rows) - 830):
 		driver.refresh()
 
 		print(counter)
@@ -110,7 +110,7 @@ def player_retrieve_1():
 			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i)
 		except IndexError:
 			continue
-		
+
 		# exit the advertisement screen
 		try:
 			advert_xpath = "//a[@id='advertClose']"

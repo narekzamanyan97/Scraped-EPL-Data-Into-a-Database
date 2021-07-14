@@ -14,6 +14,8 @@ import re
 
 from set_up_driver import *
 
+import premier_league_player_scraper
+
 urls = {
 	'url_1': 'https://www.premierleague.com/players?se=363&cl=-1',
 }
@@ -53,9 +55,12 @@ def get_all_the_player_rows():
 
 	# get the player rows to start the for loop
 	player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
-	player_rows = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-		EC.presence_of_all_elements_located((By.XPATH, player_rows_xpath))
-	)
+	
+	player_rows = premier_league_player_scraper.presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
+	# player_rows = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+	# 	EC.presence_of_all_elements_located((By.XPATH, player_rows_xpath))
+	# )
+
 	print(len(player_rows))
 	for i in range(0, len(player_rows)):
 		player_row_list = player_rows[i].text.splitlines()
