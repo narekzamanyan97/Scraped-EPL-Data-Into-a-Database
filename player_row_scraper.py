@@ -60,24 +60,17 @@ def get_all_the_player_rows():
 	# player_rows = WebDriverWait(driver, SECONDS_TO_WAIT).until(
 	# 	EC.presence_of_all_elements_located((By.XPATH, player_rows_xpath))
 	# )
+	while len(player_rows) != 863:
+		print(len(player_rows))
+		print('Wrong number of player rows. Try Again!')
+		player_rows = premier_league_player_scraper.presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
+
+	time.sleep(5)
 
 	print(len(player_rows))
 	for i in range(0, len(player_rows)):
 		player_row_list = player_rows[i].text.splitlines()
 		player_name = player_row_list[0]
-
-		# player_position_and_country = player_row_list[1].split()
-		# try:
-		# 	player_position = player_position_and_country[0]
-		# except IndexError:
-		# 	player_position = '--------------------'
-		
-		# try:
-		# 	player_country = player_position_and_country[1]
-		# except IndexError:
-		# 	player_country = '--------------------'
-
-		# print(player_name + '                  ' + player_position + '                   ' + player_country)
 		
 		list_of_all_players_in_order.append(player_name)
 
