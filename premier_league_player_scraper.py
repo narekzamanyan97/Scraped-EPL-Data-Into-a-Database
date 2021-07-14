@@ -47,6 +47,7 @@ def player_retrieve_1():
 	# there is a full screen ad on the page when we try to access the data
 	#	with a webbot. close the ad before proceeding
 	# find the close button for the ad
+	print('line 50')
 	advert_xpath = "//a[@id='advertClose']"
 	advert = presence_of_all_el_located(driver, advert_xpath, SECONDS_TO_WAIT, -2)
 	ad_close_button = advert[0]
@@ -56,10 +57,12 @@ def player_retrieve_1():
 
 	# wait until the row of the last player on the list appears on the page
 	# 	in 2020/2021 season, it is Martin Ødegaard, with the data-player='p184029'
-	last_player_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p184029']"
-	last_player = presence_of_all_el_located(driver, last_player_xpath, SECONDS_TO_WAIT, -1)
+	# print('line 60')
+	# last_player_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p184029']"
+	# last_player = presence_of_all_el_located(driver, last_player_xpath, SECONDS_TO_WAIT, -1)
 
 	# get the player rows to start the for loop
+	print('line 63')
 	player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
 	player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
 
@@ -92,12 +95,14 @@ def player_retrieve_1():
 
 		# get the player_rows for the for loop, so we can count the
 		#	number of players
+		print('line 96')
 		player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
 
 		# wait until the row of the last player on the list appears on the page
 		# 	in 2020/2021 season, it is Martin Ødegaard, with the data-player='p184029'
-		last_player_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@alt='Photo for Martin Ødegaard']"
-		last_player = presence_of_all_el_located(driver, last_player_xpath, SECONDS_TO_WAIT, -1)			
+		# print('line 101')
+		# last_player_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@alt='Photo for Martin Ødegaard']"
+		# last_player = presence_of_all_el_located(driver, last_player_xpath, SECONDS_TO_WAIT, -1)			
 
 		# get the player rows and links for the details after the page
 		#	update
@@ -108,12 +113,14 @@ def player_retrieve_1():
 		#	(list index out of range), then we should refresh the page and
 		#	try to scrape again to find the correct number of player rows
 		try:
+			print('line 114')
 			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i)
 		except IndexError:
 			continue
 
 		# exit the advertisement screen
 		try:
+			print('line 121')
 			advert_xpath = "//a[@id='advertClose']"
 			advert = presence_of_all_el_located(driver, advert_xpath, SECONDS_TO_WAIT, -2)
 			ad_close_button = advert[0]
@@ -135,6 +142,7 @@ def player_retrieve_1():
 		try:
 			player_row_text = player_row.text
 		except StaleElementReferenceException:
+			print('line 143')
 			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i)
 
 		# print(player_row_text)
@@ -309,8 +317,17 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 				EC.presence_of_all_elements_located((By.XPATH, xpath))
 			)
 			# make sure there are the right number of player rows before continuing
-			if index >= 0 and len(element) == 863:
+			if index >= -1 and len(element) == 863:
 				el_found = True
+			elif index == -2:
+				el_found = True
+			else:
+				# scroll down to the bottom of the page to include all the players
+				driver.refresh()
+				time.sleep(5)
+				driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+				time.sleep(5)
+				print(len(element))
 		except TimeoutException:
 			tries += 1
 
