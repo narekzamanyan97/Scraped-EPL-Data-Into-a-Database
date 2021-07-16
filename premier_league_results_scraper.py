@@ -72,7 +72,7 @@ def results_retrieve_1():
 		
 		# Iterating over the results to get the team names, scores, stadium names,
 		#	and then click at each result to get the details of the match
-		for i in range(0, number_of_results - (number_of_results - 4)):			
+		for i in range(0, number_of_results - (number_of_results - 10)):			
 			# Since the page is updated (after clicking on a link and going back), we need to
 			#	find the result elements again
 			stadiums = WebDriverWait(driver, 10).until(
