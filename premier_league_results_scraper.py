@@ -72,7 +72,11 @@ def results_retrieve_1():
 		
 		# Iterating over the results to get the team names, scores, stadium names,
 		#	and then click at each result to get the details of the match
-		for i in range(0, number_of_results - (number_of_results - 10)):			
+		for i in range(0, number_of_results - (number_of_results - 50)):			
+			# Scroll down to load more results to include all the results
+			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+			time.sleep(5)
+			
 			# Since the page is updated (after clicking on a link and going back), we need to
 			#	find the result elements again
 			stadiums = WebDriverWait(driver, 10).until(
@@ -87,7 +91,10 @@ def results_retrieve_1():
 
 			# id = div_id.get_attribute("data-matchid")
 			id = div_ids[i].get_attribute("data-matchid")
-			
+			print(i)
+			print(id)
+			print('results ' + str(len(results)))
+			print(len(stadiums))
 			# The rows of the page are being duplicated after the scrollTo
 			# So we check whether the row has already appeared on the page or not
 			if is_row_new(unique_ids, id) == True:
@@ -565,6 +572,8 @@ def process_events_data(string_array, is_home):
 				min_array = [is_home, 'goal penalty']
 			elif event_type == 'Red Card':
 				min_array = [is_home, 'red card']
+			elif event_type == 'Second Yellow Card (Red Card)':
+				min_array = [is_home, 'Second Yellow Card (Red Card)']
 			elif event_type == 'Assist':
 				min_array = [is_home, 'assist']
 

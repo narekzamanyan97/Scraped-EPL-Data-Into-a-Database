@@ -399,6 +399,8 @@ class database:
 				# assist (assist) = 3
 				# own goal = 4
 				# red card = 5
+				# Second Yellow Card (Red Card) = 6
+				print(performance)
 				if performance[1] == 'goal':
 					type_of_stat = 1
 				elif performance[1] == 'goal penalty':
@@ -409,6 +411,8 @@ class database:
 					type_of_stat = 4
 				elif performance[1] == 'red card':
 					type_of_stat = 5
+				elif performance[1] == 'Second Yellow Card (Red Card)':
+					type_of_stat = 6
 
 				minutes = []
 				for i in range(2, len(performance)):
