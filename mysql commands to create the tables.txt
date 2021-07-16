@@ -99,7 +99,7 @@ create table player_stats(
 	is_in_starting_11 boolean,
 
 	substitution_on varchar(7),
-	substition_off varchar(7),
+	substitution_off varchar(7),
 	yellow_card varchar(7),
 	red_card varchar(7),
 

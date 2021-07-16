@@ -414,7 +414,7 @@ class database:
 
 			for minute in minutes:
 				insert_statement = "INSERT INTO player_performance(player_id, match_id, type_of_stat, minute) "
-				insert_statement += "VALUES(" + player_id + ", "
+				insert_statement += "VALUES(" + str(player_id) + ", "
 				insert_statement += str(match_id) + ", "
 				insert_statement += str(type_of_stat) + ", "
 				insert_statement += "\"" + minute + "\");"
@@ -422,6 +422,34 @@ class database:
 				self.cursor.execute(insert_statement)
 				self.conn.commit()
 
+	# @arguments:
+	#	dictionary of dictionaries for player stats, with the key of the 
+	#	outer dictionary being the name of the player
+	def insert_player_stats(self, player_stats_dict_of_dicts, match_id):
+		for key_player_name, player_stats_dict in player_stats_dict_of_dicts.items():
+			player_name = key_player_name
+			player_id = self.get_id(player_name, 'player')
+
+			is_in_starting_11 = player_stats_dict['Starting 11']
+			substitution_on = player_stats_dict['Substitution On']
+			substitution_off = player_stats_dict['Substitution Off']
+			yellow_card = player_stats_dict['Yellow Card']
+			red_card = player_stats_dict['Red Card']
+
+			print(player_name)
+			print(match_id)
+
+			insert_statement = "INSERT INTO player_stats(player_id, match_id, is_in_starting_11, substitution_on, substitution_off, yellow_card, red_card) "
+			insert_statement += "VALUES(" + str(player_id) + ", "
+			insert_statement += str(match_id) + ", "
+			insert_statement += str(is_in_starting_11) + ", "
+			insert_statement += "\"" + str(substitution_on) + "\", "
+			insert_statement += "\"" + str(substitution_off) + "\", "
+			insert_statement += "\"" + str(yellow_card) + "\", "
+			insert_statement += "\"" + str(red_card) + "\");"
+
+			self.cursor.execute(insert_statement)
+			self.conn.commit()
 
 	# convert the month name into number from 01 to 12
 	def convert_month_to_number(self, month):

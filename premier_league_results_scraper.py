@@ -72,7 +72,7 @@ def results_retrieve_1():
 		
 		# Iterating over the results to get the team names, scores, stadium names,
 		#	and then click at each result to get the details of the match
-		for i in range(0, number_of_results - (number_of_results - 2)):			
+		for i in range(0, number_of_results - (number_of_results - 4)):			
 			# Since the page is updated (after clicking on a link and going back), we need to
 			#	find the result elements again
 			stadiums = WebDriverWait(driver, 10).until(
@@ -490,15 +490,15 @@ def extract_player_information(squad_number, squad_info, is_home_side):
 		# set the fields not present for the player to null later to be added to
 		#	the database
 		if 'Substitution On' not in temp_dict:
-			temp_dict['Substitution On'] = None
+			temp_dict['Substitution On'] = 'Null'
 		if 'Substitution Off' not in temp_dict:
-			temp_dict['Substitution Off'] = None
+			temp_dict['Substitution Off'] = 'Null'
 		if 'Yellow Card' not in temp_dict:
-			temp_dict['Yellow Card'] = None
+			temp_dict['Yellow Card'] = 'Null'
 		if 'Red Card' not in temp_dict:
-			temp_dict['Red Card'] = None
+			temp_dict['Red Card'] = 'Null'
 		if 'Pen. Scored' not in temp_dict:
-			temp_dict['Pen. Scored'] = None 
+			temp_dict['Pen. Scored'] = 'Null' 
 
 		squad_dict[player_name] = temp_dict
 
