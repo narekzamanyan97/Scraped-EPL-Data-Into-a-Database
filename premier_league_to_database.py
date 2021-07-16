@@ -391,36 +391,40 @@ class database:
 		for player_name, performance in player_performance_dict.items():
 			print(player_name)
 			player_id = self.get_id(player_name, 'player')
+			# some players have not appeared in the player's page, and thus have
+			#	no player_id
+			if player_id != 'Null':
+				# goal (goal) = 1
+				# goal penalty = 2
+				# assist (assist) = 3
+				# own goal = 4
+				# red card = 5
+				if performance[1] == 'goal':
+					type_of_stat = 1
+				elif performance[1] == 'goal penalty':
+					type_of_stat = 2
+				elif performance[1] == 'assist':
+					type_of_stat = 3
+				elif performance[1] == 'own goal':
+					type_of_stat = 4
+				elif performance[1] == 'red card':
+					type_of_stat = 5
 
-			# goal (goal) = 1
-			# goal penalty = 2
-			# assist (assist) = 3
-			# own goal = 4
-			# red card = 5
-			if performance[1] == 'goal':
-				type_of_stat = 1
-			elif performance[1] == 'goal penalty':
-				type_of_stat = 2
-			elif performance[1] == 'assist':
-				type_of_stat = 3
-			elif performance[1] == 'own goal':
-				type_of_stat = 4
-			elif performance[1] == 'red card':
-				type_of_stat = 5
+				minutes = []
+				for i in range(2, len(performance)):
+					minutes.append(performance[i])
 
-			minutes = []
-			for i in range(2, len(performance)):
-				minutes.append(performance[i])
+				for minute in minutes:
+					insert_statement = "INSERT INTO player_performance(player_id, match_id, type_of_stat, minute) "
+					insert_statement += "VALUES(" + str(player_id) + ", "
+					insert_statement += str(match_id) + ", "
+					insert_statement += str(type_of_stat) + ", "
+					insert_statement += "\"" + minute + "\");"
 
-			for minute in minutes:
-				insert_statement = "INSERT INTO player_performance(player_id, match_id, type_of_stat, minute) "
-				insert_statement += "VALUES(" + str(player_id) + ", "
-				insert_statement += str(match_id) + ", "
-				insert_statement += str(type_of_stat) + ", "
-				insert_statement += "\"" + minute + "\");"
-
-				self.cursor.execute(insert_statement)
-				self.conn.commit()
+					self.cursor.execute(insert_statement)
+					self.conn.commit()
+			else:
+				print(player_name + ' has no player_id')
 
 	# @arguments:
 	#	dictionary of dictionaries for player stats, with the key of the 
