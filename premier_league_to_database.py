@@ -283,6 +283,7 @@ class database:
 
 		except IntegrityError:
 			print('Duplicate entry exception')
+			raise
 
 	# receives the stats of both teams, the match id, and the id of both
 	#	clubs match_id_and_club_names[0] = match_id 
