@@ -1,5 +1,6 @@
 import mysql.connector as connector
 from mysql.connector import Error
+from mysql.connector import IntegrityError
 from connect_to_database import *
 
 
@@ -275,9 +276,13 @@ class database:
 		insert_statement_match_ += "\"" + str(referee_name) + "\", "
 		insert_statement_match_ += str(stadium_id) + ");"
 
-		print(insert_statement_match_)
-		self.cursor.execute(insert_statement_match_)
-		self.conn.commit()
+		try:
+			print(insert_statement_match_)
+			self.cursor.execute(insert_statement_match_)
+			self.conn.commit()
+
+		except IntegrityError:
+			print('Duplicate entry exception')
 
 	# receives the stats of both teams, the match id, and the id of both
 	#	clubs match_id_and_club_names[0] = match_id 
