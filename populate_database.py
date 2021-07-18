@@ -46,22 +46,24 @@ def populate_player_table():
 
 
 def populate_match_table():
-	match_info_list_of_list_of_dicts = results_retrieve_1()
+	db.get_all_match_ids_inserted()
+	# match_info_list_of_list_of_dicts = results_retrieve_1()
 
-	for match_info_list_of_dicts in match_info_list_of_list_of_dicts:
-		try:
-			db.insert_match_basic_info(match_info_list_of_dicts[0], match_info_list_of_dicts[1])
+	# for match_info_list_of_dicts in match_info_list_of_list_of_dicts:
+		# try:
+			# db.insert_match_basic_info(match_info_list_of_dicts[0], match_info_list_of_dicts[1])
 
-			match_id_and_club_names = []
-			match_id_and_club_names.append(match_info_list_of_dicts[0]['match id'])
-			match_id_and_club_names.append(match_info_list_of_dicts[0]['home'])
-			match_id_and_club_names.append(match_info_list_of_dicts[0]['away'])
+			# match_id_and_club_names = []
+			# match_id_and_club_names.append(match_info_list_of_dicts[0]['match id'])
+			# match_id_and_club_names.append(match_info_list_of_dicts[0]['home'])
+			# match_id_and_club_names.append(match_info_list_of_dicts[0]['away'])
 
-			db.insert_player_performance(match_info_list_of_dicts[2], match_id_and_club_names[0])
-			db.insert_player_stats(match_info_list_of_dicts[3], match_id_and_club_names[0])
-			db.insert_club_stats(match_info_list_of_dicts[4], match_id_and_club_names)
-		except IntegrityError:
-			print('Duplicate Key error raised from the insert_match_basic_info.')
+			# db.insert_player_performance(match_info_list_of_dicts[2], match_id_and_club_names[0])
+			# db.insert_player_stats(match_info_list_of_dicts[3], match_id_and_club_names[0])
+			# db.insert_club_stats(match_info_list_of_dicts[4], match_id_and_club_names)
+			# db.get_all_match_ids_inserted()
+		# except IntegrityError:
+		# 	print('Duplicate Key error raised from the insert_match_basic_info.')
 
 
 

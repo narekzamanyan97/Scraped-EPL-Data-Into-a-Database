@@ -91,7 +91,7 @@ def results_retrieve_1():
 		
 		# Iterating over the results to get the team names, scores, stadium names,
 		#	and then click at each result to get the details of the match
-		for i in range(0, number_of_results - (len(results) - 1)):			
+		for i in range(0, len(results)):			
 			# Scroll down to load more results to include all the results
 			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 			time.sleep(5)
@@ -108,25 +108,11 @@ def results_retrieve_1():
 				EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']"))
 			)
 
-			# # make sure the script gets 380 (# of matches in a premier league season)
-			# #	results before proceeding
-			# while len(results) != 380:
-			# 	driver.refresh()
-			# 	print(len(results))
-			# 	# scroll down to the bottom of the page to include all the players
-			# 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-			# 	time.sleep(5)
+			try:
+				id = div_ids[i].get_attribute("data-matchid")
+			except IndexError:
+				break
 
-
-			# 	stadiums = WebDriverWait(driver, 10).until(
-			# 		EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='stadiumName']"))
-			# 	)
-			# 	results = WebDriverWait(driver, 10).until(
-			# 		EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
-			# 	)
-
-			# id = div_id.get_attribute("data-matchid")
-			id = div_ids[i].get_attribute("data-matchid")
 			print(i)
 			print(id)
 			print('results ' + str(len(results)))

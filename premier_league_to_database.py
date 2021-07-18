@@ -531,6 +531,23 @@ class database:
 		self.cursor.execute(delete_statement)
 		self.conn.commit()
 
+	# get all the match_ids already inserted to make the results_scraper faster
+	# 	returns match_ids as a list
+	def get_all_match_ids_inserted(self):
+		query = "SELECT match_id FROM match_"
+
+		self.cursor.execute(query)
+		match_ids = self.cursor.fetchall()
+
+		list_of_match_ids = []
+
+		for match_id_tuple in match_ids:
+			match_id = match_id_tuple[0]
+			list_of_match_ids.append(match_id)
+
+		print(list_of_match_ids)
+
+		return list_of_match_ids
 	# club name->Aston Villa
 	# stadium name->Villa Park
 	# website->www.avfc.co.uk
