@@ -22,6 +22,7 @@ urls = {
 #		list of all the match_ids available in the table. This is to save time
 #		and skip over the match_ids that have already been considered before
 def results_retrieve_1(all_match_ids):
+	print(type(all_match_ids[15]))
 	# set up the chrome driver
 	# options = webdriver.ChromeOptions()
 	# options.add_argument("--no-sandbox")
@@ -94,11 +95,23 @@ def results_retrieve_1(all_match_ids):
 		
 		# Iterating over the results to get the team names, scores, stadium names,
 		#	and then click at each result to get the details of the match
-		for i in range(0, len(results)):			
+		for i in range(200, len(results)):			
 			# Scroll down to load more results to include all the results
 			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 			time.sleep(5)
 			
+			# wait until the last match is present on the page
+			last_match_found = False
+			while last_match_found == False:
+				try:
+					last_result = WebDriverWait(driver, 10).until(
+						EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@data-matchid='58903']"))
+					)
+					last_match_found = True
+				except TimeoutException:
+					print('last match was not found')
+
+
 			# Since the page is updated (after clicking on a link and going back), we need to
 			#	find the result elements again
 			stadiums = WebDriverWait(driver, 10).until(
@@ -116,13 +129,14 @@ def results_retrieve_1(all_match_ids):
 			except IndexError:
 				break
 
+			id = int(id)
 			print(i)
-			print(id)
+			print(type(id))
 			print('results ' + str(len(results)))
 			print(len(stadiums))
 			# The rows of the page are being duplicated after the scrollTo
 			# So we check whether the row has already appeared on the page or not
-			if is_row_new(unique_ids, id) == True and is_row_new(all_match_ids, id):
+			if is_row_new(unique_ids, id) == True and is_row_new(all_match_ids, id) == True:
 				# holds a result information
 				result_dict = {}
 				result_dict['match id'] = id
@@ -544,10 +558,14 @@ def extract_player_information(squad_number, squad_info, is_home_side):
 # Check whether the row with the given id has already been appeared on the page
 def is_row_new(list_of_ids, id):
 	try:
+		print(id)
 		x = list_of_ids.index(id)
+		print('false')
 		return False
 	except ValueError:
+		print('true')
 		return True
+
 
 # Find the space preceding the first digit (minute) in the string so that we can truncate 
 #	the name of the goal scorer from the string that contains the name of the scorer and

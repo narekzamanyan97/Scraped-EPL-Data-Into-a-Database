@@ -545,8 +545,6 @@ class database:
 			match_id = match_id_tuple[0]
 			list_of_match_ids.append(match_id)
 
-		print(list_of_match_ids)
-
 		return list_of_match_ids
 	# club name->Aston Villa
 	# stadium name->Villa Park
