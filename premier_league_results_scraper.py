@@ -18,7 +18,10 @@ urls = {
 }
 
 # retrieve the team names, score, the stadium name, and its city
-def results_retrieve_1():
+# 	Argument:
+#		list of all the match_ids available in the table. This is to save time
+#		and skip over the match_ids that have already been considered before
+def results_retrieve_1(all_match_ids):
 	# set up the chrome driver
 	# options = webdriver.ChromeOptions()
 	# options.add_argument("--no-sandbox")
@@ -119,7 +122,7 @@ def results_retrieve_1():
 			print(len(stadiums))
 			# The rows of the page are being duplicated after the scrollTo
 			# So we check whether the row has already appeared on the page or not
-			if is_row_new(unique_ids, id) == True:
+			if is_row_new(unique_ids, id) == True and is_row_new(all_match_ids, id):
 				# holds a result information
 				result_dict = {}
 				result_dict['match id'] = id
@@ -200,6 +203,8 @@ def results_retrieve_1():
 
 				results_list_of_list_of_dicts.append(results_list_of_dicts)
 				results_list_of_dicts = []
+			else:
+				print(str(id) + ' exists.')
 
 		return results_list_of_list_of_dicts
 

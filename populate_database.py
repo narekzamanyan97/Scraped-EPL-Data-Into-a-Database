@@ -46,8 +46,9 @@ def populate_player_table():
 
 
 def populate_match_table():
-	db.get_all_match_ids_inserted()
-	# match_info_list_of_list_of_dicts = results_retrieve_1()
+	all_match_ids_in_db = db.get_all_match_ids_inserted()
+
+	match_info_list_of_list_of_dicts = results_retrieve_1(all_match_ids_in_db)
 
 	# for match_info_list_of_dicts in match_info_list_of_list_of_dicts:
 		# try:
