@@ -655,6 +655,15 @@ def process_events_data(string_array, is_home):
 
 			return stats
 
+# Extracts the event (goal, penalty, assist, etc) for a player and appends it to
+#	a dictionary containing similar data.
+# @parameters:
+#		driver: WebDriver - to scrape the event data from the page
+#		xpath: string - of the event data on the page
+#		stats: dictionary - the existing event dictionary to which we add the new array of event
+#			with the key being the player name
+#		is_home: Boolean - is the player for the home or away side. Added to the
+#			array of event data
 def extract_event(driver, xpath, stats, is_home):
 	try:
 		# retrieve the events of the home side, which include goals (by penalty), 
@@ -663,14 +672,10 @@ def extract_event(driver, xpath, stats, is_home):
 			EC.presence_of_all_elements_located((By.XPATH, xpath))
 		)
 		for event in events:
-			# Remove the space from the text
-			# 	event_home[0] = scorer name
-			#	event_home[1] = Goal/Red Card
 			event = event.text.splitlines()
-			# stats.update(process_events_data(event, is_home))
-
 
 			processed_events_data_dict = process_events_data(event, is_home)
+			
 			# check whether the player name is already in the dictionary.
 			# When the player name is already a key in the dict, e.g. if 
 			#	the player has scored a goal, then trying to add an assist
@@ -681,12 +686,13 @@ def extract_event(driver, xpath, stats, is_home):
 			#   instead of adding the player name key to the dict.
 			player_name = list(processed_events_data_dict.keys())[0]
 
-			print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-			print(processed_events_data_dict[player_name])
-			print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-			
+			# If the player is already in the dictionary for another type of event,
+			#		append the current event array to the existing array of arrays
 			if player_name in stats.keys():
 				stats[player_name].append(processed_events_data_dict[player_name])
+			# If the player has no event data yet, create a temporary array and
+			#	append the current event array to it, making an array of arrays,
+			#	then adding to the dictionary with the key being the player's name.
 			else:
 				temp_array = []
 				temp_dict = {}
