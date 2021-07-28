@@ -293,16 +293,6 @@ def results_retrieve_2(driver, result_row):
 		events_home_xpath = "//div[@class='matchEvents matchEventsContainer']/div[@class='home']/div[@class='event']"
 
 		stats = extract_event(driver, events_home_xpath, stats, True)
-		print(stats)
-		# events_home = WebDriverWait(driver, 10).until(
-		# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchEvents matchEventsContainer']/div[@class='home']/div[@class='event']"))
-		# )
-		# for event_home in events_home:
-		# 	# Remove the space from the text
-		# 	# 	event_home[0] = scorer name
-		# 	#	event_home[1] = Goal/Red Card
-		# 	event_home = event_home.text.splitlines()
-		# 	stats.update(process_events_data(event_home, True))
 
 	except TimeoutException as ex:
 		print('')
@@ -314,32 +304,6 @@ def results_retrieve_2(driver, result_row):
 		events_away_xpath = "//div[@class='matchEvents matchEventsContainer']/div[@class='away']/div[@class='event']"
 		
 		stats = extract_event(driver, events_away_xpath, stats, False)
-		print(stats)
-		# events_away = WebDriverWait(driver, 10).until(
-		# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchEvents matchEventsContainer']/div[@class='away']/div[@class='event']"))
-		# )
-		# for event_away in events_away:
-		# 	event_away = event_away.text.splitlines()
-			
-		# 	processed_events_data_dict = process_events_data(event_away, False)
-		# 	print(processed_events_data_dict)
-		# 	# check whether the player name is already in the dictionary.
-		# 	# When the player name is already a key in the dict, e.g. if 
-		# 	#	the player has scored a goal, then trying to add an assist
-		# 	#	by the same player fails because the key already exists.
-		# 	# If the player name is already in the dictionary stats, 
-		# 	#	then append the performance array to the array
-		# 	#	already in the dictionary corresponding to the player name key,
-		# 	#   instead of adding the player name key to the dict.
-		# 	player_name = list(processed_events_data_dict.keys())[0]
-		# 	print(player_name)
-		# 	if player_name in stats.keys():
-		# 		print('player name ' + player_name + ' already in dict')
-		# 		stats[player_name].append(list(processed_events_data_dict.values()))
-		# 		print(stats[player_name])
-		# 	else:
-		# 		print('name not in dict')
-		# 		stats.update(processed_events_data_dict)
 
 	except TimeoutException as ex:
 		print('')
@@ -349,15 +313,6 @@ def results_retrieve_2(driver, result_row):
 		assists_home_xpath = "//div[@class='assists']/div[@class='matchAssistsContainer']/div[@class='home']/div[@class='event']"
 		
 		stats = extract_event(driver, assists_home_xpath, stats, True)
-		print(stats)
-
-
-		# assists_home = WebDriverWait(driver, 10).until(
-		# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='assists']/div[@class='matchAssistsContainer']/div[@class='home']/div[@class='event']"))
-		# )
-		# for assist_home in assists_home:
-		# 	assist_home = assist_home.text.splitlines()
-		# 	stats.update(process_events_data(assist_home, True))
 
 	except TimeoutException as ex:
 		print('')
@@ -369,12 +324,6 @@ def results_retrieve_2(driver, result_row):
 
 		stats = extract_event(driver, assists_away_xpath, stats, False)
 		print(stats)
-		# assists_away = WebDriverWait(driver, 10).until(
-		# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='assists']/div[@class='matchAssistsContainer']/div[@class='away']/div[@class='event']"))
-		# )
-		# for assist_away in assists_away:
-		# 	assist_away = assist_away.text.splitlines()
-		# 	stats.update(process_events_data(assist_away, False))
 
 	except TimeoutException as ex:
 		print('')
@@ -732,10 +681,18 @@ def extract_event(driver, xpath, stats, is_home):
 			#   instead of adding the player name key to the dict.
 			player_name = list(processed_events_data_dict.keys())[0]
 
+			print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+			print(processed_events_data_dict[player_name])
+			print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+			
 			if player_name in stats.keys():
-				stats[player_name].append(list(processed_events_data_dict.values()))
+				stats[player_name].append(processed_events_data_dict[player_name])
 			else:
-				stats.update(processed_events_data_dict)
+				temp_array = []
+				temp_dict = {}
+				temp_array.append(processed_events_data_dict[player_name])
+				temp_dict[player_name] = temp_array
+				stats.update(temp_dict)
 
 		return stats
 
