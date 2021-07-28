@@ -4,24 +4,24 @@ from mysql.connector import IntegrityError
 from connect_to_database import *
 
 
-def query(conn, query_string, change=False):
-	# instantiate a cursor object to interact with MySQL server and
-	#	execute queries
-	cursor = conn.cursor()
-	# execute the given query statement
-	cursor.execute(query_string)
-	# if the query changes the database, then commit the changes
-	if change == True:
-		conn.commit()
-	else:
-		# get the rows of the query result set as a list of tuples
-		# 	we must fetch all rows for the current query before executing
-		#	new statements using the same connection
-		tuple_list = cursor.fetchall()
+# def query(conn, query_string, change=False):
+# 	# instantiate a cursor object to interact with MySQL server and
+# 	#	execute queries
+# 	cursor = conn.cursor()
+# 	# execute the given query statement
+# 	cursor.execute(query_string)
+# 	# if the query changes the database, then commit the changes
+# 	if change == True:
+# 		conn.commit()
+# 	else:
+# 		# get the rows of the query result set as a list of tuples
+# 		# 	we must fetch all rows for the current query before executing
+# 		#	new statements using the same connection
+# 		tuple_list = cursor.fetchall()
 
-		# !!! convert tuplelist to dict list if necessary
-		conn.close()
-		return tuple_list
+# 		# !!! convert tuplelist to dict list if necessary
+# 		conn.close()
+# 		return tuple_list
 
 # Takes in a list of tuples and returns a list of dictionaries of those tuples
 # def convert_tuplelist_to_dictlist(cursor, tuples):
@@ -546,6 +546,20 @@ class database:
 			list_of_match_ids.append(match_id)
 
 		return list_of_match_ids
+	
+	def get_top_scorers(self, number_of_scorers):
+		query = "SELECT p.player_name, count(p_p.player_id) as number_of_goals FROM player as p, player_performance as p_p "
+		query += "WHERE p.player_id=p_p.player_id and p_p.type_of_stat=1"
+		# goal (goal) = 1
+		# goal penalty = 2
+		# assist (assist) = 3
+		# own goal = 4
+		# red card = 5
+		# Second Yellow Card (Red Card) = 6
+
+	# select p.player_name, count(p_p.player_id) as number_of_goals from player as p, player_performance as p_p where p.player_id=p_p.player_id and p_p.type_of_stat=1;
+	
+
 	# club name->Aston Villa
 	# stadium name->Villa Park
 	# website->www.avfc.co.uk
@@ -578,3 +592,9 @@ class database:
 # yellow cards
 # red cards
 # fouls
+
+select ch.club_name, ca.club_name, p.player_name, pp.type_of_stat, pp.minute from match_ m, player_performance as pp, player as p, club as ca, club as ch where (ch.club_name='Tottenham Hotspur' or ca.club_name='Tottenham Hotspur') and (p.player_id=pp.player_id) and (p.club_id=ch.club_id or p.club_id=ca.club_id);
+
+# also get the competing team names
+# get the player's performance in the season
+select m.match_id, c.club_name, c2.club_name, type_of_stat, minute from player_performance as pp INNER JOIN player as p ON pp.player_id=p.player_id and p.player_name='Harry Kane' INNER JOIN match_ as m ON pp.match_id=m.match_id INNER JOIN club as c ON c.club_id=m.home_team_id INNER JOIN club as c2 ON c2.club_id=m.away_team_id;

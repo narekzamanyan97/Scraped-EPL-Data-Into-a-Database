@@ -47,7 +47,7 @@ def populate_player_table():
 
 def populate_match_table():
 	all_match_ids_in_db = db.get_all_match_ids_inserted()
-	
+
 	match_info_list_of_list_of_dicts = results_retrieve_1(all_match_ids_in_db)
 
 	for match_info_list_of_dicts in match_info_list_of_list_of_dicts:
@@ -62,7 +62,6 @@ def populate_match_table():
 			db.insert_player_performance(match_info_list_of_dicts[2], match_id_and_club_names[0])
 			db.insert_player_stats(match_info_list_of_dicts[3], match_id_and_club_names[0])
 			db.insert_club_stats(match_info_list_of_dicts[4], match_id_and_club_names)
-			db.get_all_match_ids_inserted()
 		except IntegrityError:
 			print('Duplicate Key error raised from the insert_match_basic_info.')
 

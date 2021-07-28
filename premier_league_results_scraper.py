@@ -22,7 +22,6 @@ urls = {
 #		list of all the match_ids available in the table. This is to save time
 #		and skip over the match_ids that have already been considered before
 def results_retrieve_1(all_match_ids):
-	print(type(all_match_ids[15]))
 	# set up the chrome driver
 	# options = webdriver.ChromeOptions()
 	# options.add_argument("--no-sandbox")
@@ -38,6 +37,19 @@ def results_retrieve_1(all_match_ids):
 	time.sleep(5)
 
 	try:
+
+		# wait until the last match is present on the page
+		last_match_found = False
+		while last_match_found == False:
+			try:
+				last_result = WebDriverWait(driver, 10).until(
+					EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@data-matchid='58903']"))
+				)
+				last_match_found = True
+				print('last match found')
+			except TimeoutException:
+				print('last match was not found')
+	
 		# Stadiums contains the following information:
 		# 	stadium_name
 		#	city
@@ -76,30 +88,47 @@ def results_retrieve_1(all_match_ids):
 
 		# # make sure the script gets 380 (# of matches in a premier league season)
 		# #	results before proceeding
-		# while len(results) != 380:
-		# 	driver.refresh()
-		# 	print(len(results))
-		# 	# scroll down to the bottom of the page to include all the players
-		# 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-		# 	time.sleep(5)
+		while len(results) != 380:
+			driver.refresh()
+			print(len(results))
+			# scroll down to the bottom of the page to include all the players
+			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+			time.sleep(5)
 
 
-		# 	stadiums = WebDriverWait(driver, 10).until(
-		# 		EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='stadiumName']"))
-		# 	)
-		# 	results = WebDriverWait(driver, 10).until(
-		# 		EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
-		# 	)
+			stadiums = WebDriverWait(driver, 10).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='stadiumName']"))
+			)
+			results = WebDriverWait(driver, 10).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
+			)
 
 		# time.sleep(5)
 		
 		# Iterating over the results to get the team names, scores, stadium names,
 		#	and then click at each result to get the details of the match
-		for i in range(200, len(results)):			
+		for i in range(4, len(results)):			
 			# Scroll down to load more results to include all the results
 			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 			time.sleep(5)
 			
+			# # make sure the script gets 380 (# of matches in a premier league season)
+			# #	results before proceeding
+			while len(results) != 380:
+				driver.refresh()
+				print(len(results))
+				# scroll down to the bottom of the page to include all the players
+				driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+				time.sleep(5)
+
+
+				stadiums = WebDriverWait(driver, 10).until(
+					EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='stadiumName']"))
+				)
+				results = WebDriverWait(driver, 10).until(
+					EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
+				)
+
 			# wait until the last match is present on the page
 			last_match_found = False
 			while last_match_found == False:
@@ -108,6 +137,7 @@ def results_retrieve_1(all_match_ids):
 						EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@data-matchid='58903']"))
 					)
 					last_match_found = True
+					print('last match found')
 				except TimeoutException:
 					print('last match was not found')
 
@@ -131,9 +161,7 @@ def results_retrieve_1(all_match_ids):
 
 			id = int(id)
 			print(i)
-			print(type(id))
 			print('results ' + str(len(results)))
-			print(len(stadiums))
 			# The rows of the page are being duplicated after the scrollTo
 			# So we check whether the row has already appeared on the page or not
 			if is_row_new(unique_ids, id) == True and is_row_new(all_match_ids, id) == True:
@@ -262,52 +290,91 @@ def results_retrieve_2(driver, result_row):
 	try:
 		# retrieve the events of the home side, which include goals (by penalty), 
 		#	own goals, and red cards
-		events_home = WebDriverWait(driver, 10).until(
-			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchEvents matchEventsContainer']/div[@class='home']/div[@class='event']"))
-		)
-		for event_home in events_home:
-			# Remove the space from the text
-			# 	event_home[0] = scorer name
-			#	event_home[1] = Goal/Red Card
-			event_home = event_home.text.splitlines()
-			stats.update(process_events_data(event_home, True))
+		events_home_xpath = "//div[@class='matchEvents matchEventsContainer']/div[@class='home']/div[@class='event']"
+
+		stats = extract_event(driver, events_home_xpath, stats, True)
+		print(stats)
+		# events_home = WebDriverWait(driver, 10).until(
+		# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchEvents matchEventsContainer']/div[@class='home']/div[@class='event']"))
+		# )
+		# for event_home in events_home:
+		# 	# Remove the space from the text
+		# 	# 	event_home[0] = scorer name
+		# 	#	event_home[1] = Goal/Red Card
+		# 	event_home = event_home.text.splitlines()
+		# 	stats.update(process_events_data(event_home, True))
 
 	except TimeoutException as ex:
 		print('')
 	
 
 	try:
-		# retrieve the events of the home side, which include goals (by penalty), 
+		# retrieve the events of the away side, which include goals (by penalty), 
 		#	own goals, and red cards
-		events_away = WebDriverWait(driver, 10).until(
-			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchEvents matchEventsContainer']/div[@class='away']/div[@class='event']"))
-		)
-		for event_away in events_away:
-			event_away = event_away.text.splitlines()
-			stats.update(process_events_data(event_away, False))
+		events_away_xpath = "//div[@class='matchEvents matchEventsContainer']/div[@class='away']/div[@class='event']"
+		
+		stats = extract_event(driver, events_away_xpath, stats, False)
+		print(stats)
+		# events_away = WebDriverWait(driver, 10).until(
+		# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchEvents matchEventsContainer']/div[@class='away']/div[@class='event']"))
+		# )
+		# for event_away in events_away:
+		# 	event_away = event_away.text.splitlines()
+			
+		# 	processed_events_data_dict = process_events_data(event_away, False)
+		# 	print(processed_events_data_dict)
+		# 	# check whether the player name is already in the dictionary.
+		# 	# When the player name is already a key in the dict, e.g. if 
+		# 	#	the player has scored a goal, then trying to add an assist
+		# 	#	by the same player fails because the key already exists.
+		# 	# If the player name is already in the dictionary stats, 
+		# 	#	then append the performance array to the array
+		# 	#	already in the dictionary corresponding to the player name key,
+		# 	#   instead of adding the player name key to the dict.
+		# 	player_name = list(processed_events_data_dict.keys())[0]
+		# 	print(player_name)
+		# 	if player_name in stats.keys():
+		# 		print('player name ' + player_name + ' already in dict')
+		# 		stats[player_name].append(list(processed_events_data_dict.values()))
+		# 		print(stats[player_name])
+		# 	else:
+		# 		print('name not in dict')
+		# 		stats.update(processed_events_data_dict)
 
 	except TimeoutException as ex:
 		print('')
 
 	try:
-		assists_home = WebDriverWait(driver, 10).until(
-			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='assists']/div[@class='matchAssistsContainer']/div[@class='home']/div[@class='event']"))
-		)
-		for assist_home in assists_home:
-			assist_home = assist_home.text.splitlines()
-			stats.update(process_events_data(assist_home, True))
+		# retrieve the assists of the home side
+		assists_home_xpath = "//div[@class='assists']/div[@class='matchAssistsContainer']/div[@class='home']/div[@class='event']"
+		
+		stats = extract_event(driver, assists_home_xpath, stats, True)
+		print(stats)
+
+
+		# assists_home = WebDriverWait(driver, 10).until(
+		# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='assists']/div[@class='matchAssistsContainer']/div[@class='home']/div[@class='event']"))
+		# )
+		# for assist_home in assists_home:
+		# 	assist_home = assist_home.text.splitlines()
+		# 	stats.update(process_events_data(assist_home, True))
 
 	except TimeoutException as ex:
 		print('')
 
 
 	try:
-		assists_away = WebDriverWait(driver, 10).until(
-			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='assists']/div[@class='matchAssistsContainer']/div[@class='away']/div[@class='event']"))
-		)
-		for assist_away in assists_away:
-			assist_away = assist_away.text.splitlines()
-			stats.update(process_events_data(assist_away, False))
+		# retrieve the assists of the away side
+		assists_away_xpath = "//div[@class='assists']/div[@class='matchAssistsContainer']/div[@class='away']/div[@class='event']"
+
+		stats = extract_event(driver, assists_away_xpath, stats, False)
+		print(stats)
+		# assists_away = WebDriverWait(driver, 10).until(
+		# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='assists']/div[@class='matchAssistsContainer']/div[@class='away']/div[@class='event']"))
+		# )
+		# for assist_away in assists_away:
+		# 	assist_away = assist_away.text.splitlines()
+		# 	stats.update(process_events_data(assist_away, False))
 
 	except TimeoutException as ex:
 		print('')
@@ -560,10 +627,8 @@ def is_row_new(list_of_ids, id):
 	try:
 		print(id)
 		x = list_of_ids.index(id)
-		print('false')
 		return False
 	except ValueError:
-		print('true')
 		return True
 
 
@@ -641,4 +706,42 @@ def process_events_data(string_array, is_home):
 
 			return stats
 
-# results_retrieve_1()
+def extract_event(driver, xpath, stats, is_home):
+	try:
+		# retrieve the events of the home side, which include goals (by penalty), 
+		#	own goals, and red cards
+		events = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, xpath))
+		)
+		for event in events:
+			# Remove the space from the text
+			# 	event_home[0] = scorer name
+			#	event_home[1] = Goal/Red Card
+			event = event.text.splitlines()
+			# stats.update(process_events_data(event, is_home))
+
+
+			processed_events_data_dict = process_events_data(event, is_home)
+			# check whether the player name is already in the dictionary.
+			# When the player name is already a key in the dict, e.g. if 
+			#	the player has scored a goal, then trying to add an assist
+			#	by the same player fails because the key already exists.
+			# If the player name is already in the dictionary stats, 
+			#	then append the performance array to the array
+			#	already in the dictionary corresponding to the player name key,
+			#   instead of adding the player name key to the dict.
+			player_name = list(processed_events_data_dict.keys())[0]
+
+			if player_name in stats.keys():
+				stats[player_name].append(list(processed_events_data_dict.values()))
+			else:
+				stats.update(processed_events_data_dict)
+
+		return stats
+
+	except TimeoutException as ex:
+		# If an event is not found, still return the original stats dictionary
+		#		as the following statements in the calling funciton rely on it.
+		return stats
+
+results_retrieve_1([])
