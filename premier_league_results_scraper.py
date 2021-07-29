@@ -110,7 +110,12 @@ def results_retrieve_1(all_match_ids):
 		
 		# Iterating over the results to get the team names, scores, stadium names,
 		#	and then click at each result to get the details of the match
-		for i in range(105, len(results)):			
+		i = 0
+
+		
+		while i < len(results):	
+			duplicate_result_flag = False		
+		
 			# Scroll down to load more results to include all the results
 			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 			time.sleep(5)
@@ -171,12 +176,20 @@ def results_retrieve_1(all_match_ids):
 			id = int(id)
 			print(i)
 			print('results ' + str(len(results)))
+
 			# The rows of the page are being duplicated after the scrollTo
 			# So we check whether the row has already appeared on the page or not
-			while is_row_new(unique_ids, id) != True and is_row_new(all_match_ids, id) != True:
-				i += 1
-				print(i)
-				print(str(id) + ' exists.')
+			while is_row_new(unique_ids, id) != True or is_row_new(all_match_ids, id) != True:
+				duplicate_result_flag = True
+				if i < original_len_results:
+					i += 1
+					print(i)
+					print(str(id) + ' exists.')
+					try:
+						id = div_ids[i].get_attribute("data-matchid")
+						id = int(id)
+					except IndexError:
+						break
 			
 			# holds a result information
 			result_dict = {}
@@ -259,6 +272,10 @@ def results_retrieve_1(all_match_ids):
 			results_list_of_list_of_dicts.append(results_list_of_dicts)
 			results_list_of_dicts = []
 
+			if duplicate_result_flag == True:
+				i = 0
+			else:
+				i += 1
 
 		return results_list_of_list_of_dicts
 
