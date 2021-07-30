@@ -112,8 +112,9 @@ def results_retrieve_1(all_match_ids):
 		#	and then click at each result to get the details of the match
 		i = 0
 
-		
+		num_of_unique_ids = 0
 		while i < len(results):	
+			print('*******************************' + str(num_of_unique_ids))
 			duplicate_result_flag = False		
 		
 			# Scroll down to load more results to include all the results
@@ -190,92 +191,95 @@ def results_retrieve_1(all_match_ids):
 						id = int(id)
 					except IndexError:
 						break
+
+			if i < original_len_results:
+				# holds a result information
+				result_dict = {}
+				result_dict['match id'] = id
+
+				num_of_unique_ids += 1
+
+				unique_ids.append(id)
+				# truncated is an array of strings with the following format:
+				# ['team_name_1', 'team_1_goals-team_2_goals', 'team_name_2']
+				# truncated = result.text.splitlines()
+				truncated = results[i].text.splitlines()
+
+				# since the team names are the short versions, ignore them
+				#	on the scoresheet. Only retrieve the scores
+				scoresheet = truncated[1]
+
+				# scores is an array of 2 elements with the number of goals for each
+				# 	team. e.g. ['2-0']
+				scores = scoresheet.splitlines()
+				# scores now is an array with the number of goals as its elements
+				#	e.g. [2, 0]
+				scores = scores[0].split('-')
+				score_team_1 = scores[0]
+				score_team_2 = scores[1]
+
+				# Get the text from the stadium attribute
+				stadium = stadiums[i].text
+
+				# remove the newlines and trailing spaces and separate the name of the stadium
+				#	and the name of the city by comma
+				stadium = stadium.replace('\n', '')
+				stadium = stadium.strip()
+				stadium = stadium.split(',')
+				stadium[1] = stadium[1].strip()
+
+				stadium_name = stadium[0]
+				city = stadium[1]
+
+				
+				counter += 1
+
+				result_dict['home goals'] = score_team_1
+				result_dict['away goals'] = score_team_2
+				result_dict['stadium name'] = stadium_name
+				result_dict['city'] = city
+
+				results_list_of_dicts.append(result_dict)
 			
-			# holds a result information
-			result_dict = {}
-			result_dict['match id'] = id
+				# print(results_list_of_dicts)
 
-			unique_ids.append(id)
-			# truncated is an array of strings with the following format:
-			# ['team_name_1', 'team_1_goals-team_2_goals', 'team_name_2']
-			# truncated = result.text.splitlines()
-			truncated = results[i].text.splitlines()
+				# call results_retrieve_2 to get the match details, such as scorers and assists, 
+				#	red cards, penalty scorers, own goals, etc.
+				team_names, player_stats, match_date, line_ups, team_stats = results_retrieve_2(driver, div_ids[i])
 
-			# since the team names are the short versions, ignore them
-			#	on the scoresheet. Only retrieve the scores
-			scoresheet = truncated[1]
+				result_dict['home'] = team_names[0]
+				result_dict['away'] = team_names[1]
 
-			# scores is an array of 2 elements with the number of goals for each
-			# 	team. e.g. ['2-0']
-			scores = scoresheet.splitlines()
-			# scores now is an array with the number of goals as its elements
-			#	e.g. [2, 0]
-			scores = scores[0].split('-')
-			score_team_1 = scores[0]
-			score_team_2 = scores[1]
+				results_list_of_dicts.append(match_date)
+				results_list_of_dicts.append(player_stats)
+				results_list_of_dicts.append(line_ups)
+				results_list_of_dicts.append(team_stats)
 
-			# Get the text from the stadium attribute
-			stadium = stadiums[i].text
+				print(team_names[0] + " " + score_team_1 + "-" + score_team_2 + " " + team_names[1] + " @ " + str(stadium_name) + ", " + str(city))
 
-			# remove the newlines and trailing spaces and separate the name of the stadium
-			#	and the name of the city by comma
-			stadium = stadium.replace('\n', '')
-			stadium = stadium.strip()
-			stadium = stadium.split(',')
-			stadium[1] = stadium[1].strip()
+				print('*****************************************************************')
+				print('*****************************************************************')
+				# results_list_of_dicts's elements are:
+				#	[0] = basic match info (match_id, sides, goals, stadium)
+				#	[1] = date information, including matchweek, and referee
+				#	[2] = player events, including goal scorers with times,
+				#			red cards, penalty, own goal info.
+				# 	[3] = line_ups and player performances
+				#	[4] = club performances
+				for dict_ in results_list_of_dicts:
+					print(dict_)
+					print('--------------------------------------------')
 
-			stadium_name = stadium[0]
-			city = stadium[1]
+				print('*****************************************************************')
+				print('*****************************************************************')
 
-			
-			counter += 1
+				results_list_of_list_of_dicts.append(results_list_of_dicts)
+				results_list_of_dicts = []
 
-			result_dict['home goals'] = score_team_1
-			result_dict['away goals'] = score_team_2
-			result_dict['stadium name'] = stadium_name
-			result_dict['city'] = city
-
-			results_list_of_dicts.append(result_dict)
-		
-			# print(results_list_of_dicts)
-
-			# call results_retrieve_2 to get the match details, such as scorers and assists, 
-			#	red cards, penalty scorers, own goals, etc.
-			team_names, player_stats, match_date, line_ups, team_stats = results_retrieve_2(driver, div_ids[i])
-
-			result_dict['home'] = team_names[0]
-			result_dict['away'] = team_names[1]
-
-			results_list_of_dicts.append(match_date)
-			results_list_of_dicts.append(player_stats)
-			results_list_of_dicts.append(line_ups)
-			results_list_of_dicts.append(team_stats)
-
-			print(team_names[0] + " " + score_team_1 + "-" + score_team_2 + " " + team_names[1] + " @ " + str(stadium_name) + ", " + str(city))
-
-			print('*****************************************************************')
-			print('*****************************************************************')
-			# results_list_of_dicts's elements are:
-			#	[0] = basic match info (match_id, sides, goals, stadium)
-			#	[1] = date information, including matchweek, and referee
-			#	[2] = player events, including goal scorers with times,
-			#			red cards, penalty, own goal info.
-			# 	[3] = line_ups and player performances
-			#	[4] = club performances
-			for dict_ in results_list_of_dicts:
-				print(dict_)
-				print('--------------------------------------------')
-
-			print('*****************************************************************')
-			print('*****************************************************************')
-
-			results_list_of_list_of_dicts.append(results_list_of_dicts)
-			results_list_of_dicts = []
-
-			if duplicate_result_flag == True:
-				i = 0
-			else:
-				i += 1
+				if duplicate_result_flag == True:
+					i = 0
+				else:
+					i += 1
 
 		return results_list_of_list_of_dicts
 

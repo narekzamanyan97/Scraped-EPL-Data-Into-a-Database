@@ -399,43 +399,53 @@ class database:
 			player_id = self.get_id(player_name, 'player')
 			# some players have not appeared in the player's page, and thus have
 			#	no player_id
-			if player_id != 'Null':
-				# goal (goal) = 1
-				# goal penalty = 2
-				# assist (assist) = 3
-				# own goal = 4
-				# red card = 5
-				# Second Yellow Card (Red Card) = 6
-				for performance_array in performance_array_of_arrays:
-					print(performance_array)
-					if performance_array[1] == 'goal':
-						type_of_stat = 1
-					elif performance_array[1] == 'goal penalty':
-						type_of_stat = 2
-					elif performance_array[1] == 'assist':
-						type_of_stat = 3
-					elif performance_array[1] == 'own goal':
-						type_of_stat = 4
-					elif performance_array[1] == 'red card':
-						type_of_stat = 5
-					elif performance_array[1] == 'Second Yellow Card (Red Card)':
-						type_of_stat = 6
 
-					minutes = []
-					for i in range(2, len(performance_array)):
-						minutes.append(performance_array[i])
-
-					for minute in minutes:
-						insert_statement = "INSERT INTO player_performance(player_id, match_id, type_of_stat, minute) "
-						insert_statement += "VALUES(" + str(player_id) + ", "
-						insert_statement += str(match_id) + ", "
-						insert_statement += str(type_of_stat) + ", "
-						insert_statement += "\"" + minute + "\");"
-
-						self.cursor.execute(insert_statement)
-						self.conn.commit()
-			else:
+			if player_id == 'Null':
+				else:
 				print(player_name + ' has no player_id')
+
+				# insert the player
+				insert_player_statement = "INSERT INTO player(player_name) "
+				insert_player_statement += "VALUES(\"" + player_name + "\");"
+
+				self.cursor.execute(insert_statement)
+				self.conn.commit()
+
+			# goal (goal) = 1
+			# goal penalty = 2
+			# assist (assist) = 3
+			# own goal = 4
+			# red card = 5
+			# Second Yellow Card (Red Card) = 6
+			for performance_array in performance_array_of_arrays:
+				print(performance_array)
+				if performance_array[1] == 'goal':
+					type_of_stat = 1
+				elif performance_array[1] == 'goal penalty':
+					type_of_stat = 2
+				elif performance_array[1] == 'assist':
+					type_of_stat = 3
+				elif performance_array[1] == 'own goal':
+					type_of_stat = 4
+				elif performance_array[1] == 'red card':
+					type_of_stat = 5
+				elif performance_array[1] == 'Second Yellow Card (Red Card)':
+					type_of_stat = 6
+
+				minutes = []
+				for i in range(2, len(performance_array)):
+					minutes.append(performance_array[i])
+
+				for minute in minutes:
+					insert_statement = "INSERT INTO player_performance(player_id, match_id, type_of_stat, minute) "
+					insert_statement += "VALUES(" + str(player_id) + ", "
+					insert_statement += str(match_id) + ", "
+					insert_statement += str(type_of_stat) + ", "
+					insert_statement += "\"" + minute + "\");"
+
+					self.cursor.execute(insert_statement)
+					self.conn.commit()
+
 
 	# @arguments:
 	#	dictionary of dictionaries for player stats, with the key of the 
@@ -558,6 +568,9 @@ class database:
 		# red card = 5
 		# Second Yellow Card (Red Card) = 6
 
+select m.match_id, c.club_name, c2.club_name, type_of_stat, minute from player_performance as pp INNER JOIN player as p ON pp.player_id=p.player_id and p.player_name='Harry Kane' INNER JOIN match_ as m ON pp.match_id=m.match_id INNER JOIN club as c ON c.club_id=m.home_team_id INNER JOIN club as c2 ON c2.club_id=m.away_team_id;
+
+	select count(*) as goals from player_performance as pp INNER JOIN player as p ON pp.player_id=p.player_id INNER JOIN match_ as m ON pp.match_id=m.match_id INNER JOIN club as c ON c.club_id=m.home_team_id INNER JOIN club as c2 ON c2.club_id=m.away_team_id where (type_of_stat=1 or type_of_stat=2) order by goals limit 10;
 	# select p.player_name, count(p_p.player_id) as number_of_goals from player as p, player_performance as p_p where p.player_id=p_p.player_id and p_p.type_of_stat=1;
 	
 
@@ -572,7 +585,8 @@ class database:
 	# Phone - International->+44 (0)121 327 5353
 
 
-
+# !!! get the missing players from from the player_stats and insert them into the
+#		players table
 
 # Have functions that do the queries to obtain the following player/club stats:
 # calculate the following:
