@@ -71,4 +71,6 @@ def populate_match_table():
 # populate_stadium_and_club_tables()
 # populate_manager_table()
 # populate_player_table()
-populate_match_table()
+# populate_match_table()
+
+db.get_top_players(20, 'goals')

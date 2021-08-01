@@ -401,7 +401,6 @@ class database:
 			#	no player_id
 
 			if player_id == 'Null':
-				else:
 				print(player_name + ' has no player_id')
 
 				# insert the player
@@ -558,7 +557,7 @@ class database:
 
 		return list_of_match_ids
 	
-	def get_top_scorers(self, number_of_scorers):
+	def get_top_players(self, number_of_rows, type_of_stat):
 		query = "SELECT p.player_name, count(p_p.player_id) as number_of_goals FROM player as p, player_performance as p_p "
 		query += "WHERE p.player_id=p_p.player_id and p_p.type_of_stat=1"
 		# goal (goal) = 1
@@ -567,10 +566,58 @@ class database:
 		# own goal = 4
 		# red card = 5
 		# Second Yellow Card (Red Card) = 6
+		if type_of_stat == 'all goals':
+			type_of_stat = "1 or type_of_stat=2"
+		elif type_of_stat == 'goals':
+			type_of_stat = 1
+		elif type_of_stat == 'penalty goals':
+			type_of_stat = 2
+		elif type_of_stat == 'assists':
+			type_of_stat = 3
+		elif type_of_stat == 'own goals':
+			type_of_stat = 4
+		elif type_of_stat == 'red cards':
+			type_of_stat = 5
+		elif type_of_stat == 'second yellow card':
+			type_of_stat = 6
 
-select m.match_id, c.club_name, c2.club_name, type_of_stat, minute from player_performance as pp INNER JOIN player as p ON pp.player_id=p.player_id and p.player_name='Harry Kane' INNER JOIN match_ as m ON pp.match_id=m.match_id INNER JOIN club as c ON c.club_id=m.home_team_id INNER JOIN club as c2 ON c2.club_id=m.away_team_id;
 
-	select count(*) as goals from player_performance as pp INNER JOIN player as p ON pp.player_id=p.player_id INNER JOIN match_ as m ON pp.match_id=m.match_id INNER JOIN club as c ON c.club_id=m.home_team_id INNER JOIN club as c2 ON c2.club_id=m.away_team_id where (type_of_stat=1 or type_of_stat=2) order by goals limit 10;
+		query = "SELECT player_name as \"Player Name\", c.club_name as Club, count(*) as Goals "
+		query += "FROM player_performance as pp " 
+		query += "INNER JOIN player as p ON pp.player_id=p.player_id "
+		query += "INNER JOIN club as c on p.club_id=c.club_id "
+		query += "WHERE (type_of_stat=" + str(type_of_stat) + ") "
+		query += "GROUP BY p.player_id "
+		query += "ORDER BY goals desc "
+		query += "limit " + str(number_of_rows);
+
+
+
+		self.cursor.execute(query)
+		tuple_list = self.cursor.fetchall()
+
+		if len(tuple_list) > 0:
+			list_of_dicts = []
+
+			# get the column names of the returned query
+			columns = [column[0] for column in self.cursor.description]
+
+
+			print(columns)
+			for row in tuple_list:
+				list_of_dicts.append(dict(zip(columns, row)))
+
+				# list_of_dict.append(dict(zip(columns, row)))
+
+			for dict_ in list_of_dicts:
+				print(dict_)
+		else:
+			print('Empty set returned.')
+
+	# select m.match_id, c.club_name, c2.club_name, type_of_stat, minute from player_performance as pp INNER JOIN player as p ON pp.player_id=p.player_id and p.player_name='Harry Kane' INNER JOIN match_ as m ON pp.match_id=m.match_id INNER JOIN club as c ON c.club_id=m.home_team_id INNER JOIN club as c2 ON c2.club_id=m.away_team_id;
+	# select count(*) from player_performance as pp INNER JOIN player as p ON pp.player_id=p.player_id and p.player_name='Harry Kane' INNER JOIN match_ as m ON pp.match_id=m.match_id INNER JOIN club as c ON c.club_id=m.home_team_id INNER JOIN club as c2 ON c2.club_id=m.away_team_id where (type_of_stat=1 or type_of_stat=2);
+	
+	# select count(*) as goals from player_performance as pp INNER JOIN player as p ON pp.player_id=p.player_id INNER JOIN match_ as m ON pp.match_id=m.match_id INNER JOIN club as c ON c.club_id=m.home_team_id INNER JOIN club as c2 ON c2.club_id=m.away_team_id where (type_of_stat=1 or type_of_stat=2);
 	# select p.player_name, count(p_p.player_id) as number_of_goals from player as p, player_performance as p_p where p.player_id=p_p.player_id and p_p.type_of_stat=1;
 	
 
