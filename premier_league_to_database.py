@@ -568,27 +568,33 @@ class database:
 		# Second Yellow Card (Red Card) = 6
 		if type_of_stat == 'all goals':
 			type_of_stat = "1 or type_of_stat=2"
+			order_by = 'All_Goals'
 		elif type_of_stat == 'goals':
 			type_of_stat = 1
+			order_by = 'Goals'
 		elif type_of_stat == 'penalty goals':
 			type_of_stat = 2
 		elif type_of_stat == 'assists':
 			type_of_stat = 3
+			order_by = 'Assists'
 		elif type_of_stat == 'own goals':
 			type_of_stat = 4
+			order_by = 'Own_Goals'
 		elif type_of_stat == 'red cards':
 			type_of_stat = 5
+			order_by = 'Red_Cards'
 		elif type_of_stat == 'second yellow card':
 			type_of_stat = 6
+			order_by = 'Second_Yellow_Cards'
 
 
-		query = "SELECT player_name as \"Player Name\", c.club_name as Club, count(*) as Goals "
+		query = "SELECT player_name as \"Player Name\", c.club_name as Club, count(*) as " + order_by + " "
 		query += "FROM player_performance as pp " 
 		query += "INNER JOIN player as p ON pp.player_id=p.player_id "
 		query += "INNER JOIN club as c on p.club_id=c.club_id "
 		query += "WHERE (type_of_stat=" + str(type_of_stat) + ") "
 		query += "GROUP BY p.player_id "
-		query += "ORDER BY goals desc "
+		query += "ORDER BY " + order_by + " desc "
 		query += "limit " + str(number_of_rows);
 
 
@@ -613,6 +619,9 @@ class database:
 				print(dict_)
 		else:
 			print('Empty set returned.')
+
+	# def get_appearances(self, number_of_rows):
+		#	 select p.player_name as Player, count(p.player_name) as Appearances from player_stats as p_s INNER JOIN player as p on p.player_id=p_s.player_id where p_s.is_in_starting_11=1 or p_s.substitution_on!=Null group by p.player_id order by Appearances desc limit 10;
 
 	# select m.match_id, c.club_name, c2.club_name, type_of_stat, minute from player_performance as pp INNER JOIN player as p ON pp.player_id=p.player_id and p.player_name='Harry Kane' INNER JOIN match_ as m ON pp.match_id=m.match_id INNER JOIN club as c ON c.club_id=m.home_team_id INNER JOIN club as c2 ON c2.club_id=m.away_team_id;
 	# select count(*) from player_performance as pp INNER JOIN player as p ON pp.player_id=p.player_id and p.player_name='Harry Kane' INNER JOIN match_ as m ON pp.match_id=m.match_id INNER JOIN club as c ON c.club_id=m.home_team_id INNER JOIN club as c2 ON c2.club_id=m.away_team_id where (type_of_stat=1 or type_of_stat=2);
