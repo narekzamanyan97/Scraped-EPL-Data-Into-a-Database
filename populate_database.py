@@ -71,4 +71,4 @@ def populate_match_table():
 # populate_player_table()
 # populate_match_table()
 
-db.get_top_players(20, 'assists')
+db.get_appearances(20)
