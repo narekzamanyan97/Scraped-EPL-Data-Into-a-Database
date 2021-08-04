@@ -602,23 +602,10 @@ class database:
 		self.cursor.execute(query)
 		tuple_list = self.cursor.fetchall()
 
-		if len(tuple_list) > 0:
-			list_of_dicts = []
-
-			# get the column names of the returned query
-			columns = [column[0] for column in self.cursor.description]
-
-
-			print(columns)
-			for row in tuple_list:
-				list_of_dicts.append(dict(zip(columns, row)))
-
-				# list_of_dict.append(dict(zip(columns, row)))
-
-			for dict_ in list_of_dicts:
-				print(dict_)
-		else:
-			print('Empty set returned.')
+		list_of_dicts = self.convert_from_tuple_list_to_dict(tuple_list)
+		
+		for dict_ in list_of_dicts:
+			print(dict_)
 
 	def get_appearances(self, number_of_rows):
 		# get the player's club
@@ -634,8 +621,14 @@ class database:
 
 		self.cursor.execute(query)
 		tuple_list = self.cursor.fetchall()
+		
+		list_of_dicts = self.convert_from_tuple_list_to_dict(tuple_list)
+		
+		for dict_ in list_of_dicts:
+			print(dict_)
 
 
+	def convert_from_tuple_list_to_dict(self, tuple_list):
 		if len(tuple_list) > 0:
 			list_of_dicts = []
 
@@ -649,10 +642,11 @@ class database:
 
 				# list_of_dict.append(dict(zip(columns, row)))
 
-			for dict_ in list_of_dicts:
-				print(dict_)
+			return list_of_dicts
+
 		else:
 			print('Empty set returned.')
+			return []
 
 		# where p_s.is_in_starting_11=1 or p_s.substitution_on!=Null group by p.player_id order by Appearances desc limit 10;
 	# generate_league_table(self):
