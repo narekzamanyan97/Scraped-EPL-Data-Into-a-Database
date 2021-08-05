@@ -648,6 +648,62 @@ class database:
 			print('Empty set returned.')
 			return []
 
+	def generate_standings(self):
+		# position, club, played, won, drawn, lost, gf, ga, gd, points, form (earliest-.-.-.-newest)
+		query_won = "SELECT c.club_name, count(*) as wins "
+		query_won += "FROM match_ as m "
+		query_won += "INNER JOIN club as c "
+		query_won += "on (m.home_team_id=c.club_id and m.home_team_goals>m.away_team_goals) "
+		query_won += "or (m.away_team_id=c.club_id and m.away_team_goals>m.home_team_goals) "
+		query_won += "GROUP BY c.club_name " 
+		query_won += "ORDER BY wins DESC;"
+		
+		self.cursor.execute(query_won)
+		tuple_list = self.cursor.fetchall()
+
+		list_of_dicts = self.convert_from_tuple_list_to_dict(tuple_list)
+
+		wins_dict = {}
+
+		for dict_ in list_of_dicts:
+			wins_dict[dict_['club_name']] = dict_['wins']
+			
+		# Now get the information about draws. Just replace the > sign with =
+		#		to compare the number of goals scored in the match.
+		query_drawn = query_won.replace('>', '=')
+		query_drawn = query_drawn.replace('wins', 'draws')
+
+		self.cursor.execute(query_drawn)
+		tuple_list = self.cursor.fetchall()
+
+		list_of_dicts = self.convert_from_tuple_list_to_dict(tuple_list)
+
+		draws_dict = {}
+
+		for dict_ in list_of_dicts:
+			draws_dict[dict_['club_name']] = dict_['draws']
+
+		# Get the losses of each team. reuse the query_won
+		query_lost = query_won.replace('wins', 'lost')
+		query_lost = query_lost.replace('>', '<')
+
+		self.cursor.execute(query_lost)
+		tuple_list = self.cursor.fetchall()
+
+		list_of_dicts = self.convert_from_tuple_list_to_dict(tuple_list)
+
+		lost_dict = {}
+
+		for dict_ in list_of_dicts:
+			lost_dict[dict_['club_name']] = dict_['lost']
+
+		print(lost_dict)
+
+
+
+
+
+
 		# where p_s.is_in_starting_11=1 or p_s.substitution_on!=Null group by p.player_id order by Appearances desc limit 10;
 	# generate_league_table(self):
 
