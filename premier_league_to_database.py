@@ -739,13 +739,40 @@ class database:
 			#		goal_difference_dict
 			goal_difference_dict[key_team_name] = value_goals_scored - goals_against_dict[key_team_name]
 
-		print(goal_difference_dict)
 		# !!! calculate points
+		team_points = {}
+		for key_team_name, value_number_of_wins in wins_dict.items():
+			team_points[key_team_name] = 3*value_number_of_wins + draws_dict[key_team_name]
 
-		# where p_s.is_in_starting_11=1 or p_s.substitution_on!=Null group by p.player_id order by Appearances desc limit 10;
-	# generate_league_table(self):
+		# sort the dictionary by points
+		team_points = dict(sorted(team_points.items(), key=lambda item: item[1], reverse=True))
 
+		
 
+		# get the matchweek (last 5), home and away teams, and the winner
+		#	team name (value=draw if no winner)
+		query_form_last_5 = "SELECT matchweek, club_home.club_name AS Home, "
+		query_form_last_5 += "club_away.club_name AS Away, "
+		query_form_last_5 += "(CASE WHEN home_team_goals>away_team_goals then club_home.club_name "
+		query_form_last_5 += "WHEN home_team_goals=away_team_goals then \"draw\" "
+		query_form_last_5 += "ELSE club_away.club_name end) AS winner "
+		query_form_last_5 += "FROM match_ INNER JOIN club AS club_home ON club_home.club_id=home_team_id "
+		query_form_last_5 += "INNER JOIN club AS club_away ON club_away.club_id=away_team_id "
+		query_form_last_5 += "WHERE matchweek>33 "
+		query_form_last_5 += "ORDER BY matchweek asc;"
+
+		self.cursor.execute(query_form_last_5)
+		tuple_list = self.cursor.fetchall()
+		list_of_dicts = self.convert_from_tuple_list_to_dict(tuple_list)
+
+		print(list_of_dicts)
+		# for team, point in team_points.items():
+		# 	print(team + ": " + str(point))
+
+		#  where matchweek>33 order by matchweek asc;
+
+	# !!! Calculate the clean sheats of the goalkeepers
+	
 	# select m.match_id, c.club_name, c2.club_name, type_of_stat, minute from player_performance as pp INNER JOIN player as p ON pp.player_id=p.player_id and p.player_name='Harry Kane' INNER JOIN match_ as m ON pp.match_id=m.match_id INNER JOIN club as c ON c.club_id=m.home_team_id INNER JOIN club as c2 ON c2.club_id=m.away_team_id;
 	# select count(*) from player_performance as pp INNER JOIN player as p ON pp.player_id=p.player_id and p.player_name='Harry Kane' INNER JOIN match_ as m ON pp.match_id=m.match_id INNER JOIN club as c ON c.club_id=m.home_team_id INNER JOIN club as c2 ON c2.club_id=m.away_team_id where (type_of_stat=1 or type_of_stat=2);
 	
@@ -770,25 +797,16 @@ class database:
 # Have functions that do the queries to obtain the following player/club stats:
 # calculate the following:
 # points (league standings)
-# goals_scored
 # own goals conceded
-# goals conceded
-# clean sheats 
-# wins
-# losses
-# draws
-# passes
-# shots
-# shooting accuracy 
-# shots on target
-# penalties scored, 
-# offsides
-# yellow cards
-# red cards
-# fouls
-
-# select ch.club_name, ca.club_name, p.player_name, pp.type_of_stat, pp.minute from match_ m, player_performance as pp, player as p, club as ca, club as ch where (ch.club_name='Tottenham Hotspur' or ca.club_name='Tottenham Hotspur') and (p.player_id=pp.player_id) and (p.club_id=ch.club_id or p.club_id=ca.club_id);
-
-# also get the competing team names
-# get the player's performance in the season
-# select m.match_id, c.club_name, c2.club_name, type_of_stat, minute from player_performance as pp INNER JOIN player as p ON pp.player_id=p.player_id and p.player_name='Harry Kane' INNER JOIN match_ as m ON pp.match_id=m.match_id INNER JOIN club as c ON c.club_id=m.home_team_id INNER JOIN club as c2 ON c2.club_id=m.away_team_id;
+# average of those:
+	# goals conceded
+	# clean sheats 
+	# passes
+	# shots
+	# shooting accuracy 
+	# shots on target
+	# penalties scored, 
+	# offsides
+	# yellow cards
+	# red cards
+	# fouls
