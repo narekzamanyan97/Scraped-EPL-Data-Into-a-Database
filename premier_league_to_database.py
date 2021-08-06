@@ -635,8 +635,6 @@ class database:
 			# get the column names of the returned query
 			columns = [column[0] for column in self.cursor.description]
 
-
-			print(columns)
 			for row in tuple_list:
 				list_of_dicts.append(dict(zip(columns, row)))
 
@@ -697,12 +695,52 @@ class database:
 		for dict_ in list_of_dicts:
 			lost_dict[dict_['club_name']] = dict_['lost']
 
-		print(lost_dict)
+		# Get the goals scored
+		# Count either the home_team_goals or the away_team_goals, based on
+		#		whether the current team is the host or the guest. 
+		query_goals_for = "SELECT c.club_name, "
+		query_goals_for += "sum(case when m.home_team_id=c.club_id then m.home_team_goals "
+		query_goals_for += "else m.away_team_goals end) as goals_for "
+		query_goals_for += "FROM match_ as m INNER JOIN club as c "
+		query_goals_for += "on (m.home_team_id=c.club_id) or (m.away_team_id=c.club_id) "
+		query_goals_for += "GROUP BY c.club_name ORDER BY goals_for desc;"
+		
+		self.cursor.execute(query_goals_for)
+		tuple_list = self.cursor.fetchall()
+
+		list_of_dicts = self.convert_from_tuple_list_to_dict(tuple_list)
+
+		goals_for_dict = {}
+
+		for dict_ in list_of_dicts:
+			goals_for_dict[dict_['club_name']] = int(dict_['goals_for'])
 
 
+		# get the goals conceded
+		query_goals_against = query_goals_for.replace('then m.home_team_goals', 'then m.away_team_goals')
+		query_goals_against = query_goals_against.replace('else m.away_team_goals', 'else m.home_team_goals')
+		query_goals_against = query_goals_against.replace('goals_for', 'goals_against')
 
+		self.cursor.execute(query_goals_against)
+		tuple_list = self.cursor.fetchall()
 
+		list_of_dicts = self.convert_from_tuple_list_to_dict(tuple_list)
 
+		goals_against_dict = {}
+
+		for dict_ in list_of_dicts:
+			goals_against_dict[dict_['club_name']] = int(dict_['goals_against'])
+
+		# !!! calculate goal_difference 
+		goal_difference_dict = {}
+		
+		for key_team_name, value_goals_scored in goals_for_dict.items():
+			# calculate the goal difference of the team and store it into the
+			#		goal_difference_dict
+			goal_difference_dict[key_team_name] = value_goals_scored - goals_against_dict[key_team_name]
+
+		print(goal_difference_dict)
+		# !!! calculate points
 
 		# where p_s.is_in_starting_11=1 or p_s.substitution_on!=Null group by p.player_id order by Appearances desc limit 10;
 	# generate_league_table(self):
