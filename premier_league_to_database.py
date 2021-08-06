@@ -765,11 +765,42 @@ class database:
 		tuple_list = self.cursor.fetchall()
 		list_of_dicts = self.convert_from_tuple_list_to_dict(tuple_list)
 
-		print(list_of_dicts)
-		# for team, point in team_points.items():
-		# 	print(team + ": " + str(point))
+		form_last_5_dict = {}
+		
+		# set up the form dictionary to fill in later
+		# the dictionary key numbers 34 through 38 represent the matchweek.
+		#		their values will either be W, D, or L, for Win, Draw, or Loss,
+		#		respectively.
+		for team in team_points.keys():
+			form_last_5_dict[team] = {'34': '', '35': '', '36': '', '37': '', '38': ''}
 
-		#  where matchweek>33 order by matchweek asc;
+		# print(form_last_5_dict)
+		# extract the last 5 match results
+		counter = 1
+		for result in list_of_dicts:
+			print(counter)
+			counter += 1
+			if result['winner'] != 'draw':
+				# set the winner team's value corresponding to the current matchweek
+				#		to 'W'
+				form_last_5_dict[result['winner']][str(result['matchweek'])] = 'W'
+
+				# set the loser's value corresponding to the current matchweek
+				#		to 'L'
+				if result['Home'] != result['winner']:
+					form_last_5_dict[result['Home']][str(result['matchweek'])] = 'L'
+				else:
+					form_last_5_dict[result['Away']][str(result['matchweek'])] = 'L'
+			# if it's a draw, set both of the team values to 'D'
+			else:
+				form_last_5_dict[result['Home']][str(result['matchweek'])] = 'D'
+				form_last_5_dict[result['Away']][str(result['matchweek'])] = 'D'
+			# for key, value in result.items():
+			# 	print(key + ": " + str(value))
+			# print('-----------------------------------')
+		# print(list_of_dicts)
+		# for team_name, team_form in form_last_5_dict.items():
+		# 	print(team_name + ": " + str(team_form))
 
 	# !!! Calculate the clean sheats of the goalkeepers
 	
