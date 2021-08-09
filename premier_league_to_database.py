@@ -749,78 +749,79 @@ class database:
 
 		
 
-		# get the matchweek (last 5), home and away teams, and the winner
-		#	team name (value=draw if no winner)
-		query_form_last_5 = "SELECT matchweek, club_home.club_name AS Home, "
-		query_form_last_5 += "club_away.club_name AS Away, "
-		query_form_last_5 += "(CASE WHEN home_team_goals>away_team_goals then club_home.club_name "
-		query_form_last_5 += "WHEN home_team_goals=away_team_goals then \"draw\" "
-		query_form_last_5 += "ELSE club_away.club_name end) AS winner "
-		query_form_last_5 += "FROM match_ INNER JOIN club AS club_home ON club_home.club_id=home_team_id "
-		query_form_last_5 += "INNER JOIN club AS club_away ON club_away.club_id=away_team_id "
-		query_form_last_5 += "WHERE matchweek>33 "
-		query_form_last_5 += "ORDER BY matchweek asc;"
+		# # get the matchweek (last 5), home and away teams, and the winner
+		# #	team name (value=draw if no winner)
+		# # using only the matchweek>33 does not work because the matchweek numbers
+		# #	are not consistent.
+		# # get the last 5 match results of each team programatically
+		# query_form_last_5 = "SELECT matchweek, club_home.club_name AS Home, "
+		# query_form_last_5 += "club_away.club_name AS Away, "
+		# query_form_last_5 += "(CASE WHEN home_team_goals>away_team_goals then club_home.club_name "
+		# query_form_last_5 += "WHEN home_team_goals=away_team_goals then \"draw\" "
+		# query_form_last_5 += "ELSE club_away.club_name end) AS winner "
+		# query_form_last_5 += "FROM match_ INNER JOIN club AS club_home ON club_home.club_id=home_team_id "
+		# query_form_last_5 += "INNER JOIN club AS club_away ON club_away.club_id=away_team_id "
+		# query_form_last_5 += "WHERE matchweek>33 "
+		# query_form_last_5 += "ORDER BY matchweek asc;"
 
-		self.cursor.execute(query_form_last_5)
+		# Get the id of each team
+		query_club_ids = "SELECT club_id, club_name from club;"
+		self.cursor.execute(query_club_ids)
 		tuple_list = self.cursor.fetchall()
-		list_of_dicts = self.convert_from_tuple_list_to_dict(tuple_list)
-
-		form_last_5_dict = {}
+		list_of_dicts_clubs = self.convert_from_tuple_list_to_dict(tuple_list)
 		
+		form_last_5_dict = {}
+
 		# set up the form dictionary to fill in later
 		# the dictionary key numbers 34 through 38 represent the matchweek.
 		#		their values will either be W, D, or L, for Win, Draw, or Loss,
 		#		respectively.
 		for team in team_points.keys():
-			form_last_5_dict[team] = {'34': '', '35': '', '36': '', '37': '', '38': ''}
+			# print(team)
+			form_last_5_dict[team] = {} 		
 
-		# print(form_last_5_dict)
-		# extract the last 5 match results
-		counter = 1
-		for result in list_of_dicts:
-			print(counter)
-			counter += 1
-			if result['winner'] != 'draw':
-				# set the winner team's value corresponding to the current matchweek
-				#		to 'W'
-				form_last_5_dict[result['winner']][str(result['matchweek'])] = 'W'
+		for id_dict in list_of_dicts_clubs:
+			club_id = id_dict.get('club_id')
+			club_name = id_dict.get('club_name')
+			# Get the last 5 matches of each team
+			query_form_last_5 = "SELECT m.matchweek, c_h.club_name AS Home, m.home_team_goals, "
+			query_form_last_5 += "m.away_team_goals, c_a.club_name AS Away, "
+			query_form_last_5 += "(CASE WHEN m.home_team_goals>m.away_team_goals then c_h.club_name "
+			query_form_last_5 += "WHEN m.home_team_goals=m.away_team_goals then \"draw\" "
+			query_form_last_5 += "ELSE c_a.club_name END) AS winner "
+			query_form_last_5 += "FROM match_ AS m "
+			query_form_last_5 += "INNER JOIN club AS c_h ON c_h.club_id=m.home_team_id "
+			query_form_last_5 += "INNER JOIN club AS c_a on c_a.club_id=m.away_team_id "
+			query_form_last_5 += "WHERE home_team_id=" + str(club_id) + " or away_team_id=" + str(club_id) + " "
+			query_form_last_5 += "ORDER BY match_date desc "
+			query_form_last_5 += "LIMIT 5;"
+			# order by matchweek desc limit 5;
 
-				# set the loser's value corresponding to the current matchweek
-				#		to 'L'
-				if result['Home'] != result['winner']:
-					form_last_5_dict[result['Home']][str(result['matchweek'])] = 'L'
+			self.cursor.execute(query_form_last_5)
+			tuple_list = self.cursor.fetchall()
+			list_of_dicts_last_5 = self.convert_from_tuple_list_to_dict(tuple_list)
+			
+			# print(list_of_dicts_last_5)
+
+			# extract the last 5 match results
+			matchweek = 38
+			for result in list_of_dicts_last_5:
+				
+				# !!! get the results based on team name club_name 
+				if result['winner'] == club_name:
+					form_last_5_dict[club_name][matchweek] = 'W'
+				elif result['winner'] != 'draw':
+					form_last_5_dict[club_name][matchweek] = 'L'
 				else:
-					form_last_5_dict[result['Away']][str(result['matchweek'])] = 'L'
-			# if it's a draw, set both of the team values to 'D'
-			else:
-				form_last_5_dict[result['Home']][str(result['matchweek'])] = 'D'
-				form_last_5_dict[result['Away']][str(result['matchweek'])] = 'D'
-			# for key, value in result.items():
-			# 	print(key + ": " + str(value))
-			# print('-----------------------------------')
-		# print(list_of_dicts)
-		# for team_name, team_form in form_last_5_dict.items():
-		# 	print(team_name + ": " + str(team_form))
+					form_last_5_dict[club_name][matchweek] = 'D'
+				matchweek -= 1
 
-	# !!! Calculate the clean sheats of the goalkeepers
-	
-	# select m.match_id, c.club_name, c2.club_name, type_of_stat, minute from player_performance as pp INNER JOIN player as p ON pp.player_id=p.player_id and p.player_name='Harry Kane' INNER JOIN match_ as m ON pp.match_id=m.match_id INNER JOIN club as c ON c.club_id=m.home_team_id INNER JOIN club as c2 ON c2.club_id=m.away_team_id;
-	# select count(*) from player_performance as pp INNER JOIN player as p ON pp.player_id=p.player_id and p.player_name='Harry Kane' INNER JOIN match_ as m ON pp.match_id=m.match_id INNER JOIN club as c ON c.club_id=m.home_team_id INNER JOIN club as c2 ON c2.club_id=m.away_team_id where (type_of_stat=1 or type_of_stat=2);
-	
-	# select count(*) as goals from player_performance as pp INNER JOIN player as p ON pp.player_id=p.player_id INNER JOIN match_ as m ON pp.match_id=m.match_id INNER JOIN club as c ON c.club_id=m.home_team_id INNER JOIN club as c2 ON c2.club_id=m.away_team_id where (type_of_stat=1 or type_of_stat=2);
-	# select p.player_name, count(p_p.player_id) as number_of_goals from player as p, player_performance as p_p where p.player_id=p_p.player_id and p_p.type_of_stat=1;
-	
 
-	# club name->Aston Villa
-	# stadium name->Villa Park
-	# website->www.avfc.co.uk
-	# Capacity->42,682
-	# Built->1897
-	# Pitch size->105m x 68m
-	# Stadium address->Villa Park, Trinity Road, Birmingham, B6 6HE
-	# Phone - UK->0333 323 1874
-	# Phone - International->+44 (0)121 327 5353
-
+		for key, value in form_last_5_dict.items():
+			print(key, end="  ")
+			for key_last_5 in sorted(value):
+				print((key_last_5, value[key_last_5]), end=" ")
+			print()
 
 # !!! get the missing players from from the player_stats and insert them into the
 #		players table
