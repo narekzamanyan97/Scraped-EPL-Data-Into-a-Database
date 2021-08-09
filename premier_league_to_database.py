@@ -844,9 +844,23 @@ class database:
 				table_list_of_dicts[table_position]['form'] = w_d_l + table_list_of_dicts[table_position]['form']
 			
 			
-			print(table_list_of_dicts[table_position])
-			table_position += 1
 
+			table_position += 1
+			
+		self.print_table(table_list_of_dicts)
+
+	def print_table(self, table_list_of_dicts):
+		for row_dict in table_list_of_dicts:
+			print(row_dict['team_name'], end="  ")
+			print(row_dict['num_of_wins'], end="  ")
+			print(row_dict['num_of_draws'], end="  ")
+			print(row_dict['num_of_losses'], end="  ")
+			print(row_dict['goals_for'], end="  ")
+			print(row_dict['goals_against'], end="  ")
+			print(row_dict['goal_difference'], end="  ")
+			print(row_dict['team_points'], end="  ")
+			print(row_dict['form'], end="  ")
+			print()
 
 		# print(team_points)
 		# print(wins_dict)
