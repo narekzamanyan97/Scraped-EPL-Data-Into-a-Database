@@ -816,13 +816,45 @@ class database:
 					form_last_5_dict[club_name][matchweek] = 'D'
 				matchweek -= 1
 
+		table_list_of_dicts = []
+		# [{'team_name': 'Chelsea', 'team_points': '67', 'num_of_wins': '19',
+		#  'num_of_draws': '12', 'num_of_losses': '6', 
+		# 'goals_for': 100, 'goals_against': 30, 'goal_difference': 70,
+		#  'form': 'WWLDW'}]
+		table_position = 0
+		# combine all the table information together into table_list_of_dicts
+		for key_club_name, value in form_last_5_dict.items():
+			# print(key_club_name, end="  ")
+			
+			table_list_of_dicts.append({})
+			# add the team information to the table
+			table_list_of_dicts[table_position]['team_name'] = key_club_name
+			table_list_of_dicts[table_position]['num_of_wins'] = wins_dict[key_club_name]
+			table_list_of_dicts[table_position]['num_of_draws'] = draws_dict[key_club_name]
+			table_list_of_dicts[table_position]['num_of_losses'] = lost_dict[key_club_name]
+			table_list_of_dicts[table_position]['goals_for'] = goals_for_dict[key_club_name]
+			table_list_of_dicts[table_position]['goals_against'] = goals_against_dict[key_club_name]
+			table_list_of_dicts[table_position]['goal_difference'] = goal_difference_dict[key_club_name]
+			table_list_of_dicts[table_position]['team_points'] = team_points[key_club_name]
+			table_list_of_dicts[table_position]['form'] = ''
 
-		for key, value in form_last_5_dict.items():
-			print(key, end="  ")
-			for key_last_5 in sorted(value):
-				print((key_last_5, value[key_last_5]), end=" ")
-			print()
+			# for key_last_5 in sorted(value):
+			for matchweek, w_d_l in value.items():
+				# append to the result from the left
+				table_list_of_dicts[table_position]['form'] = w_d_l + table_list_of_dicts[table_position]['form']
+			
+			
+			print(table_list_of_dicts[table_position])
+			table_position += 1
 
+
+		# print(team_points)
+		# print(wins_dict)
+		# print(draws_dict)
+		# print(lost_dict)
+		# print(goals_for_dict)
+		# print(goals_against_dict)
+		# print(goal_difference_dict)
 # !!! get the missing players from from the player_stats and insert them into the
 #		players table
 
