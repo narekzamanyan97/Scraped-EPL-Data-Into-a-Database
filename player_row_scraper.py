@@ -18,6 +18,7 @@ import premier_league_player_scraper
 
 urls = {
 	'url_1': 'https://www.premierleague.com/players?se=363&cl=-1',
+	'url_2': 'https://www.premierleague.com/players'
 }
 
 SECONDS_TO_WAIT = 15
@@ -27,9 +28,13 @@ SECONDS_TO_WAIT = 15
 #	the player rows. 
 # the purpose is to have an ordered list with which the player_scraper
 #	can compare its rows and avoid duplicates or miss players.
-def get_all_the_player_rows():
+def get_all_the_player_rows(url_to_use):
+	
 	# set up the driver
-	driver = set_up_driver(urls['url_1'])
+	if url_to_use == 1:
+		driver = set_up_driver(urls['url_1'])
+	else:
+		driver = set_up_driver(urls['url_2'])
 
 	advert_xpath = "//a[@id='advertClose']"
 	advert = WebDriverWait(driver, SECONDS_TO_WAIT).until(
@@ -41,9 +46,15 @@ def get_all_the_player_rows():
 	driver.execute_script("arguments[0].click();", ad_close_button)
 	time.sleep(5)
 
-	filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
-	)
+
+	if url_to_use == 1:
+		filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
+		)
+	else:
+		filter_2021_22 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2021/22']"))
+		)
 
 	# scroll down to the bottom of the page to include all the players
 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -56,19 +67,17 @@ def get_all_the_player_rows():
 	# get the player rows to start the for loop
 	player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
 	
-	player_rows = premier_league_player_scraper.presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
-	# player_rows = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-	# 	EC.presence_of_all_elements_located((By.XPATH, player_rows_xpath))
-	# )
+	player_rows = premier_league_player_scraper.presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, url_to_use)
+
 	print(len(player_rows))
-	while len(player_rows) < 800:
+	while len(player_rows) != 861:
 		print(len(player_rows))
 		print('Wrong number of player rows. Try Again!')
 		
 		# scroll down to the bottom of the page to include all the players
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 		time.sleep(5)
-		player_rows = premier_league_player_scraper.presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
+		player_rows = premier_league_player_scraper.presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, url_to_use)
 
 	time.sleep(5)
 

@@ -24,11 +24,16 @@ urls = {
 SECONDS_TO_WAIT = 15
 
 # get the player's name, position, and country, then click on the row
+# @parameters:
+#	url_to_use specifies whether we want the 2020/21 or 2021/22 player
+#		page
+# 	list_of_all_inserted_players is an array of all the players that are
+#		already in the database so that we can save time and skip them
 def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 	# call the get_all_the_player_rows() from player_row_scraper to
 	#	get the correct order of all the players and check this scraper
 	#	to match the correct order.
-	list_of_all_players_in_order = get_all_the_player_rows()
+	list_of_all_players_in_order = get_all_the_player_rows(url_to_use)
 	print('***********************')
 	print(len(list_of_all_players_in_order))
 
@@ -66,7 +71,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 
 	# get the player rows to start the for loop
 	player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
-	player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
+	player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, url_to_use)
 
 	players_list_of_dicts = []
 
@@ -81,9 +86,9 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 
 
 
-	i = 50
+	i = 0
 	# get the basic player information from the 
-	while i < len(player_rows) - (len(player_rows) - 150):
+	while i < len(player_rows) - (len(player_rows) - 10):
 		driver.refresh()
 
 		print(i)
@@ -101,7 +106,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 
 		# get the player_rows for the for loop, so we can count the
 		#	number of players
-		player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
+		player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, url_to_use)
 
 		# wait until the row of the last player on the list appears on the page
 		# 	in 2020/2021 season, it is Martin Ødegaard, with the data-player='p184029'
@@ -146,8 +151,10 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			player_row_text = player_row.text
 		except StaleElementReferenceException:
 			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i)
+			player_row_text = player_row.text
 		except AttributeError:
 			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i)
+			player_row_text = player_row.text
 
 		# print(player_row_text)
 		player_row_text_list = player_row_text.splitlines()
@@ -343,9 +350,16 @@ def player_retrieve_2(driver, player_row_button):
 #		once to find it, as the chances are it is not there.
 #		Same with the shirt number, a lot of players don't have their
 #		shirt number specified
-def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
+def presence_of_all_el_located(driver, xpath, seconds_to_wait, index, url_to_use=-1):
 	tries = 0
 	el_found = False
+	
+
+	if url_to_use == 1:
+		num_of_player_rows = 861
+	elif url_to_use == 2:
+		num_of_player_rows = 850
+
 	# handle TimeoutException
 	while el_found == False and tries < 3:
 		try:
@@ -353,7 +367,7 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 				EC.presence_of_all_elements_located((By.XPATH, xpath))
 			)
 			# make sure there are the right number of player rows before continuing
-			if index >= -1 and len(element) >= 800:
+			if index >= -1 and len(element) == num_of_player_rows:
 				el_found = True
 			elif index == -2:
 				el_found = True

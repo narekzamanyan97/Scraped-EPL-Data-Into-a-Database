@@ -37,7 +37,7 @@ def populate_manager_table():
 def populate_player_table():
 	list_of_all_inserted_players = db.get_all_players_inserted()
 
-	player_list_of_dicts = player_retrieve_1(1, list_of_all_inserted_players)
+	player_list_of_dicts = player_retrieve_1(2, list_of_all_inserted_players)
 	
 	for player_dict in player_list_of_dicts:
 		# print(player_dict)
