@@ -18,21 +18,25 @@ from player_row_scraper import *
 
 urls = {
 	'url_1': 'https://www.premierleague.com/players?se=363&cl=-1',
+	'url_2': 'https://www.premierleague.com/players'
 }
 
 SECONDS_TO_WAIT = 15
 
 # get the player's name, position, and country, then click on the row
-def player_retrieve_1():
-
+def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 	# call the get_all_the_player_rows() from player_row_scraper to
 	#	get the correct order of all the players and check this scraper
 	#	to match the correct order.
 	list_of_all_players_in_order = get_all_the_player_rows()
+	print('***********************')
+	print(len(list_of_all_players_in_order))
 
 	# set up the driver
-	driver = set_up_driver(urls['url_1'])
-
+	if url_to_use == 1:
+		driver = set_up_driver(urls['url_1'])
+	else:
+		driver = set_up_driver(urls['url_2'])
 
 	filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
@@ -47,7 +51,6 @@ def player_retrieve_1():
 	# there is a full screen ad on the page when we try to access the data
 	#	with a webbot. close the ad before proceeding
 	# find the close button for the ad
-	print('line 50')
 	advert_xpath = "//a[@id='advertClose']"
 	advert = presence_of_all_el_located(driver, advert_xpath, SECONDS_TO_WAIT, -2)
 	ad_close_button = advert[0]
@@ -62,7 +65,6 @@ def player_retrieve_1():
 	# last_player = presence_of_all_el_located(driver, last_player_xpath, SECONDS_TO_WAIT, -1)
 
 	# get the player rows to start the for loop
-	print('line 63')
 	player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
 	player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
 
@@ -77,9 +79,11 @@ def player_retrieve_1():
 	print(len(player_rows))
 	original_row_amount = len(player_rows)
 
-	i = 833
-	# get the basic player information from the rows
-	while i < len(player_rows):
+
+
+	i = 0
+	# get the basic player information from the 
+	while i < len(player_rows) - (len(player_rows) - 10):
 		driver.refresh()
 
 		print(counter)
@@ -95,7 +99,6 @@ def player_retrieve_1():
 
 		# get the player_rows for the for loop, so we can count the
 		#	number of players
-		print('line 96')
 		player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1)
 
 		# wait until the row of the last player on the list appears on the page
@@ -113,14 +116,12 @@ def player_retrieve_1():
 		#	(list index out of range), then we should refresh the page and
 		#	try to scrape again to find the correct number of player rows
 		try:
-			print('line 114')
 			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i)
 		except IndexError:
 			continue
 
 		# exit the advertisement screen
 		try:
-			print('line 121')
 			advert_xpath = "//a[@id='advertClose']"
 			advert = presence_of_all_el_located(driver, advert_xpath, SECONDS_TO_WAIT, -2)
 			ad_close_button = advert[0]
@@ -142,7 +143,6 @@ def player_retrieve_1():
 		try:
 			player_row_text = player_row.text
 		except StaleElementReferenceException:
-			print('line 143')
 			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i)
 
 		# print(player_row_text)
@@ -167,6 +167,10 @@ def player_retrieve_1():
 			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 			time.sleep(5)
 			continue
+		elif is_player_new(list_of_all_inserted_players, player_name) != True:
+			i += 1
+			continue
+
 		else:
 			unique_player_names.append(player_name)
 
@@ -317,7 +321,7 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 				EC.presence_of_all_elements_located((By.XPATH, xpath))
 			)
 			# make sure there are the right number of player rows before continuing
-			if index >= -1 and len(element) == 863:
+			if index >= -1 and len(element) >= 800:
 				el_found = True
 			elif index == -2:
 				el_found = True
@@ -327,6 +331,7 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 				time.sleep(5)
 				driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 				time.sleep(5)
+				print('******************* in presence_of_all_el_located')
 				print(len(element))
 		except TimeoutException:
 			tries += 1
@@ -353,6 +358,16 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index):
 				tries += 1
 	else:
 		return element
+
+# check whether the has already been inserted into the database (whether it is
+#		in list_of_players) or not
+def is_player_new(list_of_players, player_name):
+	try:
+		print(player_name)
+		x = list_of_players.index(player_name)
+		return False
+	except ValueError:
+		return True
 
 # player_retrieve_1()
 

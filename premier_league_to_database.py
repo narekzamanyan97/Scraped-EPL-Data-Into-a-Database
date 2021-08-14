@@ -556,6 +556,21 @@ class database:
 			list_of_match_ids.append(match_id)
 
 		return list_of_match_ids
+
+	# get all the player names already inserted
+	def get_all_players_inserted(self):
+		query = "SELECT player_name FROM player;"
+
+		self.cursor.execute(query)
+		player_names = self.cursor.fetchall()
+
+		list_of_player_names = []
+
+		for player_name_tuple in player_names:
+			player_name = player_name_tuple[0]
+			list_of_player_names.append(player_name)
+
+		return list_of_player_names
 	
 	def get_top_players(self, number_of_rows, type_of_stat):
 		query = "SELECT p.player_name, count(p_p.player_id) as number_of_goals FROM player as p, player_performance as p_p "
@@ -846,7 +861,7 @@ class database:
 			
 
 			table_position += 1
-			
+
 		self.print_table(table_list_of_dicts)
 
 	def print_table(self, table_list_of_dicts):

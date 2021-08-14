@@ -22,16 +22,8 @@ urls = {
 #		list of all the match_ids available in the table. This is to save time
 #		and skip over the match_ids that have already been considered before
 def results_retrieve_1(all_match_ids):
-	# set up the chrome driver
-	# options = webdriver.ChromeOptions()
-	# options.add_argument("--no-sandbox")
-	# options.add_experimental_option('excludeSwitches', ['enable-logging'])
-	# options.add_argument("--start-maximized")
-	# driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 	driver = set_up_driver(urls['url_1'])
 
-
-	
 	# Scroll down to load more results to include all the results
 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 	time.sleep(5)

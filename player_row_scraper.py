@@ -60,7 +60,8 @@ def get_all_the_player_rows():
 	# player_rows = WebDriverWait(driver, SECONDS_TO_WAIT).until(
 	# 	EC.presence_of_all_elements_located((By.XPATH, player_rows_xpath))
 	# )
-	while len(player_rows) != 863:
+	print(len(player_rows))
+	while len(player_rows) < 800:
 		print(len(player_rows))
 		print('Wrong number of player rows. Try Again!')
 		
