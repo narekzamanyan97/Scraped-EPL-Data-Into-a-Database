@@ -43,9 +43,17 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 	else:
 		driver = set_up_driver(urls['url_2'])
 
-	filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
-	)
+	# make sure the proper season table is loaded 
+		# 	based on the url_to_use
+	if url_to_use == 1:
+		filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
+		)
+	else:
+		filter_2021_22 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2021/22']"))
+		)
+
 
 	# scroll down to the bottom of the page to include all the players
 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -86,19 +94,24 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 
 
 
-	i = 0
+	i = 810
 	# get the basic player information from the 
-	while i < len(player_rows) - (len(player_rows) - 10):
+	while i < len(player_rows):
 		driver.refresh()
 
 		print(i)
 		print(counter)
 
-		# make sure the 2020/2021 season table is loaded (instead of
-		#	2021/22). check for the 2020/21 to appear
-		filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
-		)
+		# make sure the proper season table is loaded 
+		# 	based on the url_to_use
+		if url_to_use == 1:
+			filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
+			)
+		else:
+			filter_2021_22 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2021/22']"))
+			)
 
 		# scroll down to the bottom of the page to include all the players
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -123,7 +136,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 		#	(list index out of range), then we should refresh the page and
 		#	try to scrape again to find the correct number of player rows
 		try:
-			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i)
+			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, url_to_use)
 		except IndexError:
 			continue
 
@@ -150,99 +163,101 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 		try:
 			player_row_text = player_row.text
 		except StaleElementReferenceException:
-			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i)
+			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, url_to_use)
 			player_row_text = player_row.text
 		except AttributeError:
-			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i)
+			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, url_to_use)
 			player_row_text = player_row.text
 
-		# print(player_row_text)
 		player_row_text_list = player_row_text.splitlines()
 		player_name = player_row_text_list[0]
 
-		# if the player is a duplicate, then the scraper is clicking on the
-		#	wrong row. So let the scraper try again by decrementing i
-		if player_name != list_of_all_players_in_order[i]:
+		# !!! add explanation
+		while is_player_new(list_of_all_inserted_players, player_name) != True:
 			print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 			print(player_name)
-			print(list_of_all_players_in_order[i])
-			print('Index Pointing to Wrong Player. Try Again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-			driver.refresh()
+			# print(list_of_all_players_in_order[i])
+			print('Player already in database')
+			# driver.refresh()
 			
 
-			# make sure the 2020/2021 season table is loaded (instead of
-			#	2021/22). check for the 2020/21 to appear
-			if url_to_use == 1:
-				filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-					EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
-				)
-			# use the 2021/22 season
-			else:
-				filter_2021_22 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-					EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2021/22']"))
-				)
+			# # make sure the 2020/2021 season table is loaded (instead of
+			# #	2021/22). check for the 2020/21 to appear
+			# if url_to_use == 1:
+			# 	filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+			# 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
+			# 	)
+			# # use the 2021/22 season
+			# else:
+			# 	filter_2021_22 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+			# 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2021/22']"))
+			# 	)
 
-			# scroll down to the bottom of the page to include all the players
-			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-			time.sleep(5)
-			continue
-		elif is_player_new(list_of_all_inserted_players, player_name) != True:
+			# # scroll down to the bottom of the page to include all the players
+			# driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+			# time.sleep(5)
+			# continue
 			i += 1
-			
-			driver.refresh()
-			
 
-			# make sure the 2020/2021 season table is loaded (instead of
-			#	2021/22). check for the 2020/21 to appear
-			if url_to_use == 1:
-				filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-					EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
-				)
-			# use the 2021/22 season
-			else:
-				filter_2021_22 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-					EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2021/22']"))
-				)
+			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, url_to_use)
+			player_row_text = player_row.text
+			player_row_text_list = player_row_text.splitlines()
+			player_name = player_row_text_list[0]
 
-			# scroll down to the bottom of the page to include all the players
-			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-			time.sleep(5)
-
+		# !!! add explanation
+		if player_name != list_of_all_players_in_order[i]:
+			# 	i += 1
+			print('Index Pointing to Wrong Player. Try Again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 			continue
+			# 	driver.refresh()
+			# 	# make sure the 2020/2021 season table is loaded (instead of
+			# 	#	2021/22). check for the 2020/21 to appear
+			# 	if url_to_use == 1:
+			# 		filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+			# 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
+			# 		)
+			# 	# use the 2021/22 season
+			# 	else:
+			# 		filter_2021_22 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+			# 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2021/22']"))
+			# 		)
 
-		else:
-			unique_player_names.append(player_name)
+			# 	# scroll down to the bottom of the page to include all the players
+			# 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+			# 	time.sleep(5)
+		 	
 
-			player_position_and_country = player_row_text_list[1].split()
-			player_position = player_position_and_country[0]
-			
-			# get the country of the player: some player rows are missing the 
-			#	country column
-			try:
-				player_country = player_position_and_country[1]
-			except IndexError:
-				player_country = 'Null'
-			
-			temp_dict = {}
+		unique_player_names.append(player_name)
 
+		player_position_and_country = player_row_text_list[1].split()
+		player_position = player_position_and_country[0]
 		
-			counter += 1
+		# get the country of the player: some player rows are missing the 
+		#	country column
+		try:
+			player_country = player_position_and_country[1]
+		except IndexError:
+			player_country = 'Null'
+		
+		temp_dict = {}
 
-			# add the player info to a dictionary
-			temp_dict['player name'] = player_name
-			temp_dict['position'] = player_position
-			temp_dict['country'] = player_country
+	
+		counter += 1
 
-			player_row_buttons_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a"
-			player_row_button = presence_of_all_el_located(driver, player_row_buttons_xpath, SECONDS_TO_WAIT, i)
+		# add the player info to a dictionary
+		temp_dict['player name'] = player_name
+		temp_dict['position'] = player_position
+		temp_dict['country'] = player_country
 
-			# add the player's detailed info to the temp_dict 
-			player_details_dict = player_retrieve_2(driver, player_row_button)
-			temp_dict.update(player_details_dict)
-			print(temp_dict)
-			# add the temp_dict to the list later to be returned from the function
-			players_list_of_dicts.append(temp_dict)
-			print('-----------------------------------------------------')
+		player_row_buttons_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a"
+		player_row_button = presence_of_all_el_located(driver, player_row_buttons_xpath, SECONDS_TO_WAIT, i, url_to_use)
+		# add the player's detailed info to the temp_dict 
+		player_details_dict = player_retrieve_2(driver, player_row_button)
+		temp_dict.update(player_details_dict)
+		print(temp_dict)
+		# add the temp_dict to the list later to be returned from the function
+		players_list_of_dicts.append(temp_dict)
+		print('-----------------------------------------------------')
 
 		i += 1
 	# print(players_list_of_dicts)
@@ -273,30 +288,36 @@ def player_retrieve_2(driver, player_row_button):
 	#	season
 	# player_career_xpath = "//div[@class='table playerClubHistory  true']/table/tbody/tr[@class='table']"
 	# player_career = presence_of_all_el_located(driver, player_number_xpath, SECONDS_TO_WAIT, -1)
-	player_career = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-		EC.presence_of_all_elements_located((By.XPATH, "//div[@data-script='pl_player']/table/tbody/tr[@class='table']"))
-	)
+	try:
+		player_career = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@data-script='pl_player']/table/tbody/tr[@class='table']"))
+		)
 
-	# get the top two rows on the table, either of which contain the 
-	#	2020/2021 and 2021/2022 seasons. 
-	season_1 = player_career[0]
-	season_1_list = season_1.text.splitlines()
-	season_years = season_1_list[0]
-	if season_years == '2020/2021':
-		season_club = season_1_list[1]
-	# if the top-most row is not 2020/2021, then the 2nd row should be 2020/2021
-	else:
-		# in case the player started in 2021/2022 season, he will not have
-		#	a second row in player_career, so the index 1 can be out of range
-		try:
-			season_2 = player_career[1]
-			# print(season_2.text)
-			season_2_list = season_2.text.splitlines()
-			season_years = season_2_list[0]
-			season_club = season_2_list[1]
-		except IndexError:
-			season_club = 'Null'
+		# get the top two rows on the table, either of which contain the 
+		#	2020/2021 and 2021/2022 seasons. 
+		season_1 = player_career[0]
+		season_1_list = season_1.text.splitlines()
+		season_years = season_1_list[0]
+		if season_years == '2020/2021':
+			season_club = season_1_list[1]
+		# if the top-most row is not 2020/2021, then the 2nd row should be 2020/2021
+		else:
+			# in case the player started in 2021/2022 season, he will not have
+			#	a second row in player_career, so the index 1 can be out of range
+			try:
+				season_2 = player_career[1]
+				# print(season_2.text)
+				season_2_list = season_2.text.splitlines()
+				season_years = season_2_list[0]
+				season_club = season_2_list[1]
+			except IndexError:
+				season_club = 'Null'
 
+
+		
+	# Some players, such as Junior Firpo, have no Career table populated
+	except TimeoutException:
+		season_club = 'Null'
 
 	dict_to_return['club'] = season_club
 
@@ -354,11 +375,12 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index, url_to_use
 	tries = 0
 	el_found = False
 	
+	num_of_player_rows = 0
 
 	if url_to_use == 1:
 		num_of_player_rows = 861
 	elif url_to_use == 2:
-		num_of_player_rows = 850
+		num_of_player_rows = 820
 
 	# handle TimeoutException
 	while el_found == False and tries < 3:
@@ -372,13 +394,21 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index, url_to_use
 			elif index == -2:
 				el_found = True
 			else:
+				print('----------------------------------------------')
+				print(len(element))
+				# print(element[len(element) - 1].text)
+				# print(element[0].text)
+				# print(element[222].text)
+				# print(element[444].text)
+
 				# scroll down to the bottom of the page to include all the players
 				driver.refresh()
 				time.sleep(5)
 				driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 				time.sleep(5)
-				print('******************* in presence_of_all_el_located')
-				print(len(element))
+				print('******************* in presence_of_all_el_located ' + str(num_of_player_rows))
+				
+
 		except TimeoutException:
 			tries += 1
 
@@ -394,7 +424,7 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index, url_to_use
 		while el_not_stale == False and tries < 3:
 			try:
 				el = element[index]
-				print(el.text)
+				# print(el.text)
 				return el
 			except StaleElementReferenceException:
 				# in this case the element is stale, find it again
@@ -409,9 +439,9 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index, url_to_use
 #		in list_of_players) or not
 def is_player_new(list_of_players, player_name):
 	try:
-		print(player_name)
+		# print(player_name)
 		x = list_of_players.index(player_name)
-		print(player_name + " already exists.")
+		# print(player_name + " already exists.")
 		return False
 	except ValueError:
 		return True

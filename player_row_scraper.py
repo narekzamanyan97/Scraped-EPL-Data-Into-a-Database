@@ -33,8 +33,10 @@ def get_all_the_player_rows(url_to_use):
 	# set up the driver
 	if url_to_use == 1:
 		driver = set_up_driver(urls['url_1'])
+		num_of_player_rows = 861
 	else:
 		driver = set_up_driver(urls['url_2'])
+		num_of_player_rows = 820
 
 	advert_xpath = "//a[@id='advertClose']"
 	advert = WebDriverWait(driver, SECONDS_TO_WAIT).until(
@@ -70,14 +72,22 @@ def get_all_the_player_rows(url_to_use):
 	player_rows = premier_league_player_scraper.presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, url_to_use)
 
 	print(len(player_rows))
-	while len(player_rows) != 861:
+	while len(player_rows) != num_of_player_rows:
+		print('----------------------------------------------------')
 		print(len(player_rows))
+		print(player_rows[len(player_rows) - 1].text)
+		print(player_rows[0].text)
+		print(player_rows[222].text)
 		print('Wrong number of player rows. Try Again!')
 		
+		# refresh the page
+		driver.refresh()
+
 		# scroll down to the bottom of the page to include all the players
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 		time.sleep(5)
 		player_rows = premier_league_player_scraper.presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, url_to_use)
+		print('----------------------------------------------------')
 
 	time.sleep(5)
 
