@@ -172,31 +172,14 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 		player_row_text_list = player_row_text.splitlines()
 		player_name = player_row_text_list[0]
 
-		# !!! add explanation
+		# Checks whether the player is already inserted into the database.
+		#		if it is, then increment the counter and check the next
+		#		player on the player rows without refreshing the page.
 		while is_player_new(list_of_all_inserted_players, player_name) != True:
 			print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 			print(player_name)
-			# print(list_of_all_players_in_order[i])
 			print('Player already in database')
-			# driver.refresh()
-			
 
-			# # make sure the 2020/2021 season table is loaded (instead of
-			# #	2021/22). check for the 2020/21 to appear
-			# if url_to_use == 1:
-			# 	filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-			# 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
-			# 	)
-			# # use the 2021/22 season
-			# else:
-			# 	filter_2021_22 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-			# 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2021/22']"))
-			# 	)
-
-			# # scroll down to the bottom of the page to include all the players
-			# driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-			# time.sleep(5)
-			# continue
 			i += 1
 
 			player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, url_to_use)
@@ -204,28 +187,13 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			player_row_text_list = player_row_text.splitlines()
 			player_name = player_row_text_list[0]
 
-		# !!! add explanation
+		# Check whether the player found in this row matches the player that
+		#		is supposed to be there. If not, then go back to the main loop
+		#		and scrape the page again.
 		if player_name != list_of_all_players_in_order[i]:
 			# 	i += 1
 			print('Index Pointing to Wrong Player. Try Again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-			continue
-			# 	driver.refresh()
-			# 	# make sure the 2020/2021 season table is loaded (instead of
-			# 	#	2021/22). check for the 2020/21 to appear
-			# 	if url_to_use == 1:
-			# 		filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-			# 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
-			# 		)
-			# 	# use the 2021/22 season
-			# 	else:
-			# 		filter_2021_22 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-			# 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2021/22']"))
-			# 		)
-
-			# 	# scroll down to the bottom of the page to include all the players
-			# 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-			# 	time.sleep(5)
-		 	
+			continue		 	
 
 		unique_player_names.append(player_name)
 

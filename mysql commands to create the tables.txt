@@ -78,6 +78,8 @@ create table match_(
 
 	stadium_id int(2),
 
+	season varchar(7) default '2020/21',
+
 	constraint MATCH_ID_PK PRIMARY KEY (match_id),
 	constraint MATCH_HOME_TEAM_ID FOREIGN KEY (home_team_id)
 		references club(club_id) on delete cascade
@@ -155,4 +157,32 @@ create table club_stats(
 			on update cascade
 );
 
+create table manager_club(
+	manager_id int(4) not null,
+	club_id int(2) not null,
 
+	season varchar(7) default '2020/21',
+
+	constraint MANAGER_CLUB_PK primary key (manager_id, club_id, season),
+	constraint MANAGER_CLUB_MANAGER_ID_FK foreign key (manager_id)
+		references manager(manager_id) on delete cascade
+			on update cascade,
+	constraint MANAGER_CLUB_CLUB_ID_FK foreign key (club_id)
+		references club(club_id) on delete cascade
+			on update cascade
+);
+
+create table player_club(
+	player_id int(4) not null,
+	club_id int(2) not null,
+
+	season varchar(7) default '2020/21',
+
+	constraint PLAYER_CLUB_PK primary key (player_id, club_id, season),
+	constraint PLAYER_CLUB_PLAYER_ID_FK foreign key (player_id)
+		references player(player_id) on delete cascade
+			on update cascade,
+	constraint PLAYER_CLUB_CLUB_ID_FK foreign key (club_id)
+		references club(club_id) on delete cascade
+			on update cascade
+);
