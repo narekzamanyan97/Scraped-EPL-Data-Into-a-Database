@@ -28,8 +28,6 @@ create table club(
 
 create table player(
 	player_id int(4) not null auto_increment,
-	
-	club_id int(2),
 
 	player_name varchar(50),
 	player_number int(2),
@@ -39,14 +37,10 @@ create table player(
 	height int(3),
 
 	constraint PLAYER_ID_PK PRIMARY KEY(player_id),
-	constraint PLAYER_CLUB_ID_FK FOREIGN KEY (club_id)
-		references club(club_id) on delete set null
-			on update cascade
 );
 
 create table manager(
 	manager_id int(2) not null auto_increment,
-	club_id int(2),
 
 	manager_name varchar(40),
 	country varchar(40),
@@ -57,9 +51,6 @@ create table manager(
 	epl_debut_match varchar(100),
 
 	constraint MANAGER_ID_PK PRIMARY KEY(manager_id),
-	constraint MANAGER_CLUB_ID_FK FOREIGN KEY (club_id)
-		references club(club_id) on delete set null
-			on update cascade
 );
 
 
@@ -172,3 +163,17 @@ create table manager_club(
 			on update cascade
 );
 
+create table player_club(
+	player_id int(4) not null,
+	club_id int(2) not null,
+
+	season varchar(7) default '2020/21',
+
+	constraint PLAYER_CLUB_PK primary key (player_id, club_id, season),
+	constraint PLAYER_CLUB_PLAYER_ID_FK foreign key (player_id)
+		references player(player_id) on delete cascade
+			on update cascade,
+	constraint PLAYER_CLUB_CLUB_ID_FK foreign key (club_id)
+		references club(club_id) on delete cascade
+			on update cascade
+);

@@ -1,23 +1,23 @@
-# https://www.premierleague.com/managers?se=363&cl=-1
 from selenium.common.exceptions import TimeoutException
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from selenium.webdriver.common.keys import Keys
-# from webdriver_manager.chrome import ChromeDriverManager
-
-from selenium.webdriver.support.ui import Select
-
-import time
-import re
-
 from set_up_driver import *
 
 urls = {
+	'url_all': 'https://www.premierleague.com/managers?se=-1&cl=-1',
 	'url_1': 'https://www.premierleague.com/managers?se=363&cl=-1',
 }
+
+def all_seasons_manager_retrieve():
+	# set up the driver
+	driver = set_up_driver(urls['url_all'])
+
+	all_seasons_managers =  WebDriverWait(driver, 10).until(														
+		EC.presence_of_all_elements_located((By.XPATH, "//")
+	)
 
 # get the manager's name and club, then call another fucntion to get the
 #	button to click to get the details
@@ -94,7 +94,7 @@ def manager_retrieve_2(driver, button):
 					temp_dict[detail_list[0]] = detail_list[1]
 		except IndexError as ie:
 			 print(ie)
-		print('-------------------------------')
+	print('-------------------------------')
 
 	# print(temp_dict)
 
@@ -103,4 +103,4 @@ def manager_retrieve_2(driver, button):
 
 	return temp_dict
 
-# manager_retrieve_1()
+manager_retrieve_1()
