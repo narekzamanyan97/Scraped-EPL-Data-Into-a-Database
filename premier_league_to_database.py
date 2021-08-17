@@ -43,8 +43,6 @@ class database:
 		tuple_list = self.cursor.fetchall()
 
 	def insert_managers(self, managers_dict):
-		insert_statement = "INSERT INTO manager(club_id, manager_name, country, active, joined_club, date_of_birth, epl_seasons, epl_debut_match) "
-		
 		country = managers_dict['Country of Birth']
 		manager_name = managers_dict['manager name']
 		status = managers_dict['Status']
@@ -89,6 +87,8 @@ class database:
 
 		club_id = self.get_id(club_name, 'club')
 
+		# !!! also update the manager_club table using manager_id, club_id, and season
+		insert_statement = "INSERT INTO manager(club_id, manager_name, country, active, joined_club, date_of_birth, epl_seasons, epl_debut_match) "
 		insert_statement += "VALUES(" + str(club_id) + ", "
 		insert_statement += "\"" + str(manager_name) + "\", "
 		insert_statement += "\"" + str(country) + "\", "
@@ -104,10 +104,6 @@ class database:
 
 
 	def insert_players(self, player_dict):
-		insert_statement = "INSERT INTO player(club_id, player_name, player_number, position, country, date_of_birth, height) "
-
-		# !!! get the club_id
-
 		club_name = player_dict['club']
 
 		# some club names end with '(loan)'. If that is the case, then remove 
@@ -160,7 +156,9 @@ class database:
 			height = height_list[0]
 		except KeyError:
 			height = 'Null'
-
+		
+		# !!! also update the player_club table using player_id, club_id, and season
+		insert_statement = "INSERT INTO player(club_id, player_name, player_number, position, country, date_of_birth, height) "
 		insert_statement += "VALUES(" + str(club_id) + ", "
 		insert_statement += "\"" + player_name + "\", "
 		insert_statement += str(shirt_number) + ", "
@@ -264,6 +262,7 @@ class database:
 
 		matchweek = date_dict['matchweek']
 
+		# !!! add the season after the stadium_id
 		insert_statement_match_ = "INSERT INTO match_(match_id, home_team_id, away_team_id, home_team_goals, away_team_goals, match_date, matchweek, referee, stadium_id) "
 		insert_statement_match_ += "VALUES("
 		insert_statement_match_ += str(match_id) + ", "
@@ -754,7 +753,6 @@ class database:
 			#		goal_difference_dict
 			goal_difference_dict[key_team_name] = value_goals_scored - goals_against_dict[key_team_name]
 
-		# !!! calculate points
 		team_points = {}
 		for key_team_name, value_number_of_wins in wins_dict.items():
 			team_points[key_team_name] = 3*value_number_of_wins + draws_dict[key_team_name]
@@ -792,7 +790,6 @@ class database:
 		#		their values will either be W, D, or L, for Win, Draw, or Loss,
 		#		respectively.
 		for team in team_points.keys():
-			# print(team)
 			form_last_5_dict[team] = {} 		
 
 		for id_dict in list_of_dicts_clubs:
@@ -810,7 +807,7 @@ class database:
 			query_form_last_5 += "WHERE home_team_id=" + str(club_id) + " or away_team_id=" + str(club_id) + " "
 			query_form_last_5 += "ORDER BY match_date desc "
 			query_form_last_5 += "LIMIT 5;"
-			# order by matchweek desc limit 5;
+
 
 			self.cursor.execute(query_form_last_5)
 			tuple_list = self.cursor.fetchall()
@@ -832,10 +829,7 @@ class database:
 				matchweek -= 1
 
 		table_list_of_dicts = []
-		# [{'team_name': 'Chelsea', 'team_points': '67', 'num_of_wins': '19',
-		#  'num_of_draws': '12', 'num_of_losses': '6', 
-		# 'goals_for': 100, 'goals_against': 30, 'goal_difference': 70,
-		#  'form': 'WWLDW'}]
+
 		table_position = 0
 		# combine all the table information together into table_list_of_dicts
 		for key_club_name, value in form_last_5_dict.items():

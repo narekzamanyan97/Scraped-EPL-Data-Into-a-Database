@@ -172,17 +172,3 @@ create table manager_club(
 			on update cascade
 );
 
-create table player_club(
-	player_id int(4) not null,
-	club_id int(2) not null,
-
-	season varchar(7) default '2020/21',
-
-	constraint PLAYER_CLUB_PK primary key (player_id, club_id, season),
-	constraint PLAYER_CLUB_PLAYER_ID_FK foreign key (player_id)
-		references player(player_id) on delete cascade
-			on update cascade,
-	constraint PLAYER_CLUB_CLUB_ID_FK foreign key (club_id)
-		references club(club_id) on delete cascade
-			on update cascade
-);

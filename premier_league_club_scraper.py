@@ -26,52 +26,57 @@ def club_retrieve_1():
 
 
 	try:
-		# get the player rows and links for the details
-		club_rows = WebDriverWait(driver, 10).until(
-				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='indexSection']/div/ul[@class='block-list-5 block-list-3-m block-list-1-s block-list-1-xs block-list-padding dataContainer']/li/a"))
+		# get the club rows and links for the details
+		club_rows_team = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table']/table/tbody[@class='allTimeDataContainer']/tr/td[@class='team']/a/div[@class='nameContainer']"))
 		)
+
+		club_rows_venue = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table']/table/tbody[@class='allTimeDataContainer']/tr/td[@class='venue']/a"))
+		)
+
+		# for i in range(0, len(club_rows_team)):
+		# 	print(club_rows_team[i].text)
+		# 	print(club_rows_venue[i].text)
+		# 	print('------------------------------')
 
 		clubs_list_of_dicts = []
 
-		for i in range(0, len(club_rows)):
-			# After we go pack to the previous page, it automatically takes
-			#	us to the page for 2021-2022 season, and a few moments later,
-			#	switches to 2020-2021 (the desired page).
-			# Fulham does not appear in 2021-2022 club list as it was relegated. 
-			# So wait until Fulham's logo appears before proceeding with the page
-			fulham_logo = WebDriverWait(driver, 10).until(														
-				EC.presence_of_all_elements_located((By.XPATH, "//img[@src='https://resources.premierleague.com/premierleague/badges/70/t54.png']"))
+		for i in range(0, len(club_rows_team)):
+			# again, get the player rows and links for the details
+			club_rows_team = WebDriverWait(driver, 10).until(
+					EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table']/table/tbody[@class='allTimeDataContainer']/tr/td[@class='team']/a/div[@class='nameContainer']"))
 			)
 
-			# again, get the player rows and links for the details
-			club_rows = WebDriverWait(driver, 10).until(
-					EC.presence_of_all_elements_located((By.XPATH, "//div[@class='indexSection']/div/ul[@class='block-list-5 block-list-3-m block-list-1-s block-list-1-xs block-list-padding dataContainer']/li/a"))
+			club_rows_venue = WebDriverWait(driver, 10).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table']/table/tbody[@class='allTimeDataContainer']/tr/td[@class='venue']/a"))
 			)
 
 			temp_dict = {}
 
 			# get the name of the club
-			club_name = club_rows[i].text.splitlines()[0]
+			club_name = club_rows_team[i].text
 
 			# get the name of the stadium
-			stadium_name = club_rows[i].text.splitlines()[1]
+			stadium_name = club_rows_venue[i].text
+
+
+			print(club_name + ':   ' + stadium_name)
 			
 			temp_dict['club name'] = club_name			
 			temp_dict['stadium name'] = stadium_name
 
 			# call club_retrieve_2() to get the website of the team
-			temp_dict.update(club_retrieve_2(driver, club_rows[i]))
+			temp_dict.update(club_retrieve_2(driver, club_rows_team[i]))
 
 			clubs_list_of_dicts.append(temp_dict)
 
-			# print(clubs_list_of_dicts)
-			
 			# print the club info
-			for club_dict in clubs_list_of_dicts:
-				for key, value in club_dict.items():
-					print(key + '->' + value)
+			# for club_dict in clubs_list_of_dicts:
+			for key, value in clubs_list_of_dicts[i].items():
+				print(key + '->' + value)
 
-				print('--------------------------------------')
+			print('--------------------------------------')
 
 		driver.close()
 		return clubs_list_of_dicts
@@ -87,22 +92,17 @@ def club_retrieve_2(driver, club_row):
 	# click on the club row
 	driver.execute_script("arguments[0].click();", club_row)
 
-	# # get the stadium name
-	# stadium_name = WebDriverWait(driver, 10).until(
-	# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='clubDetails']/div[@class='stadiumName']/a/span[@class='stadium']"))
-	# )
-	# stadium_name = stadium_name[0].text.strip()
+	# get the website name (some teams have no website)
+	try:
+		website = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='clubDetails']/div[@class='website']/a"))
+		)
+		website = website[0].text
+		temp_dict['website'] = website
+	except TimeoutException:
+		temp_dict['website'] = 'Null'
 
-	# temp_dict['stadium name'] = stadium_name
-
-	# get the website name
-	website = WebDriverWait(driver, 10).until(
-		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='clubDetails']/div[@class='website']/a"))
-	)
-
-	website = website[0].text
-
-	temp_dict['website'] = website
+	
 
 	# call club_retrieve_3() to obtain the stadium information
 	stadium_dict = club_retrieve_3(driver)
@@ -122,6 +122,7 @@ def club_retrieve_3(driver):
 	stadium_button = WebDriverWait(driver, 10).until(
 		EC.presence_of_all_elements_located((By.XPATH, "//nav[@class='heroPageLinks']/ul/li/a"))
 	)
+	print('line 122')
 
 	# click on the stadium button
 	driver.execute_script("arguments[0].click();", stadium_button[6])
@@ -142,6 +143,7 @@ def club_retrieve_3(driver):
 
 	temp_dict = {}
 	
+	print('line 143')
 	for detail in stadium_details:
 		type_and_detail = detail.text.split(':')
 		try:
@@ -177,4 +179,4 @@ def club_retrieve_3(driver):
 
 	return temp_dict
 
-# clubs = club_retrieve_1()
+clubs = club_retrieve_1()
