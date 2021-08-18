@@ -6,6 +6,8 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from set_up_driver import *
 
+SECONDS_TO_WAIT = 15
+
 urls = {
 	'url_all': 'https://www.premierleague.com/managers?se=-1&cl=-1',
 	'url_1': 'https://www.premierleague.com/managers?se=363&cl=-1',
@@ -37,10 +39,8 @@ def all_seasons_manager_retrieve():
 		)
 
 		manager_name = all_seasons_managers[i].text.splitlines()[0]
-		
-		temp_dict['manager name'] = manager_name
 
-		# driver.execute_script("arguments[0].click();", button)
+		temp_dict['manager name'] = manager_name
 
 		temp_dict.update(manager_retrieve_2(driver, all_seasons_manager_button[i]))
 
@@ -54,25 +54,26 @@ def all_seasons_manager_retrieve():
 def manager_retrieve_1():
 	# set up the driver
 	driver = set_up_driver(urls['url_1'])
+	
+	all_seasons = ['1992/93', '1993/94', '1994/95', '1995/96', '1996/97', '1997/98',
+			'1998/99', '1999/00', '2000/01', '2001/02', '2002/03', '2003/04', 
+			'2004/05', '2005/06', '2006/07', '2007/08', '2008/09', '2009/10',
+			'2010/11', '2011/12', '2012/13', '2013/14', '2014/15', '2015/16',
+			'2016/17', '2017/18', '2018/19', '2019/20', '2020/21']
 
-	# get the manager rows and links for the details
-	managers = WebDriverWait(driver, 10).until(														
-		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table']/table/tbody[@class='dataContainer']/tr"))
-	)
+	for season in all_seasons:
+		# select the previous season from the dropdown
+		filter_season = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + season  + "']"))
+		)
 
-	# get the link to click to open the details page for the manager
-	managers_button = WebDriverWait(driver, 10).until(														
-		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table']/table/tbody[@class='dataContainer']/tr/td/a[@class='managerName']"))
-	)
+		print('**************************************************')
+		driver.execute_script("arguments[0].click();", filter_season[0])
+		print(filter_season[0].text)
+		print('**************************************************')
+	
 
-	managers_list_of_dicts = []
-
-	print('--------------------------------')
-	for i in range(0, len(managers)):
-		temp_dict = {}
-
-		# get the manager rows and links for the details to avoid
-		#	stale element error
+		# get the manager rows and links for the details
 		managers = WebDriverWait(driver, 10).until(														
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table']/table/tbody[@class='dataContainer']/tr"))
 		)
@@ -82,21 +83,38 @@ def manager_retrieve_1():
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table']/table/tbody[@class='dataContainer']/tr/td/a[@class='managerName']"))
 		)
 
-		name_club_nation = managers[i].text
-		name_club_nation_list = name_club_nation.splitlines()
+		managers_list_of_dicts = []
 
-		manager_name = name_club_nation_list[0]
-		manager_club = name_club_nation_list[1]
+		print('--------------------------------')
+		for i in range(0, len(managers)):
+			temp_dict = {}
 
-		temp_dict['manager name'] = manager_name
-		temp_dict['manager club'] = manager_club
+			# get the manager rows and links for the details to avoid
+			#	stale element error
+			managers = WebDriverWait(driver, 10).until(														
+				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table']/table/tbody[@class='dataContainer']/tr"))
+			)
 
-		# call manager_retrieve_2() which clicks on the manager row
-		temp_dict.update(manager_retrieve_2(driver, managers_button[i]))
+			# get the link to click to open the details page for the manager
+			managers_button = WebDriverWait(driver, 10).until(														
+				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table']/table/tbody[@class='dataContainer']/tr/td/a[@class='managerName']"))
+			)
 
-		managers_list_of_dicts.append(temp_dict)
-		
-		# print(managers_list_of_dicts)
+			name_club_nation = managers[i].text
+			name_club_nation_list = name_club_nation.splitlines()
+
+			manager_name = name_club_nation_list[0]
+			manager_club = name_club_nation_list[1]
+
+			temp_dict['manager name'] = manager_name
+			temp_dict['manager club'] = manager_club
+
+			# call manager_retrieve_2() which clicks on the manager row
+			temp_dict.update(manager_retrieve_2(driver, managers_button[i]))
+
+			managers_list_of_dicts.append(temp_dict)
+			
+			# print(managers_list_of_dicts)
 
 	print('--------------------------------')
 	return managers_list_of_dicts
@@ -133,5 +151,5 @@ def manager_retrieve_2(driver, button):
 
 	return temp_dict
 
-all_seasons_manager_retrieve()
-# manager_retrieve_1()
+# all_seasons_manager_retrieve()
+manager_retrieve_1()
