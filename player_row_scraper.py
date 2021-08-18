@@ -10,11 +10,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
 import time
-import re
 
 from set_up_driver import *
 
-import premier_league_player_scraper
+from premier_league_player_scraper import *
+
+from custom_functions import *
 
 urls = {
 	'url_1': 'https://www.premierleague.com/players?se=363&cl=-1',
@@ -69,7 +70,7 @@ def get_all_the_player_rows(url_to_use):
 	# get the player rows to start the for loop
 	player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
 	
-	player_rows = premier_league_player_scraper.presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, url_to_use)
+	player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, url_to_use)
 
 	print(len(player_rows))
 	while len(player_rows) != num_of_player_rows:
@@ -100,4 +101,4 @@ def get_all_the_player_rows(url_to_use):
 
 	return list_of_all_players_in_order
 
-# get_all_the_player_rows()
+# get_all_the_player_rows(1)

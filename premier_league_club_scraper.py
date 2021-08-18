@@ -179,4 +179,4 @@ def club_retrieve_3(driver):
 
 	return temp_dict
 
-clubs = club_retrieve_1()
+# clubs = club_retrieve_1()

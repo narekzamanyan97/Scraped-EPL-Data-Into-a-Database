@@ -54,12 +54,6 @@ def all_seasons_manager_retrieve():
 def manager_retrieve_1():
 	# set up the driver
 	driver = set_up_driver(urls['url_1'])
-	
-	all_seasons = ['1992/93', '1993/94', '1994/95', '1995/96', '1996/97', '1997/98',
-			'1998/99', '1999/00', '2000/01', '2001/02', '2002/03', '2003/04', 
-			'2004/05', '2005/06', '2006/07', '2007/08', '2008/09', '2009/10',
-			'2010/11', '2011/12', '2012/13', '2013/14', '2014/15', '2015/16',
-			'2016/17', '2017/18', '2018/19', '2019/20', '2020/21']
 
 	for season in all_seasons:
 		# select the previous season from the dropdown
@@ -67,11 +61,8 @@ def manager_retrieve_1():
 				EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + season  + "']"))
 		)
 
-		print('**************************************************')
-		driver.execute_script("arguments[0].click();", filter_season[0])
-		print(filter_season[0].text)
-		print('**************************************************')
-	
+		# choose the appropriate season from the dropdown list
+		driver.execute_script("arguments[0].click();", filter_season[0])	
 
 		# get the manager rows and links for the details
 		managers = WebDriverWait(driver, 10).until(														
@@ -152,4 +143,4 @@ def manager_retrieve_2(driver, button):
 	return temp_dict
 
 # all_seasons_manager_retrieve()
-manager_retrieve_1()
+# manager_retrieve_1()
