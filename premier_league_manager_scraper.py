@@ -15,9 +15,39 @@ def all_seasons_manager_retrieve():
 	# set up the driver
 	driver = set_up_driver(urls['url_all'])
 
-	all_seasons_managers =  WebDriverWait(driver, 10).until(														
-		EC.presence_of_all_elements_located((By.XPATH, "//")
+	all_seasons_managers =  WebDriverWait(driver, 10).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//table/tbody[@class='dataContainer']/tr"))
 	)
+
+
+	managers_list_of_dicts = []
+
+
+	for i in range(0, len(all_seasons_managers) - (len(all_seasons_managers) - 5)):
+		temp_dict = {}
+
+		# get the row of the manager
+		all_seasons_managers =  WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//table/tbody[@class='dataContainer']/tr"))
+		)
+
+		# get the name button rows for the manager
+		all_seasons_manager_button =  WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//table/tbody[@class='dataContainer']/tr/td/a[@class='managerName']"))
+		)
+
+		manager_name = all_seasons_managers[i].text.splitlines()[0]
+		
+		temp_dict['manager name'] = manager_name
+
+		# driver.execute_script("arguments[0].click();", button)
+
+		temp_dict.update(manager_retrieve_2(driver, all_seasons_manager_button[i]))
+
+		managers_list_of_dicts.append(temp_dict)
+
+		print('----------------------------------')
+	print(managers_list_of_dicts)
 
 # get the manager's name and club, then call another fucntion to get the
 #	button to click to get the details
@@ -103,4 +133,5 @@ def manager_retrieve_2(driver, button):
 
 	return temp_dict
 
-manager_retrieve_1()
+all_seasons_manager_retrieve()
+# manager_retrieve_1()
