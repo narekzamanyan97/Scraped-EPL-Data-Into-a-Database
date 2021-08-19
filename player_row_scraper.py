@@ -73,29 +73,10 @@ def get_all_the_player_rows(url_to_use, season):
 	# get the player rows to start the for loop
 	player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
 
-	print('=======================================================' + season)
-
 	player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=season)
 
-	print('=======================================================' + season)
-
-	while len(player_rows) != number_of_players_per_season[season]:
-		print('----------------------------------------------------')
-		
-		# players_list = []
-		
+	while len(player_rows) != number_of_players_per_season[season]:				
 		print(len(player_rows))
-
-		# for i in range(0, len(player_rows)):
-		# 	player_row_list = player_rows[i].text.splitlines()
-		# 	player_name = player_row_list[0]
-
-		# 	if is_player_new(players_list, player_name) == False:
-		# 		print(player_name + ' -------------------- Duplicate')
-		# 	else:
-		# 		# print(player_name)
-		# 		player_rows.append(player_name)
-
 
 		print('Wrong number of player rows. Try Again!')
 		

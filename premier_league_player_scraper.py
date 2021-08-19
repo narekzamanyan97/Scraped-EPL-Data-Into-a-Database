@@ -66,17 +66,6 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 		# click on the close button
 		driver.execute_script("arguments[0].click();", ad_close_button)
 
-		# wait until the row of the last player on the list appears on the page
-		# 	in 2020/2021 season, it is Martin Ødegaard, with the data-player='p184029'
-		# print('line 60')
-		# last_player_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p184029']"
-		# last_player = presence_of_all_el_located(driver, last_player_xpath, SECONDS_TO_WAIT, -1)
-
-		print('line 86')
-
-
-
-		print('line 96')
 		# get the player rows to start the for loop
 		player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
 		player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=season)
@@ -89,7 +78,6 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 		#	player table, as the scraper sometimes clicks on the same player row
 		unique_player_names = []
 
-		print(len(player_rows))
 		original_row_amount = len(player_rows)
 
 
@@ -102,7 +90,6 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			print(i)
 			print(counter)
 
-			print('line 107')
 			# get the player_rows for the for loop, so we can count the
 			#	number of players
 			player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=season)
@@ -137,8 +124,8 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			# !!! The scraper jumps on players, or counts the same player twice.
 			#	check whether the name of the player has aleary appeared or not
 			#	if it did, go to the start of the loop and try again, 
+			
 			#	decrementing the counter by 1.
-			print('line 143')
 			# the player_rows frequently throws a stale element error.
 			#	keep looking for the element (3 tries)
 			# Sometimes player_row.text throws a StaleElementReferenceException
@@ -167,7 +154,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 				print('Player already in database')
 
 				i += 1
-				print('line 172')
+
 				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=season)
 				player_row_text = player_row.text
 				player_row_text_list = player_row_text.splitlines()
@@ -206,7 +193,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			player_row_buttons_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a"
 			player_row_button = presence_of_all_el_located(driver, player_row_buttons_xpath, SECONDS_TO_WAIT, i, season=season)
 			# add the player's detailed info to the temp_dict 
-			player_details_dict = player_retrieve_2(driver, player_row_button)
+			player_details_dict = player_retrieve_2(driver, player_row_button, season)
 			temp_dict.update(player_details_dict)
 			print(temp_dict)
 			# add the temp_dict to the list later to be returned from the function
@@ -214,11 +201,11 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			print('-----------------------------------------------------')
 
 			i += 1
-	# print(players_list_of_dicts)
+
 	return players_list_of_dicts
 
 # get the player's shirt number, club, date of birth, height, and club
-def player_retrieve_2(driver, player_row_button):
+def player_retrieve_2(driver, player_row_button, season):
 	dict_to_return = {}
 
 
@@ -247,27 +234,38 @@ def player_retrieve_2(driver, player_row_button):
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@data-script='pl_player']/table/tbody/tr[@class='table']"))
 		)
 
-		# get the top two rows on the table, either of which contain the 
-		#	2020/2021 and 2021/2022 seasons. 
-		season_1 = player_career[0]
-		season_1_list = season_1.text.splitlines()
-		season_years = season_1_list[0]
-		if season_years == '2020/2021':
-			season_club = season_1_list[1]
-		# if the top-most row is not 2020/2021, then the 2nd row should be 2020/2021
-		else:
-			# in case the player started in 2021/2022 season, he will not have
-			#	a second row in player_career, so the index 1 can be out of range
-			try:
-				season_2 = player_career[1]
-				# print(season_2.text)
-				season_2_list = season_2.text.splitlines()
-				season_years = season_2_list[0]
-				season_club = season_2_list[1]
-			except IndexError:
-				season_club = 'Null'
+		# get the row of the table that contains the appropriate season
 
+		# iterate through the player_career rows to find the one with the current
+		#		season
+		season_found = False
+		for k in range(0, len(player_career)):
+			season_1 = player_career[k]
+			season_1_list = season_1.text.splitlines()
+			print(season_1_list)
+			season_years = season_1_list[0]
+			season_formatted = season_for_career_table[season]
+			if season_years == season_formatted:
+				season_found = True
+				season_club = season_1_list[1]
+				break
+				
+			# # if the top-most row is not 2020/2021, then the 2nd row should be 2020/2021
+			# else:
+			# 	# in case the player started in 2021/2022 season, he will not have
+			# 	#	a second row in player_career, so the index 1 can be out of range
+			# 	try:
+			# 		season_2 = player_career[1]
+			# 		season_2_list = season_2.text.splitlines()
+			# 		season_years = season_2_list[0]
+			# 		season_club = season_2_list[1]
+			# 	except IndexError:
+			# 		season_club = 'Null'
 
+		if season_found == False:
+			season_club = 'Null'
+	# !!! The club is taken from 2020/21 season. change that to reflect the appropriate
+	#		season
 		
 	# Some players, such as Junior Firpo, have no Career table populated
 	except TimeoutException:
@@ -279,8 +277,6 @@ def player_retrieve_2(driver, player_row_button):
 	try:
 		personal_details_xpath = "//div[@class='personalLists']/ul"
 		personal_details = presence_of_all_el_located(driver, personal_details_xpath, SECONDS_TO_WAIT, -2)
-		for detail in personal_details:
-		 	print(detail.text)
 
 		# get the date of birth and height of the player
 		try:
