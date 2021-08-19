@@ -37,26 +37,21 @@ SECONDS_TO_WAIT = 15
 # 	list_of_all_inserted_players is an array of all the players that are
 #		already in the database so that we can save time and skip them
 def player_retrieve_1(url_to_use, list_of_all_inserted_players):
-	# call the get_all_the_player_rows() from player_row_scraper to
-	#	get the correct order of all the players and check this scraper
-	#	to match the correct order.
-	list_of_all_players_in_order = get_all_the_player_rows(url_to_use)
-
-	print('***********************')
-	print(len(list_of_all_players_in_order))
+	season_counter = -1
 
 	for season in all_seasons:
+		season_counter += 1
+		# call the get_all_the_player_rows() from player_row_scraper to
+		#	get the correct order of all the players and check this scraper
+		#	to match the correct order.
+		list_of_all_players_in_order = get_all_the_player_rows(url_to_use, season)
+	
+		print('***********************')
+		print(len(list_of_all_players_in_order))
+
+
+		# set up the driver
 		driver = set_up_driver(urls['url_1'])
-
-		# select the previous season from the dropdown
-		filter_season = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-				EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + season  + "']"))
-		)
-		
-		# choose the appropriate season from the dropdown list
-		driver.execute_script("arguments[0].click();", filter_season[0])
-
-
 
 		# scroll down to the bottom of the page to include all the players
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -77,9 +72,14 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 		# last_player_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@data-player='p184029']"
 		# last_player = presence_of_all_el_located(driver, last_player_xpath, SECONDS_TO_WAIT, -1)
 
+		print('line 86')
+
+
+
+		print('line 96')
 		# get the player rows to start the for loop
 		player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
-		player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, url_to_use)
+		player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=season)
 
 		players_list_of_dicts = []
 
@@ -94,7 +94,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 
 
 
-		i = 810
+		i = 0
 		# get the basic player information from the 
 		while i < len(player_rows):
 			driver.refresh()
@@ -102,18 +102,10 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			print(i)
 			print(counter)
 
-			# select the previous season from the dropdown
-			filter_season = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-					EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + season  + "']"))
-			)
-
-			# scroll down to the bottom of the page to include all the players
-			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-			time.sleep(5)
-
+			print('line 107')
 			# get the player_rows for the for loop, so we can count the
 			#	number of players
-			player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, url_to_use)
+			player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=season)
 
 			# wait until the row of the last player on the list appears on the page
 			# 	in 2020/2021 season, it is Martin Ødegaard, with the data-player='p184029'
@@ -130,7 +122,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			#	(list index out of range), then we should refresh the page and
 			#	try to scrape again to find the correct number of player rows
 			try:
-				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, url_to_use)
+				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=season)
 			except IndexError:
 				continue
 
@@ -146,7 +138,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			#	check whether the name of the player has aleary appeared or not
 			#	if it did, go to the start of the loop and try again, 
 			#	decrementing the counter by 1.
-
+			print('line 143')
 			# the player_rows frequently throws a stale element error.
 			#	keep looking for the element (3 tries)
 			# Sometimes player_row.text throws a StaleElementReferenceException
@@ -157,10 +149,10 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			try:
 				player_row_text = player_row.text
 			except StaleElementReferenceException:
-				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, url_to_use)
+				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=season)
 				player_row_text = player_row.text
 			except AttributeError:
-				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, url_to_use)
+				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=season)
 				player_row_text = player_row.text
 
 			player_row_text_list = player_row_text.splitlines()
@@ -175,8 +167,8 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 				print('Player already in database')
 
 				i += 1
-
-				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, url_to_use)
+				print('line 172')
+				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=season)
 				player_row_text = player_row.text
 				player_row_text_list = player_row_text.splitlines()
 				player_name = player_row_text_list[0]
@@ -212,7 +204,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			temp_dict['country'] = player_country
 
 			player_row_buttons_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a"
-			player_row_button = presence_of_all_el_located(driver, player_row_buttons_xpath, SECONDS_TO_WAIT, i, url_to_use)
+			player_row_button = presence_of_all_el_located(driver, player_row_buttons_xpath, SECONDS_TO_WAIT, i, season=season)
 			# add the player's detailed info to the temp_dict 
 			player_details_dict = player_retrieve_2(driver, player_row_button)
 			temp_dict.update(player_details_dict)
@@ -318,15 +310,5 @@ def player_retrieve_2(driver, player_row_button):
 
 	return dict_to_return
 
-# check whether the has already been inserted into the database (whether it is
-#		in list_of_players) or not
-def is_player_new(list_of_players, player_name):
-	try:
-		# print(player_name)
-		x = list_of_players.index(player_name)
-		# print(player_name + " already exists.")
-		return False
-	except ValueError:
-		return True
 
 # Jan Bednarek plays in Southampton

@@ -18,8 +18,8 @@ from premier_league_player_scraper import *
 from custom_functions import *
 
 urls = {
-	'url_1': 'https://www.premierleague.com/players?se=363&cl=-1',
-	'url_2': 'https://www.premierleague.com/players'
+	'url_1': 'https://www.premierleague.com/players',
+	'url_2': 'https://www.premierleague.com/players?se=363&cl=-1',
 }
 
 SECONDS_TO_WAIT = 15
@@ -29,15 +29,18 @@ SECONDS_TO_WAIT = 15
 #	the player rows. 
 # the purpose is to have an ordered list with which the player_scraper
 #	can compare its rows and avoid duplicates or miss players.
-def get_all_the_player_rows(url_to_use):
+def get_all_the_player_rows(url_to_use, season):
 	
 	# set up the driver
-	if url_to_use == 1:
-		driver = set_up_driver(urls['url_1'])
-		num_of_player_rows = 861
-	else:
-		driver = set_up_driver(urls['url_2'])
-		num_of_player_rows = 820
+	driver = set_up_driver(urls['url_1'])
+
+	print('in get_all_the_player_rows')
+	# if url_to_use == 1:
+	# 	driver = set_up_driver(urls['url_1'])
+	# 	num_of_player_rows = 861
+	# else:
+	# 	driver = set_up_driver(urls['url_2'])
+	# 	num_of_player_rows = 820
 
 	advert_xpath = "//a[@id='advertClose']"
 	advert = WebDriverWait(driver, SECONDS_TO_WAIT).until(
@@ -50,14 +53,14 @@ def get_all_the_player_rows(url_to_use):
 	time.sleep(5)
 
 
-	if url_to_use == 1:
-		filter_2020_21 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2020/21']"))
-		)
-	else:
-		filter_2021_22 = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='current' and text()='2021/22']"))
-		)
+	# select the appropriate season from the dropdown
+	filter_season = WebDriverWait(driver, SECONDS_TO_WAIT).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + season  + "']"))
+	)
+	
+	# choose the appropriate season from the dropdown list
+	driver.execute_script("arguments[0].click();", filter_season[0])
+
 
 	# scroll down to the bottom of the page to include all the players
 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -69,16 +72,31 @@ def get_all_the_player_rows(url_to_use):
 
 	# get the player rows to start the for loop
 	player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
-	
-	player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, url_to_use)
 
-	print(len(player_rows))
-	while len(player_rows) != num_of_player_rows:
+	print('=======================================================' + season)
+
+	player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=season)
+
+	print('=======================================================' + season)
+
+	while len(player_rows) != number_of_players_per_season[season]:
 		print('----------------------------------------------------')
+		
+		# players_list = []
+		
 		print(len(player_rows))
-		print(player_rows[len(player_rows) - 1].text)
-		print(player_rows[0].text)
-		print(player_rows[222].text)
+
+		# for i in range(0, len(player_rows)):
+		# 	player_row_list = player_rows[i].text.splitlines()
+		# 	player_name = player_row_list[0]
+
+		# 	if is_player_new(players_list, player_name) == False:
+		# 		print(player_name + ' -------------------- Duplicate')
+		# 	else:
+		# 		# print(player_name)
+		# 		player_rows.append(player_name)
+
+
 		print('Wrong number of player rows. Try Again!')
 		
 		# refresh the page
@@ -87,7 +105,8 @@ def get_all_the_player_rows(url_to_use):
 		# scroll down to the bottom of the page to include all the players
 		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 		time.sleep(5)
-		player_rows = premier_league_player_scraper.presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, url_to_use)
+		
+		player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=season)
 		print('----------------------------------------------------')
 
 	time.sleep(5)

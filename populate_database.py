@@ -14,7 +14,6 @@ db = database(connection)
 def populate_stadium_and_club_tables():
 	# call the club_retrieve_1() function, that returns a list of dictionaries
 	#	of 20 clubs, to get the club data
-	print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
 	club_list_of_dicts = club_retrieve_1()
 
 	# iterate through the list to work with the individual club dictionaries
@@ -67,7 +66,6 @@ def populate_match_table():
 		except IntegrityError:
 			print('Duplicate Key error raised from the insert_match_basic_info.')
 
-print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
 # populate_stadium_and_club_tables()
 # # # populate_manager_table()
 populate_player_table()
