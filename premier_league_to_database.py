@@ -158,6 +158,7 @@ class database:
 			height = 'Null'
 		
 		# !!! also update the player_club table using player_id, club_id, and season
+		# !!! remove the club_id from the statement below
 		insert_statement = "INSERT INTO player(club_id, player_name, player_number, position, country, date_of_birth, height) "
 		insert_statement += "VALUES(" + str(club_id) + ", "
 		insert_statement += "\"" + player_name + "\", "

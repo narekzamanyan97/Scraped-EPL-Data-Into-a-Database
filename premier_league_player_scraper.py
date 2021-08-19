@@ -39,12 +39,13 @@ SECONDS_TO_WAIT = 15
 def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 	season_counter = -1
 
-	for season in all_seasons:
+	for j in range(27, len(all_seasons)):
+		print(all_seasons[j])
 		season_counter += 1
 		# call the get_all_the_player_rows() from player_row_scraper to
 		#	get the correct order of all the players and check this scraper
 		#	to match the correct order.
-		list_of_all_players_in_order = get_all_the_player_rows(url_to_use, season)
+		list_of_all_players_in_order = get_all_the_player_rows(url_to_use, all_seasons[j])
 	
 		print('***********************')
 		print(len(list_of_all_players_in_order))
@@ -68,7 +69,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 
 		# get the player rows to start the for loop
 		player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
-		player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=season)
+		player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=all_seasons[j])
 
 		players_list_of_dicts = []
 
@@ -82,9 +83,11 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 
 
 
-		i = 0
+		i = len(player_rows) - 1
 		# get the basic player information from the 
 		while i < len(player_rows):
+			print(all_seasons[j])
+
 			driver.refresh()
 
 			print(i)
@@ -92,7 +95,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 
 			# get the player_rows for the for loop, so we can count the
 			#	number of players
-			player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=season)
+			player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=all_seasons[j])
 
 			# wait until the row of the last player on the list appears on the page
 			# 	in 2020/2021 season, it is Martin Ødegaard, with the data-player='p184029'
@@ -109,7 +112,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			#	(list index out of range), then we should refresh the page and
 			#	try to scrape again to find the correct number of player rows
 			try:
-				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=season)
+				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
 			except IndexError:
 				continue
 
@@ -136,10 +139,10 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			try:
 				player_row_text = player_row.text
 			except StaleElementReferenceException:
-				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=season)
+				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
 				player_row_text = player_row.text
 			except AttributeError:
-				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=season)
+				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
 				player_row_text = player_row.text
 
 			player_row_text_list = player_row_text.splitlines()
@@ -155,7 +158,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 
 				i += 1
 
-				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=season)
+				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
 				player_row_text = player_row.text
 				player_row_text_list = player_row_text.splitlines()
 				player_name = player_row_text_list[0]
@@ -191,9 +194,9 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			temp_dict['country'] = player_country
 
 			player_row_buttons_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a"
-			player_row_button = presence_of_all_el_located(driver, player_row_buttons_xpath, SECONDS_TO_WAIT, i, season=season)
+			player_row_button = presence_of_all_el_located(driver, player_row_buttons_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
 			# add the player's detailed info to the temp_dict 
-			player_details_dict = player_retrieve_2(driver, player_row_button, season)
+			player_details_dict = player_retrieve_2(driver, player_row_button, all_seasons[j])
 			temp_dict.update(player_details_dict)
 			print(temp_dict)
 			# add the temp_dict to the list later to be returned from the function
@@ -240,6 +243,10 @@ def player_retrieve_2(driver, player_row_button, season):
 		#		season
 		season_found = False
 		for k in range(0, len(player_career)):
+			# !!! If the player is transfered from one PL club to another in the
+			#		winter transfer window, then we must have two clubs for the 
+			#		player for the same season. e.g. Olivier Giroud played both
+			#		for Arsenal and Chelsea in 2017-2018 season.
 			season_1 = player_career[k]
 			season_1_list = season_1.text.splitlines()
 			print(season_1_list)
