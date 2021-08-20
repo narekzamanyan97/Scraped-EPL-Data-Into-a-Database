@@ -293,6 +293,7 @@ class database:
 		match_id = match_id_and_club_names[0]
 		club_home_name = match_id_and_club_names[1]
 		club_away_name = match_id_and_club_names[2]
+		season = match_id_and_club_names[3]
 
 		club_home_id = self.get_id(club_home_name, 'club')
 		club_away_id = self.get_id(club_away_name, 'club')
@@ -582,13 +583,20 @@ class database:
 	#		accepts the dictionary for the match stats and the key to look for.
 	# @returns the values found corresponding to the keys
 	# 		if the results are not found, returns 0's
-	def insert_club_stats_helper(self, club_stats_dict, key):
-		try:
-			value_home = club_stats_dict[key + ' home']
-			value_away = club_stats_dict[key + ' away']
-			return value_home, value_away
-		except KeyError:
-			return 0, 0
+	# 		if there are no such stats (such as when the season is older than
+	#			the 2006/07 season), then return Null's
+	def insert_club_stats_helper(self, club_stats_dict, key, season):
+		# if the result is from the season prior to 1995/96, then there are no 
+		#		stats provided
+		if season < '2006/07':
+			return 'Null', 'Null'
+		else:
+			try:
+				value_home = club_stats_dict[key + ' home']
+				value_away = club_stats_dict[key + ' away']
+				return value_home, value_away
+			except KeyError:
+				return 0, 0
 
 	def get_top_players(self, number_of_rows, type_of_stat):
 		query = "SELECT p.player_name, count(p_p.player_id) as number_of_goals FROM player as p, player_performance as p_p "
