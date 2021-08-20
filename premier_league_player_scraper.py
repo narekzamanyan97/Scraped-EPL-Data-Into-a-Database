@@ -39,7 +39,7 @@ SECONDS_TO_WAIT = 15
 def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 	season_counter = -1
 
-	for j in range(27, len(all_seasons)):
+	for j in range(len(all_seasons) - 1, len(all_seasons)):
 		print(all_seasons[j])
 		season_counter += 1
 		# call the get_all_the_player_rows() from player_row_scraper to
@@ -192,6 +192,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			temp_dict['player name'] = player_name
 			temp_dict['position'] = player_position
 			temp_dict['country'] = player_country
+			temp_dict['season'] = all_seasons[j]
 
 			player_row_buttons_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a"
 			player_row_button = presence_of_all_el_located(driver, player_row_buttons_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])

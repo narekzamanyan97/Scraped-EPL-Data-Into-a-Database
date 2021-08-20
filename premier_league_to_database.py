@@ -29,7 +29,7 @@ class database:
 		country = managers_dict['Country of Birth']
 		manager_name = managers_dict['manager name']
 		season = managers_dict['season']
-		
+
 		status = managers_dict['Status']
 		if status == 'Active':
 			active = True
@@ -127,6 +127,8 @@ class database:
 		player_name = player_dict['player name']
 		position = player_dict['position']
 		country = player_dict['country']
+		season = player_dict['season']
+
 		try:
 			shirt_number = player_dict['shirt number']
 		except KeyError:
@@ -150,16 +152,24 @@ class database:
 		except KeyError:
 			height = 'Null'
 		
-		# !!! also update the player_club table using player_id, club_id, and season
-		# !!! remove the club_id from the statement below
+		# !!! add a try catch statement to handle exception where the player already
+		#		exists
 		insert_statement = "INSERT INTO player(club_id, player_name, player_number, position, country, date_of_birth, height) "
-		insert_statement += "VALUES(" + str(club_id) + ", "
-		insert_statement += "\"" + player_name + "\", "
+		insert_statement += "VALUES(\"" + player_name + "\", "
 		insert_statement += str(shirt_number) + ", "
 		insert_statement += "\"" + position + "\", "
 		insert_statement += "\"" + country + "\", "
 		insert_statement += "\"" + dob_date + "\", "
 		insert_statement += str(height) + ");"
+
+		self.cursor.execute(insert_statement)
+		self.conn.commit()
+
+		# !!! also update the player_club table using player_id, club_id, and season
+		insert_statement = "INSERT INTO player_club(player_id, club_id, season) "
+		insert_statement += "VALUES(" + str(player_id) + ", "
+		insert_statement += str(club_id) + ", "
+		insert_statement += "\"" + season + "\");"
 
 		self.cursor.execute(insert_statement)
 		self.conn.commit()
