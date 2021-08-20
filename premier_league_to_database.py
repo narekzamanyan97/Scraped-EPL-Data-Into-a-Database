@@ -298,61 +298,19 @@ class database:
 		club_home_id = self.get_id(club_home_name, 'club')
 		club_away_id = self.get_id(club_away_name, 'club')
 
-		# !!! try catch for every block since older matches have no stats info
-		#		at all
-		# !!! also, create a function that takes in the key as the string, and
-		#		contains the try-except block in itself. returns 0's (or Nulls)
-		#		if it is an old match, add nulls for everything.
-		#		if it is a new match, add 0's 
-		possession_home = club_stats_dict['Possession home']
-		possession_away = club_stats_dict['Possession away']
-		shots_on_target_home = club_stats_dict['Shots on target home']
-		shots_on_target_away = club_stats_dict['Shots on target away']
-		shots_home = club_stats_dict['Shots home']
-		shots_away = club_stats_dict['Shots away']
-		touches_home = club_stats_dict['Touches home']
-		touches_away = club_stats_dict['Touches away']
-		passes_home = club_stats_dict['Passes home']
-		passes_away = club_stats_dict['Passes away']
-		tackles_home = club_stats_dict['Tackles home']
-		tackles_away = club_stats_dict['Tackles away']
-		clearances_home = club_stats_dict['Clearances home']
-		clearances_away = club_stats_dict['Clearances away']
-
-		try:
-			corners_home = club_stats_dict['Corners home']
-			corners_away = club_stats_dict['Corners away']
-		except KeyError:
-			corners_home = 0
-			corners_away = 0
-		
-		try:
-			offsides_home = club_stats_dict['Offsides home']
-			offsides_away = club_stats_dict['Offsides away']
-		except KeyError:
-			offsides_home = 0
-			offsides_away = 0
-
-		try:
-			fouls_conceded_home = club_stats_dict['Fouls conceded home']
-			fouls_conceded_away = club_stats_dict['Fouls conceded away']
-		except KeyError:
-			fouls_conceded_home = 0
-			fouls_conceded_away = 0
-
-		try:
-			yellow_cards_home = club_stats_dict['Yellow cards home']
-			yellow_cards_away = club_stats_dict['Yellow cards away']
-		except KeyError:
-			yellow_cards_home = 0
-			yellow_cards_away = 0
-
-		try:
-			red_cards_home = club_stats_dict['Red cards home']
-			red_cards_away = club_stats_dict['Red cards away']
-		except KeyError:
-			red_cards_home = 0
-			red_cards_away = 0
+		# use the helper function to get the match stats
+		possession_home, possession_away = insert_club_stats_helper(club_stats_dict, 'Possession', season)
+		shots_on_target_home, shots_on_target_away = insert_club_stats_helper(club_stats_dict, 'Shots on target', season)
+		shots_home, shots_away = insert_club_stats_helper(club_stats_dict, 'Shots', season)
+		touches_home, touches_away = insert_club_stats_helper(club_stats_dict, 'Touches', season)
+		passes_home, passes_away = insert_club_stats_helper(club_stats_dict, 'Passes', season)
+		tackles_home, tackles_away = insert_club_stats_helper(club_stats_dict, 'Tackles', season)
+		clearances_home, clearances_away = insert_club_stats_helper(club_stats_dict, 'Clearances', season)
+		corners_home, corners_away = insert_club_stats_helper(club_stats_dict, 'Corners', season)
+		offsides_home, offsides_away = insert_club_stats_helper(club_stats_dict, 'Offsides', season)
+		fouls_conceded_home, fouls_conceded_away = insert_club_stats_helper(club_stats_dict, 'Fouls conceded', season)
+		yellow_cards_home, yellow_cards_away = insert_club_stats_helper(club_stats_dict, 'Fouls conceded', season)
+		red_cards_home, red_cards_away = insert_club_stats_helper(club_stats_dict, 'Red cards', season)
 
 		# insert statement for the home side
 		insert_statement = "INSERT INTO club_stats(match_id, club_id, possession, shots, shots_on_target, touches, passes, tackles, clearances, corners, offsides, fouls_conceded, yellow_cards, red_cards) "
