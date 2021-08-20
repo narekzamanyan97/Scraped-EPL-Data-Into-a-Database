@@ -297,6 +297,12 @@ class database:
 		club_home_id = self.get_id(club_home_name, 'club')
 		club_away_id = self.get_id(club_away_name, 'club')
 
+		# !!! try catch for every block since older matches have no stats info
+		#		at all
+		# !!! also, create a function that takes in the key as the string, and
+		#		contains the try-except block in itself. returns 0's (or Nulls)
+		#		if it is an old match, add nulls for everything.
+		#		if it is a new match, add 0's 
 		possession_home = club_stats_dict['Possession home']
 		possession_away = club_stats_dict['Possession away']
 		shots_on_target_home = club_stats_dict['Shots on target home']

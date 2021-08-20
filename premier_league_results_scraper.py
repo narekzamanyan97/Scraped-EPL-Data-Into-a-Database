@@ -40,7 +40,7 @@ def results_retrieve_1(all_match_ids):
 			# Scroll down to load more results to include all the results
 			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 			time.sleep(5)
-					
+
 			# Stadiums contains the following information:
 			# 	stadium_name
 			#	city
@@ -80,15 +80,16 @@ def results_retrieve_1(all_match_ids):
 			original_len_results = len(results)
 			print('original results: ' + str(len(results)))
 
-			# # make sure the script gets 380 (# of matches in a premier league season)
-			# #	results before proceeding
-			# while len(results) != 380:
-			# 	driver.refresh()
-			# 	time.sleep(5)
-			# 	print(len(results))
-			# 	# scroll down to the bottom of the page to include all the players
-			# 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-			# 	time.sleep(5)
+			# make sure the script gets >= 380 (# of matches in a premier league season)
+			#	results before proceeding
+			# or >= 462 results for matches in season <= 1994/95
+			while len(results) != 380:
+				driver.refresh()
+				time.sleep(5)
+				print(len(results))
+				# scroll down to the bottom of the page to include all the players
+				driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+				time.sleep(5)
 
 
 			# 	stadiums = WebDriverWait(driver, 10).until(
@@ -103,6 +104,8 @@ def results_retrieve_1(all_match_ids):
 			# Iterating over the results to get the team names, scores, stadium names,
 			#	and then click at each result to get the details of the match
 			i = 0
+
+			# !!! Also get the city of the stadium
 
 			num_of_unique_ids = 0
 			while i < len(results):
@@ -474,7 +477,6 @@ def results_retrieve_3(driver):
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='teamList mcLineUpContainter awayLineup']/div[@class='col-4-m right']/div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList']/li[@class='player']/a/div[@class='info']"))
 	)
 
-	# !!! RETURN THE FORMATION TOO
 	print(formation_home + ' : ' + formation_away)
 
 	line_ups_home = extract_player_information(squad_home_number, squad_home_info, True)
@@ -487,48 +489,55 @@ def results_retrieve_3(driver):
 
 # get the team stats
 def results_retrieve_4(driver):
-	# get the stats tab on the screen
-	stats_tab = WebDriverWait(driver, 10).until(
-		EC.presence_of_element_located((By.XPATH, "//div[@class='centralContent']/div[@class='mcTabsContainer']/div[@class='wrapper col-12']/div[@class='tabLinks matchNav']/div[@class='tabs']/ul[@class='tablist']/li[@data-tab-index='2']"))
-	)
-	# click on the stats botton
-	driver.execute_script("arguments[0].click();", stats_tab)
+	# put the entire function into try-catch block with TimeoutException as the
+	#		older matches have no stats section
+	try:
+		# get the stats tab on the screen
+		stats_tab = WebDriverWait(driver, 10).until(
+			EC.presence_of_element_located((By.XPATH, "//div[@class='centralContent']/div[@class='mcTabsContainer']/div[@class='wrapper col-12']/div[@class='tabLinks matchNav']/div[@class='tabs']/ul[@class='tablist']/li[@data-tab-index='2']"))
+		)
+		# click on the stats botton
+		driver.execute_script("arguments[0].click();", stats_tab)
 
-	# get the stats table on the screen
-	teams_stats = WebDriverWait(driver, 10).until(
-		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='mcStatsTab statsSection season-so-far wrapper col-12 active']/table/tbody[@class='matchCentreStatsContainer']/tr"))
-	)
+		# !!! Older results have empty stats section. 
+		# get the stats table on the screen
+		teams_stats = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='mcStatsTab statsSection season-so-far wrapper col-12 active']/table/tbody[@class='matchCentreStatsContainer']/tr"))
+		)
 
-	# append the statistics into a list
-	stats_list = []
+		# append the statistics into a list
+		stats_list = []
 
-	# The format of the stats is:
-	# 28.8 Possession % 71.2
-	# 3 Shots on target 7
-	# 		 ....
-	# 11 Fouls conceded 12
-	for team_stats in teams_stats:
-		stats_list.append(team_stats.text)
-	
+		# The format of the stats is:
+		# 28.8 Possession % 71.2
+		# 3 Shots on target 7
+		# 		 ....
+		# 11 Fouls conceded 12
+		for team_stats in teams_stats:
+			stats_list.append(team_stats.text)
+		
 
-	stats_dict = {}
+		stats_dict = {}
 
-	
-	# convert the stats_list into a dictionary, where the keys are the types of
-	#	the statistic along with home/away, and the values are the numbers
-	#	e.g. {... 'Shots on target home': '3', 'Shots on target away': '7'}
-	for i in range(0, len(stats_list)):
-		first_space = stats_list[i].index(' ')
-		if i == 0:
-			percent_sign = stats_list[i].rindex('%')	
-			type_of_stat = stats_list[i][first_space+1:percent_sign - 1]
-		else:
-			last_space = stats_list[i].rindex(' ')
-			type_of_stat = stats_list[i][first_space + 1:last_space]
+		
+		# convert the stats_list into a dictionary, where the keys are the types of
+		#	the statistic along with home/away, and the values are the numbers
+		#	e.g. {... 'Shots on target home': '3', 'Shots on target away': '7'}
+		for i in range(0, len(stats_list)):
+			first_space = stats_list[i].index(' ')
+			if i == 0:
+				percent_sign = stats_list[i].rindex('%')	
+				type_of_stat = stats_list[i][first_space+1:percent_sign - 1]
+			else:
+				last_space = stats_list[i].rindex(' ')
+				type_of_stat = stats_list[i][first_space + 1:last_space]
 
-		stats_splitted = stats_list[i].split()
-		stats_dict[type_of_stat + ' home'] = stats_splitted[0]
-		stats_dict[type_of_stat + ' away'] = stats_splitted[len(stats_splitted) - 1]
+			stats_splitted = stats_list[i].split()
+			stats_dict[type_of_stat + ' home'] = stats_splitted[0]
+			stats_dict[type_of_stat + ' away'] = stats_splitted[len(stats_splitted) - 1]
+	except TimeoutException:
+		print('The match has no stats info.')
+		stats_dict = {}
 
 	return stats_dict
 
