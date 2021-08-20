@@ -113,8 +113,6 @@ def results_retrieve_1(all_match_ids):
 			#	and then click at each result to get the details of the match
 			i = 0
 
-			# !!! Also get the city of the stadium
-
 			num_of_unique_ids = 0
 			while i < len(results):
 				# select the appropriate season from the dropdown
@@ -145,26 +143,12 @@ def results_retrieve_1(all_match_ids):
 					driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 					time.sleep(5)
 
-					# !!! implement a function refresh_page(driver) to delegate the refresh
-					#		and sleep to it.
 					stadiums = WebDriverWait(driver, 10).until(
 						EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='stadiumName']"))
 					)
 					results = WebDriverWait(driver, 10).until(
 						EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
 					)
-
-				# # wait until the last match is present on the page
-				# last_match_found = False
-				# while last_match_found == False:
-				# 	try:
-				# 		last_result = WebDriverWait(driver, 10).until(
-				# 			EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@data-matchid='58903']"))
-				# 		)
-				# 		last_match_found = True
-				# 		print('last match found')
-				# 	except TimeoutException:
-				# 		print('last match was not found')
 
 
 				# Since the page is updated (after clicking on a link and going back), we need to
@@ -206,6 +190,9 @@ def results_retrieve_1(all_match_ids):
 					# holds a result information
 					result_dict = {}
 					result_dict['match id'] = id
+
+					# add the season to the result_dict
+					result_dict['season'] = all_seasons[j]
 
 					num_of_unique_ids += 1
 
@@ -250,13 +237,13 @@ def results_retrieve_1(all_match_ids):
 					result_dict['city'] = city
 
 					results_list_of_dicts.append(result_dict)
-				
-					# print(results_list_of_dicts)
-
+					
 					# call results_retrieve_2 to get the match details, such as scorers and assists, 
 					#	red cards, penalty scorers, own goals, etc.
 					team_names, player_stats, match_date, line_ups, team_stats = results_retrieve_2(driver, div_ids[i])
 
+					print(team_names[0] + " " + score_team_1 + "-" + score_team_2 + " " + team_names[1] + " @ " + str(stadium_name) + ", " + str(city))
+					
 					result_dict['home'] = team_names[0]
 					result_dict['away'] = team_names[1]
 
@@ -265,7 +252,7 @@ def results_retrieve_1(all_match_ids):
 					results_list_of_dicts.append(line_ups)
 					results_list_of_dicts.append(team_stats)
 
-					print(team_names[0] + " " + score_team_1 + "-" + score_team_2 + " " + team_names[1] + " @ " + str(stadium_name) + ", " + str(city))
+					
 
 					print('*****************************************************************')
 					print('*****************************************************************')
@@ -286,6 +273,10 @@ def results_retrieve_1(all_match_ids):
 					results_list_of_list_of_dicts.append(results_list_of_dicts)
 					results_list_of_dicts = []
 
+					# if there was a duplicate, start from the first result since
+					#		the scraper duplicates random results, and continuing
+					#		after duplication would cause the script to skip other
+					#		results
 					if duplicate_result_flag == True:
 						i = 0
 					else:
@@ -330,6 +321,7 @@ def results_retrieve_2(driver, result_row):
 
 	print('###########################################################')
 	
+	# !!! have a function that handles these try-catch blocks
 	try:
 		# retrieve the events of the home side, which include goals (by penalty), 
 		#	own goals, and red cards
@@ -507,7 +499,6 @@ def results_retrieve_4(driver):
 		# click on the stats botton
 		driver.execute_script("arguments[0].click();", stats_tab)
 
-		# !!! Older results have empty stats section. 
 		# get the stats table on the screen
 		teams_stats = WebDriverWait(driver, 10).until(
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='mcStatsTab statsSection season-so-far wrapper col-12 active']/table/tbody[@class='matchCentreStatsContainer']/tr"))

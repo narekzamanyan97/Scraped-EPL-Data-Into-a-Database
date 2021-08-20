@@ -578,6 +578,18 @@ class database:
 
 		return list_of_player_names
 	
+	# @parameters
+	#		accepts the dictionary for the match stats and the key to look for.
+	# @returns the values found corresponding to the keys
+	# 		if the results are not found, returns 0's
+	def insert_club_stats_helper(self, club_stats_dict, key):
+		try:
+			value_home = club_stats_dict[key + ' home']
+			value_away = club_stats_dict[key + ' away']
+			return value_home, value_away
+		except KeyError:
+			return 0, 0
+
 	def get_top_players(self, number_of_rows, type_of_stat):
 		query = "SELECT p.player_name, count(p_p.player_id) as number_of_goals FROM player as p, player_performance as p_p "
 		query += "WHERE p.player_id=p_p.player_id and p_p.type_of_stat=1"

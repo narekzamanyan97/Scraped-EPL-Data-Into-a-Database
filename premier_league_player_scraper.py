@@ -81,7 +81,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 
 		original_row_amount = len(player_rows)
 
-
+		# !!! add the season key-value to the returned dictionary
 
 		i = len(player_rows) - 1
 		# get the basic player information from the 
