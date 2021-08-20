@@ -78,20 +78,28 @@ def results_retrieve_1(all_match_ids):
 			results_list_of_list_of_dicts = []
 
 			original_len_results = len(results)
-			print('original results: ' + str(len(results)))
+			
 
 			# make sure the script gets >= 380 (# of matches in a premier league season)
 			#	results before proceeding
 			# or >= 462 results for matches in season <= 1994/95
-			while len(results) != 380:
+			if all_seasons[j] <= '1994/95':
+				number_of_matchweeks = 462
+			else:
+				number_of_matchweeks = 380
+			while len(results) < number_of_matchweeks:
 				driver.refresh()
 				time.sleep(5)
 				print(len(results))
 				# scroll down to the bottom of the page to include all the players
 				driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 				time.sleep(5)
-
-
+				results = WebDriverWait(driver, 10).until(
+					EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
+				)
+				
+			original_len_results = len(results)
+			print('original results: ' + str(len(results)))
 			# 	stadiums = WebDriverWait(driver, 10).until(
 			# 		EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='stadiumName']"))
 			# 	)
