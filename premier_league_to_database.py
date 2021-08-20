@@ -4,28 +4,7 @@ from mysql.connector import IntegrityError
 from connect_to_database import *
 
 
-# def query(conn, query_string, change=False):
-# 	# instantiate a cursor object to interact with MySQL server and
-# 	#	execute queries
-# 	cursor = conn.cursor()
-# 	# execute the given query statement
-# 	cursor.execute(query_string)
-# 	# if the query changes the database, then commit the changes
-# 	if change == True:
-# 		conn.commit()
-# 	else:
-# 		# get the rows of the query result set as a list of tuples
-# 		# 	we must fetch all rows for the current query before executing
-# 		#	new statements using the same connection
-# 		tuple_list = cursor.fetchall()
-
-# 		# !!! convert tuplelist to dict list if necessary
-# 		conn.close()
-# 		return tuple_list
-
-# Takes in a list of tuples and returns a list of dictionaries of those tuples
-# def convert_tuplelist_to_dictlist(cursor, tuples):
-
+# handles all the database related work.
 class database:
 	cursor = ''
 	conn = ''
@@ -42,9 +21,15 @@ class database:
 		self.cursor.execute(query_string)
 		tuple_list = self.cursor.fetchall()
 
+	# @parameters:
+	#		managers_dict = contains the manaeger-specific data, such as name, country, dob, etc
+	#		season = used for inserting the manager into the manager_club table. Tells us the
+	#			season in which the manager has been in the club
 	def insert_managers(self, managers_dict):
 		country = managers_dict['Country of Birth']
 		manager_name = managers_dict['manager name']
+		season = managers_dict['season']
+		
 		status = managers_dict['Status']
 		if status == 'Active':
 			active = True
@@ -81,16 +66,13 @@ class database:
 		epl_debut_match = managers_dict['Premier League Debut Match']
 
 
-
-		# !!! get the club id
 		club_name = managers_dict['manager club']
 
 		club_id = self.get_id(club_name, 'club')
 
 		# !!! also update the manager_club table using manager_id, club_id, and season
-		insert_statement = "INSERT INTO manager(club_id, manager_name, country, active, joined_club, date_of_birth, epl_seasons, epl_debut_match) "
-		insert_statement += "VALUES(" + str(club_id) + ", "
-		insert_statement += "\"" + str(manager_name) + "\", "
+		insert_statement = "INSERT INTO manager(manager_name, country, active, joined_club, date_of_birth, epl_seasons, epl_debut_match) "
+		insert_statement += "VALUES(\"" + str(manager_name) + "\", "
 		insert_statement += "\"" + str(country) + "\", "
 		insert_statement += str(active) + ", "
 		insert_statement += "\"" + joined_club_date + "\", "
@@ -98,10 +80,21 @@ class database:
 		insert_statement += "\"" + epl_seasons + "\", "
 		insert_statement += "\"" + epl_debut_match + "\");"
 
+
 		self.cursor.execute(insert_statement)
 		self.conn.commit()
 
+		# !!! get the id of the manager that just got inserted into the table
+		manager_id = self.get_id(manager_name, 'manager')
 
+		# update the manager_club table
+		insert_statement = "INSERT INTO manager_club(manager_id, club_id, season) "
+		insert_statement += "VALUES(" + str(manager_id) + ", "
+		insert_statement += str(club_id) + ", "
+		insert_statement += "\"" + season + "\");"
+
+		self.cursor.execute(insert_statement)
+		self.conn.commit()
 
 	def insert_players(self, player_dict):
 		club_name = player_dict['club']
@@ -730,7 +723,6 @@ class database:
 		for dict_ in list_of_dicts:
 			goals_against_dict[dict_['club_name']] = int(dict_['goals_against'])
 
-		# !!! calculate goal_difference 
 		goal_difference_dict = {}
 		
 		for key_team_name, value_goals_scored in goals_for_dict.items():
@@ -804,7 +796,7 @@ class database:
 			matchweek = 38
 			for result in list_of_dicts_last_5:
 				
-				# !!! get the results based on team name club_name 
+				# !!! get the results based on team name club_name
 				if result['winner'] == club_name:
 					form_last_5_dict[club_name][matchweek] = 'W'
 				elif result['winner'] != 'draw':

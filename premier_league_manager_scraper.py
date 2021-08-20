@@ -5,6 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 from set_up_driver import *
+from custom_functions import *
 
 SECONDS_TO_WAIT = 15
 
@@ -25,7 +26,7 @@ def all_seasons_manager_retrieve():
 	managers_list_of_dicts = []
 
 
-	for i in range(0, len(all_seasons_managers) - (len(all_seasons_managers) - 5)):
+	for i in range(0, len(all_seasons_managers)):
 		temp_dict = {}
 
 		# get the row of the manager
@@ -41,13 +42,15 @@ def all_seasons_manager_retrieve():
 		manager_name = all_seasons_managers[i].text.splitlines()[0]
 
 		temp_dict['manager name'] = manager_name
-
+		print(temp_dict)
 		temp_dict.update(manager_retrieve_2(driver, all_seasons_manager_button[i]))
-
+		
+		
+		
 		managers_list_of_dicts.append(temp_dict)
 
 		print('----------------------------------')
-	print(managers_list_of_dicts)
+		
 
 # get the manager's name and club, then call another fucntion to get the
 #	button to click to get the details
@@ -55,10 +58,10 @@ def manager_retrieve_1():
 	# set up the driver
 	driver = set_up_driver(urls['url_1'])
 
-	for season in all_seasons:
+	for j in range(0, len(all_seasons)):
 		# select the previous season from the dropdown
 		filter_season = WebDriverWait(driver, SECONDS_TO_WAIT).until(
-				EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + season  + "']"))
+				EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + all_seasons[j]  + "']"))
 		)
 
 		# choose the appropriate season from the dropdown list
@@ -99,13 +102,14 @@ def manager_retrieve_1():
 
 			temp_dict['manager name'] = manager_name
 			temp_dict['manager club'] = manager_club
+			temp_dict['season'] = all_seasons[j]
 
 			# call manager_retrieve_2() which clicks on the manager row
 			temp_dict.update(manager_retrieve_2(driver, managers_button[i]))
 
 			managers_list_of_dicts.append(temp_dict)
 			
-			# print(managers_list_of_dicts)
+			print(managers_list_of_dicts)
 
 	print('--------------------------------')
 	return managers_list_of_dicts
@@ -123,7 +127,6 @@ def manager_retrieve_2(driver, button):
 	)
 
 	for detail in manager_personal_details:
-		print(detail.text)
 		try:
 			detail_list = detail.text.splitlines()
 			if detail_list[0] != 'Age':
@@ -132,7 +135,7 @@ def manager_retrieve_2(driver, button):
 				else:	
 					temp_dict[detail_list[0]] = detail_list[1]
 		except IndexError as ie:
-			 print(ie)
+			 print()
 	print('-------------------------------')
 
 	# print(temp_dict)
