@@ -39,7 +39,7 @@ SECONDS_TO_WAIT = 15
 def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 	season_counter = -1
 
-	for j in range(len(all_seasons) - 1, len(all_seasons)):
+	for j in range(len(all_seasons) - 3, len(all_seasons)):
 		print(all_seasons[j])
 		season_counter += 1
 		# call the get_all_the_player_rows() from player_row_scraper to
@@ -83,7 +83,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 
 		# !!! add the season key-value to the returned dictionary
 
-		i = len(player_rows) - 1
+		i = 0
 		# get the basic player information from the 
 		while i < len(player_rows):
 			print(all_seasons[j])
@@ -96,13 +96,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			# get the player_rows for the for loop, so we can count the
 			#	number of players
 			player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=all_seasons[j])
-
-			# wait until the row of the last player on the list appears on the page
-			# 	in 2020/2021 season, it is Martin Ødegaard, with the data-player='p184029'
-			# print('line 101')
-			# last_player_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img[@alt='Photo for Martin Ødegaard']"
-			# last_player = presence_of_all_el_located(driver, last_player_xpath, SECONDS_TO_WAIT, -1)			
-
+			
 			# get the player rows and links for the details after the page
 			#	update
 			player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
@@ -127,8 +121,8 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			# !!! The scraper jumps on players, or counts the same player twice.
 			#	check whether the name of the player has aleary appeared or not
 			#	if it did, go to the start of the loop and try again, 
-			
 			#	decrementing the counter by 1.
+
 			# the player_rows frequently throws a stale element error.
 			#	keep looking for the element (3 tries)
 			# Sometimes player_row.text throws a StaleElementReferenceException
@@ -152,7 +146,8 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			# Checks whether the player is already inserted into the database.
 			#		if it is, then increment the counter and check the next
 			#		player on the player rows without refreshing the page.
-			while is_player_new(list_of_all_inserted_players, player_name) != True:
+			# !!! change == back to !=
+			while is_player_new(list_of_all_inserted_players, player_name) == True:
 				print(player_name)
 				print('Player already in database')
 
@@ -294,7 +289,7 @@ def player_retrieve_2(driver, player_row_button, season):
 
 	dict_to_return['club_1'] = season_club_1
 	dict_to_return['club_2'] = season_club_2
-	
+
 	# Some players have no nationality
 	try:
 		personal_details_xpath = "//div[@class='personalLists']/ul"

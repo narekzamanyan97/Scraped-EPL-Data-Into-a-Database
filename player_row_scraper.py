@@ -75,29 +75,19 @@ def get_all_the_player_rows(url_to_use, season):
 
 	player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=season)
 
-	while len(player_rows) != number_of_players_per_season[season]:				
-		print(len(player_rows))
-
-		print('Wrong number of player rows. Try Again!')
-		
-		# refresh the page
-		driver.refresh()
-
-		# scroll down to the bottom of the page to include all the players
-		driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-		time.sleep(5)
-		
-		player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=season)
-		print('----------------------------------------------------')
-
-	time.sleep(5)
+	# time.sleep(5)
 
 	print(len(player_rows))
+	print('before the for loop.')
 	for i in range(0, len(player_rows)):
-		player_row_list = player_rows[i].text.splitlines()
-		player_name = player_row_list[0]
-		
-		list_of_all_players_in_order.append(player_name)
+		try:
+			print('in the loop: ' + str(i))
+			player_row_list = player_rows[i].text.splitlines()
+			player_name = player_row_list[0]
+			
+			list_of_all_players_in_order.append(player_name)
+		except StaleElementReferenceException:
+			player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=season)
 
 	return list_of_all_players_in_order
 
