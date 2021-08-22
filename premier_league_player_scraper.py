@@ -39,7 +39,7 @@ SECONDS_TO_WAIT = 15
 def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 	season_counter = -1
 
-	for j in range(len(all_seasons) - 3, len(all_seasons)):
+	for j in range(len(all_seasons) - 3, len(all_seasons) - 2):
 		print(all_seasons[j])
 		season_counter += 1
 		# call the get_all_the_player_rows() from player_row_scraper to
@@ -85,7 +85,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 
 		i = 0
 		# get the basic player information from the 
-		while i < len(player_rows):
+		while i < len(player_rows) - (len(player_rows) - 3):
 			print(all_seasons[j])
 
 			driver.refresh()
@@ -142,21 +142,21 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			player_row_text_list = player_row_text.splitlines()
 			player_name = player_row_text_list[0]
 
-			# !!! remove this because we still need to update the team of the player
-			# Checks whether the player is already inserted into the database.
-			#		if it is, then increment the counter and check the next
-			#		player on the player rows without refreshing the page.
-			# !!! change == back to !=
-			while is_player_new(list_of_all_inserted_players, player_name) == True:
-				print(player_name)
-				print('Player already in database')
+			# # !!! remove this because we still need to update the team of the player
+			# # Checks whether the player is already inserted into the database.
+			# #		if it is, then increment the counter and check the next
+			# #		player on the player rows without refreshing the page.
+			# # !!! change == back to !=
+			# while is_player_new(list_of_all_inserted_players, player_name) == True:
+			# 	print(player_name)
+			# 	print('Player already in database')
 
-				i += 1
+			# 	i += 1
 
-				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
-				player_row_text = player_row.text
-				player_row_text_list = player_row_text.splitlines()
-				player_name = player_row_text_list[0]
+			# 	player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
+			# 	player_row_text = player_row.text
+			# 	player_row_text_list = player_row_text.splitlines()
+			# 	player_name = player_row_text_list[0]
 
 			# Check whether the player found in this row matches the player that
 			#		is supposed to be there. If not, then go back to the main loop

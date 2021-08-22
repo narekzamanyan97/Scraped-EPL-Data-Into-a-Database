@@ -128,7 +128,7 @@ class database:
 		# !!! add a try catch statement to handle exception where the player already
 		#		exists
 		try:
-			insert_statement = "INSERT INTO player(club_id, player_name, player_number, position, country, date_of_birth, height) "
+			insert_statement = "INSERT INTO player(player_name, player_number, position, country, date_of_birth, height) "
 			insert_statement += "VALUES(\"" + player_name + "\", "
 			insert_statement += str(shirt_number) + ", "
 			insert_statement += "\"" + position + "\", "
