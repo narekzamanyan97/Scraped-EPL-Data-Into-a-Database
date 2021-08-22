@@ -52,6 +52,12 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index, season='20
 	
 	num_of_player_rows = number_of_players_per_season[season]
 
+	# define a variable that holds an approximation of how low the number of rows
+	#		can be. Since it is hard to load a page that has exactly num_of_player_rows
+	#		number of rows, we can allow for little less, and not spend too much time
+	#		on the loop below
+	margin_of_error = num_of_player_rows - (num_of_player_rows/10)
+
 	# handle TimeoutException
 	while el_found == False and tries < 3:
 		try:
@@ -60,7 +66,7 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index, season='20
 			)
 
 			# make sure there are the right number of player rows before continuing
-			if index >= -1 and len(element) == num_of_player_rows:
+			if index >= -1 and len(element) >= num_of_player_rows - margin_of_error:
 				el_found = True
 			elif index == -2:
 				el_found = True

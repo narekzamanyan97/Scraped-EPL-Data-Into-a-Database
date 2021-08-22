@@ -31,12 +31,7 @@ urls = {
 SECONDS_TO_WAIT = 15
 
 # get the player's name, position, and country, then click on the row
-# @parameters:
-#	url_to_use specifies whether we want the 2020/21 or 2021/22 player
-#		page
-# 	list_of_all_inserted_players is an array of all the players that are
-#		already in the database so that we can save time and skip them
-def player_retrieve_1(url_to_use, list_of_all_inserted_players):
+def player_retrieve_1():
 	season_counter = -1
 
 	for j in range(len(all_seasons) - 3, len(all_seasons) - 2):
@@ -45,7 +40,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 		# call the get_all_the_player_rows() from player_row_scraper to
 		#	get the correct order of all the players and check this scraper
 		#	to match the correct order.
-		list_of_all_players_in_order = get_all_the_player_rows(url_to_use, all_seasons[j])
+		list_of_all_players_in_order = get_all_the_player_rows(all_seasons[j])
 	
 		print('***********************')
 		print(len(list_of_all_players_in_order))

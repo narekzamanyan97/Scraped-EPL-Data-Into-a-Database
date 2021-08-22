@@ -29,7 +29,7 @@ SECONDS_TO_WAIT = 15
 #	the player rows. 
 # the purpose is to have an ordered list with which the player_scraper
 #	can compare its rows and avoid duplicates or miss players.
-def get_all_the_player_rows(url_to_use, season):
+def get_all_the_player_rows(season):
 	
 	# set up the driver
 	driver = set_up_driver(urls['url_1'])
