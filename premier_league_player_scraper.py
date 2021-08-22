@@ -148,11 +148,11 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			player_row_text_list = player_row_text.splitlines()
 			player_name = player_row_text_list[0]
 
+			# !!! remove this because we still need to update the team of the player
 			# Checks whether the player is already inserted into the database.
 			#		if it is, then increment the counter and check the next
 			#		player on the player rows without refreshing the page.
 			while is_player_new(list_of_all_inserted_players, player_name) != True:
-				print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 				print(player_name)
 				print('Player already in database')
 
@@ -168,7 +168,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			#		and scrape the page again.
 			if player_name != list_of_all_players_in_order[i]:
 				# 	i += 1
-				print('Index Pointing to Wrong Player. Try Again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+				print('Index Pointing to Wrong Player. Try Again!')
 				continue		 	
 
 			unique_player_names.append(player_name)
@@ -242,7 +242,14 @@ def player_retrieve_2(driver, player_row_button, season):
 
 		# iterate through the player_career rows to find the one with the current
 		#		season
-		season_found = False
+		# The current season may have two rows in case the player is transfered
+		#		in the winter from one PL club to another.
+		season_found_1 = False
+		season_found_2 = False
+
+		season_club_1 = 'Null'
+		season_club_2 = 'Null'
+
 		for k in range(0, len(player_career)):
 			# !!! If the player is transfered from one PL club to another in the
 			#		winter transfer window, then we must have two clubs for the 
@@ -254,10 +261,16 @@ def player_retrieve_2(driver, player_row_button, season):
 			season_years = season_1_list[0]
 			season_formatted = season_for_career_table[season]
 			if season_years == season_formatted:
-				season_found = True
-				season_club = season_1_list[1]
-				break
-				
+				# if this is the first occurance of the season
+				if season_found_1 == False:
+					season_found_1 = True
+					season_club_1 = season_1_list[1]
+					
+				else:
+					season_found_2 = True
+					season_club_2 = season_1_list[1]
+					break
+					
 			# # if the top-most row is not 2020/2021, then the 2nd row should be 2020/2021
 			# else:
 			# 	# in case the player started in 2021/2022 season, he will not have
@@ -269,18 +282,19 @@ def player_retrieve_2(driver, player_row_button, season):
 			# 		season_club = season_2_list[1]
 			# 	except IndexError:
 			# 		season_club = 'Null'
+	
+	# !!! change the model to reflect the fact that a player can have two clubs
+	#		in one season
 
-		if season_found == False:
-			season_club = 'Null'
-	# !!! The club is taken from 2020/21 season. change that to reflect the appropriate
-	#		season
-		
-	# Some players, such as Junior Firpo, have no Career table populated
+
+	# Some players have no Career table populated
 	except TimeoutException:
-		season_club = 'Null'
+		season_club_1 = 'Null'
+		season_club_2 = 'Null'
 
-	dict_to_return['club'] = season_club
-
+	dict_to_return['club_1'] = season_club_1
+	dict_to_return['club_2'] = season_club_2
+	
 	# Some players have no nationality
 	try:
 		personal_details_xpath = "//div[@class='personalLists']/ul"
