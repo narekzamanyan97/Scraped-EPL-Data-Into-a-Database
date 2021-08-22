@@ -96,7 +96,7 @@ def player_retrieve_1(url_to_use, list_of_all_inserted_players):
 			# get the player_rows for the for loop, so we can count the
 			#	number of players
 			player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=all_seasons[j])
-			
+
 			# get the player rows and links for the details after the page
 			#	update
 			player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
@@ -245,6 +245,8 @@ def player_retrieve_2(driver, player_row_button, season):
 		season_club_1 = 'Null'
 		season_club_2 = 'Null'
 
+		clubs_list = []
+
 		for k in range(0, len(player_career)):
 			# !!! If the player is transfered from one PL club to another in the
 			#		winter transfer window, then we must have two clubs for the 
@@ -259,11 +261,13 @@ def player_retrieve_2(driver, player_row_button, season):
 				# if this is the first occurance of the season
 				if season_found_1 == False:
 					season_found_1 = True
-					season_club_1 = season_1_list[1]
+					clubs_list.append(season_1_list[1])
+					# season_club_1 = season_1_list[1]
 					
 				else:
 					season_found_2 = True
-					season_club_2 = season_1_list[1]
+					clubs_list.append(season_1_list[1])
+					# season_club_2 = season_1_list[1]
 					break
 					
 			# # if the top-most row is not 2020/2021, then the 2nd row should be 2020/2021
@@ -284,11 +288,9 @@ def player_retrieve_2(driver, player_row_button, season):
 
 	# Some players have no Career table populated
 	except TimeoutException:
-		season_club_1 = 'Null'
-		season_club_2 = 'Null'
+		print()
 
-	dict_to_return['club_1'] = season_club_1
-	dict_to_return['club_2'] = season_club_2
+	dict_to_return['clubs'] = clubs_list
 
 	# Some players have no nationality
 	try:

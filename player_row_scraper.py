@@ -81,7 +81,7 @@ def get_all_the_player_rows(url_to_use, season):
 	print('before the for loop.')
 	for i in range(0, len(player_rows)):
 		try:
-			print('in the loop: ' + str(i))
+			# print('in the loop: ' + str(i))
 			player_row_list = player_rows[i].text.splitlines()
 			player_name = player_row_list[0]
 			

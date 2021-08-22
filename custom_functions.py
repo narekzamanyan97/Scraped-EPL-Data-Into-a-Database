@@ -58,6 +58,7 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index, season='20
 			element = WebDriverWait(driver, seconds_to_wait).until(
 				EC.presence_of_all_elements_located((By.XPATH, xpath))
 			)
+
 			# make sure there are the right number of player rows before continuing
 			if index >= -1 and len(element) == num_of_player_rows:
 				el_found = True

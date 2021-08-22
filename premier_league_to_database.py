@@ -97,33 +97,6 @@ class database:
 		self.conn.commit()
 
 	def insert_players(self, player_dict):
-		club_name = player_dict['club']
-
-		# some club names end with '(loan)'. If that is the case, then remove 
-		#	the 'loan' substring
-		if '(loan)' in club_name:
-			# remove the '(loan)' from the club name
-			club_name = club_name.replace('(loan)', '')
-		# the 'L' in loan can be capitalized
-		elif '(Loan)' in club_name:
-			club_name = club_name.replace('(Loan)', '')
-
-		# remove U21 from the club_name
-		if 'U21' in club_name:
-			club_name = club_name.replace('U21', '')
-
-		# remove trailing spaces
-		club_name = club_name.strip()
-
-		# For the player Lars Dendoncker, the club name has the '&' instead of
-		#	'and for Brighton and Hove Albion'
-		if club_name == 'Brighton & Hove Albion':
-			print('Changing the Brighton name')
-			club_name = 'Brighton and Hove Albion'
-
-		# get the club id of the player
-		club_id = self.get_id(club_name, 'club')
-
 		player_name = player_dict['player name']
 		position = player_dict['position']
 		country = player_dict['country']
@@ -154,25 +127,63 @@ class database:
 		
 		# !!! add a try catch statement to handle exception where the player already
 		#		exists
-		insert_statement = "INSERT INTO player(club_id, player_name, player_number, position, country, date_of_birth, height) "
-		insert_statement += "VALUES(\"" + player_name + "\", "
-		insert_statement += str(shirt_number) + ", "
-		insert_statement += "\"" + position + "\", "
-		insert_statement += "\"" + country + "\", "
-		insert_statement += "\"" + dob_date + "\", "
-		insert_statement += str(height) + ");"
+		try:
+			insert_statement = "INSERT INTO player(club_id, player_name, player_number, position, country, date_of_birth, height) "
+			insert_statement += "VALUES(\"" + player_name + "\", "
+			insert_statement += str(shirt_number) + ", "
+			insert_statement += "\"" + position + "\", "
+			insert_statement += "\"" + country + "\", "
+			insert_statement += "\"" + dob_date + "\", "
+			insert_statement += str(height) + ");"
 
-		self.cursor.execute(insert_statement)
-		self.conn.commit()
+			self.cursor.execute(insert_statement)
+			self.conn.commit()
+		except IntegrityError:
+			print('Player already in database. Move on the player_club table.')
 
-		# !!! also update the player_club table using player_id, club_id, and season
-		insert_statement = "INSERT INTO player_club(player_id, club_id, season) "
-		insert_statement += "VALUES(" + str(player_id) + ", "
-		insert_statement += str(club_id) + ", "
-		insert_statement += "\"" + season + "\");"
 
-		self.cursor.execute(insert_statement)
-		self.conn.commit()
+		club_names = player_dict['clubs']
+
+		player_counter = 1
+
+		for club_name in club_names:
+
+			# some club names end with '(loan)'. If that is the case, then remove 
+			#	the 'loan' substring
+			if '(loan)' in club_name:
+				# remove the '(loan)' from the club name
+				club_name = club_name.replace('(loan)', '')
+			# the 'L' in loan can be capitalized
+			elif '(Loan)' in club_name:
+				club_name = club_name.replace('(Loan)', '')
+
+			# remove U21 from the club_name
+			if 'U21' in club_name:
+				club_name = club_name.replace('U21', '')
+
+			# remove trailing spaces
+			club_name = club_name.strip()
+
+			# For the player Lars Dendoncker, the club name has the '&' instead of
+			#	'and for Brighton and Hove Albion'
+			if club_name == 'Brighton & Hove Albion':
+				print('Changing the Brighton name')
+				club_name = 'Brighton and Hove Albion'
+
+			# get the club id of the player
+			club_id = self.get_id(club_name, 'club')
+
+			# !!! also update the player_club table using player_id, club_id, season, and player counter
+			insert_statement = "INSERT INTO player_club(player_id, club_id, season, player_counter) "
+			insert_statement += "VALUES(" + str(player_id) + ", "
+			insert_statement += str(club_id) + ", "
+			insert_statement += "\"" + season + "\", "
+			insert_statement += str(player_counter) + ");"
+
+			self.cursor.execute(insert_statement)
+			self.conn.commit()
+
+			player_counter += 1
 
 	# get the stadium_name to obtain stadium_id from the stadium table
 	def insert_clubs(self, club_dict):
