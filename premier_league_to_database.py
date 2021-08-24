@@ -70,7 +70,8 @@ class database:
 
 		club_id = self.get_id(club_name, 'club')
 
-		# !!! also update the manager_club table using manager_id, club_id, and season
+		# !!! some managers can already be in the database in the manager table.
+		# 		handle a duplicate entry error.
 		insert_statement = "INSERT INTO manager(manager_name, country, active, joined_club, date_of_birth, epl_seasons, epl_debut_match) "
 		insert_statement += "VALUES(\"" + str(manager_name) + "\", "
 		insert_statement += "\"" + str(country) + "\", "
@@ -174,11 +175,10 @@ class database:
 			club_id = self.get_id(club_name, 'club')
 
 			# !!! also update the player_club table using player_id, club_id, season, and player counter
-			insert_statement = "INSERT INTO player_club(player_id, club_id, season, player_counter) "
+			insert_statement = "INSERT INTO player_club(player_id, club_id, season) "
 			insert_statement += "VALUES(" + str(player_id) + ", "
 			insert_statement += str(club_id) + ", "
-			insert_statement += "\"" + season + "\", "
-			insert_statement += str(player_counter) + ");"
+			insert_statement += "\"" + season + "\");"
 
 			self.cursor.execute(insert_statement)
 			self.conn.commit()

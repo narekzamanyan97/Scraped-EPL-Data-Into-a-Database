@@ -158,6 +158,8 @@ def player_retrieve_1():
 			#		and scrape the page again.
 			if player_name != list_of_all_players_in_order[i]:
 				# 	i += 1
+				print(player_name)
+				print(list_of_all_players_in_order[i])
 				print('Index Pointing to Wrong Player. Try Again!')
 				continue		 	
 

@@ -56,10 +56,11 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index, season='20
 	#		can be. Since it is hard to load a page that has exactly num_of_player_rows
 	#		number of rows, we can allow for little less, and not spend too much time
 	#		on the loop below
-	margin_of_error = num_of_player_rows - (num_of_player_rows/10)
-
+	margin_of_error = (num_of_player_rows/10)
+	
 	# handle TimeoutException
 	while el_found == False and tries < 3:
+		
 		try:
 			element = WebDriverWait(driver, seconds_to_wait).until(
 				EC.presence_of_all_elements_located((By.XPATH, xpath))
