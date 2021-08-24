@@ -308,16 +308,6 @@ class database:
 			print('Duplicate entry exception')
 			raise
 
-		# !!! separate the insertion of city into a separate function to avoid 
-		#		unnecessary database accesses, because there are 380 games, and
-		# 		only 20 stadiums. 
-		update_city_of_stadium = "UPDATE stadium "
-		update_city_of_stadium += "SET city=\"" + city + "\" "
-		update_city_of_stadium += "WHERE stadium_id=" + str(stadium_id) + ";"
-
-		self.cursor.execute(update_city_of_stadium)
-		self.conn.commit()
-
 	# receives the stats of both teams, the match id, and the id of both
 	#	clubs match_id_and_club_names[0] = match_id 
 	#		  match_id_and_club_names[1] = home club_id
@@ -473,7 +463,18 @@ class database:
 				print('************************Null player_id')
 				print(player_name)
 
-			
+	def update_stadium_city(self, stadium_city_dict):
+		for stadium_name, city_value in stadium_city_dict.items():
+			# get the stadium_id from stadium_name using get_id() function
+			stadium_id = self.get_id(stadium_name, 'stadium')
+
+			update_city_of_stadium = "UPDATE stadium "
+			update_city_of_stadium += "SET city=\"" + stadium_name + "\" "
+			update_city_of_stadium += "WHERE stadium_id=" + str(stadium_id) + ";"
+
+			self.cursor.execute(update_city_of_stadium)
+			self.conn.commit()
+
 
 	# convert the month name into number from 01 to 12
 	def convert_month_to_number(self, month):
@@ -898,7 +899,7 @@ class database:
 		# print(goals_for_dict)
 		# print(goals_against_dict)
 		# print(goal_difference_dict)
-		
+
 # !!! get the missing players from from the player_stats and insert them into the
 #		players table
 

@@ -55,8 +55,14 @@ def populate_match_table():
 	for match_info_list_of_dicts in match_info_list_of_list_of_dicts:
 		try:
 			# !!! first, insert the city name of the stadium into stadium table
+			print('********************************************************')
+			print('********************************************************')
+			print('********************************************************')
 			print(match_info_list_of_dicts[5])
-
+			db.update_stadium_city(match_info_list_of_dicts[5])
+			print('********************************************************')
+			print('********************************************************')
+			print('********************************************************')
 			db.insert_match_basic_info(match_info_list_of_dicts[0], match_info_list_of_dicts[1])
 
 			match_id_and_club_names = []

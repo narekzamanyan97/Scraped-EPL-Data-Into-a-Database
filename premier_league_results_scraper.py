@@ -119,7 +119,7 @@ def results_retrieve_1(all_match_ids):
 			i = 0
 
 			num_of_unique_ids = 0
-			while i < 2:
+			while i < 1:
 				# select the appropriate season from the dropdown
 				filter_season = WebDriverWait(driver, 15).until(
 						EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + all_seasons[j]  + "']"))
@@ -181,7 +181,7 @@ def results_retrieve_1(all_match_ids):
 				# So we check whether the row has already appeared on the page or not
 				while is_row_new(unique_ids, id) != True or is_row_new(all_match_ids, id) != True:
 					duplicate_result_flag = True
-					if i < original_len_results and i < 2:
+					if i < original_len_results and i < 1:
 						i += 1
 						print(i)
 						print(str(id) + ' exists.')
@@ -191,7 +191,7 @@ def results_retrieve_1(all_match_ids):
 						except IndexError:
 							break
 
-				if i < original_len_results and i < 2:
+				if i < original_len_results and i < 1:
 					# holds a result information
 					result_dict = {}
 					result_dict['match id'] = id
