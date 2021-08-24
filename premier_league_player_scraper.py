@@ -1,5 +1,3 @@
-# !!! get the players of all the clubs from https://www.premierleague.com/players?se=363&cl=-1
-
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import StaleElementReferenceException
 
@@ -75,8 +73,6 @@ def player_retrieve_1():
 		unique_player_names = []
 
 		original_row_amount = len(player_rows)
-
-		# !!! add the season key-value to the returned dictionary
 
 		i = 0
 		# get the basic player information from the 
@@ -233,7 +229,7 @@ def player_retrieve_2(driver, player_row_button, season):
 		clubs_list = []
 
 		for k in range(0, len(player_career)):
-			# !!! If the player is transfered from one PL club to another in the
+			# If the player is transfered from one PL club to another in the
 			#		winter transfer window, then we must have two clubs for the 
 			#		player for the same season. e.g. Olivier Giroud played both
 			#		for Arsenal and Chelsea in 2017-2018 season.
@@ -254,22 +250,6 @@ def player_retrieve_2(driver, player_row_button, season):
 					clubs_list.append(season_1_list[1])
 					# season_club_2 = season_1_list[1]
 					break
-					
-			# # if the top-most row is not 2020/2021, then the 2nd row should be 2020/2021
-			# else:
-			# 	# in case the player started in 2021/2022 season, he will not have
-			# 	#	a second row in player_career, so the index 1 can be out of range
-			# 	try:
-			# 		season_2 = player_career[1]
-			# 		season_2_list = season_2.text.splitlines()
-			# 		season_years = season_2_list[0]
-			# 		season_club = season_2_list[1]
-			# 	except IndexError:
-			# 		season_club = 'Null'
-	
-	# !!! change the model to reflect the fact that a player can have two clubs
-	#		in one season
-
 
 	# Some players have no Career table populated
 	except TimeoutException:

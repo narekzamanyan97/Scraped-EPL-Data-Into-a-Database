@@ -275,10 +275,6 @@ class database:
 
 		city = match_basic_info_dict['city']
 
-		# !!! add the city name to the stadium in stadium table and
-		#	the name of the stadium for:
-		#		Fullham
-
 		month_name = date_dict['month']
 		month = self.convert_month_to_number(month_name)
 		day = date_dict['day']
@@ -312,7 +308,9 @@ class database:
 			print('Duplicate entry exception')
 			raise
 
-		# !!! update the city of the stadium
+		# !!! separate the insertion of city into a separate function to avoid 
+		#		unnecessary database accesses, because there are 380 games, and
+		# 		only 20 stadiums. 
 		update_city_of_stadium = "UPDATE stadium "
 		update_city_of_stadium += "SET city=\"" + city + "\" "
 		update_city_of_stadium += "WHERE stadium_id=" + str(stadium_id) + ";"
@@ -900,6 +898,7 @@ class database:
 		# print(goals_for_dict)
 		# print(goals_against_dict)
 		# print(goal_difference_dict)
+		
 # !!! get the missing players from from the player_stats and insert them into the
 #		players table
 

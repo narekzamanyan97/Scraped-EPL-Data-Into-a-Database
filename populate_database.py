@@ -50,10 +50,13 @@ def populate_match_table():
 	all_match_ids_in_db = db.get_all_match_ids_inserted()
 
 	match_info_list_of_list_of_dicts = results_retrieve_1(all_match_ids_in_db)
-	print(match_info_list_of_list_of_dicts)
+	# print(match_info_list_of_list_of_dicts)
 
 	for match_info_list_of_dicts in match_info_list_of_list_of_dicts:
 		try:
+			# !!! first, insert the city name of the stadium into stadium table
+			print(match_info_list_of_dicts[5])
+
 			db.insert_match_basic_info(match_info_list_of_dicts[0], match_info_list_of_dicts[1])
 
 			match_id_and_club_names = []
