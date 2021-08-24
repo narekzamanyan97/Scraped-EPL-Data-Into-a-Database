@@ -260,6 +260,9 @@ def results_retrieve_1(all_match_ids):
 					results_list_of_dicts.append(team_stats)
 					results_list_of_dicts.append(stadium_city_dict)
 					
+					# reset the stadium_city_dict
+					stadium_city_dict = {}
+					
 
 					print('*****************************************************************')
 					print('*****************************************************************')

@@ -464,16 +464,21 @@ class database:
 				print(player_name)
 
 	def update_stadium_city(self, stadium_city_dict):
-		for stadium_name, city_value in stadium_city_dict.items():
-			# get the stadium_id from stadium_name using get_id() function
-			stadium_id = self.get_id(stadium_name, 'stadium')
+		key_list = list(stadium_city_dict.keys())
+		value_list = list(stadium_city_dict.values())
 
-			update_city_of_stadium = "UPDATE stadium "
-			update_city_of_stadium += "SET city=\"" + stadium_name + "\" "
-			update_city_of_stadium += "WHERE stadium_id=" + str(stadium_id) + ";"
+		stadium_name = key_list[0]
+		city = value_list[0]
 
-			self.cursor.execute(update_city_of_stadium)
-			self.conn.commit()
+		# get the stadium_id from stadium_name using get_id() function
+		stadium_id = self.get_id(stadium_name, 'stadium')
+
+		update_city_of_stadium = "UPDATE stadium "
+		update_city_of_stadium += "SET city=\"" + city + "\" "
+		update_city_of_stadium += "WHERE stadium_id=" + str(stadium_id) + ";"
+
+		self.cursor.execute(update_city_of_stadium)
+		self.conn.commit()
 
 
 	# convert the month name into number from 01 to 12
