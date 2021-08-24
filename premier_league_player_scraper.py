@@ -34,7 +34,7 @@ SECONDS_TO_WAIT = 15
 def player_retrieve_1():
 	season_counter = -1
 
-	for j in range(len(all_seasons) - 3, len(all_seasons) - 2):
+	for j in range(len(all_seasons) - 2, len(all_seasons) - 1):
 		print(all_seasons[j])
 		season_counter += 1
 		# call the get_all_the_player_rows() from player_row_scraper to

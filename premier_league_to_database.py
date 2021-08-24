@@ -70,32 +70,39 @@ class database:
 
 		club_id = self.get_id(club_name, 'club')
 
-		# !!! some managers can already be in the database in the manager table.
-		# 		handle a duplicate entry error.
-		insert_statement = "INSERT INTO manager(manager_name, country, active, joined_club, date_of_birth, epl_seasons, epl_debut_match) "
-		insert_statement += "VALUES(\"" + str(manager_name) + "\", "
-		insert_statement += "\"" + str(country) + "\", "
-		insert_statement += str(active) + ", "
-		insert_statement += "\"" + joined_club_date + "\", "
-		insert_statement += "\"" + dob_date + "\", "
-		insert_statement += "\"" + epl_seasons + "\", "
-		insert_statement += "\"" + epl_debut_match + "\");"
+		print('manager_name = ' + manager_name)
 
-
-		self.cursor.execute(insert_statement)
-		self.conn.commit()
-
-		# !!! get the id of the manager that just got inserted into the table
+		# use the get_id function to see if the manager already is in the database
 		manager_id = self.get_id(manager_name, 'manager')
 
-		# update the manager_club table
-		insert_statement = "INSERT INTO manager_club(manager_id, club_id, season) "
-		insert_statement += "VALUES(" + str(manager_id) + ", "
-		insert_statement += str(club_id) + ", "
-		insert_statement += "\"" + season + "\");"
+		# if no manager with that name was found (id = 'Null'), insert the manager
+		if manager_id == 'Null':
+			insert_statement = "INSERT INTO manager(manager_name, country, active, joined_club, date_of_birth, epl_seasons, epl_debut_match) "
+			insert_statement += "VALUES(\"" + str(manager_name) + "\", "
+			insert_statement += "\"" + str(country) + "\", "
+			insert_statement += str(active) + ", "
+			insert_statement += "\"" + joined_club_date + "\", "
+			insert_statement += "\"" + dob_date + "\", "
+			insert_statement += "\"" + epl_seasons + "\", "
+			insert_statement += "\"" + epl_debut_match + "\");"
 
-		self.cursor.execute(insert_statement)
-		self.conn.commit()
+			self.cursor.execute(insert_statement)
+			self.conn.commit()
+
+			# get the id of the manager that just got inserted into the table
+			manager_id = self.get_id(manager_name, 'manager')
+
+		# update the manager_club table
+		try:
+			insert_statement = "INSERT INTO manager_club(manager_id, club_id, season) "
+			insert_statement += "VALUES(" + str(manager_id) + ", "
+			insert_statement += str(club_id) + ", "
+			insert_statement += "\"" + season + "\");"
+
+			self.cursor.execute(insert_statement)
+			self.conn.commit()
+		except IntegrityError:
+			print(manager_name + ' ' + str(club_id) + ' ' + season + ' already in manager_club.')
 
 	def insert_players(self, player_dict):
 		player_name = player_dict['player name']
@@ -128,7 +135,11 @@ class database:
 		
 		# !!! add a try catch statement to handle exception where the player already
 		#		exists
-		try:
+		player_id = self.get_id(player_name, 'player')
+
+		# if the player name is not in the database (player_id='Null'), then insert
+		#		the player
+		if player_id == 'Null':
 			insert_statement = "INSERT INTO player(player_name, player_number, position, country, date_of_birth, height) "
 			insert_statement += "VALUES(\"" + player_name + "\", "
 			insert_statement += str(shirt_number) + ", "
@@ -139,13 +150,10 @@ class database:
 
 			self.cursor.execute(insert_statement)
 			self.conn.commit()
-		except IntegrityError:
-			print('Player already in database. Move on the player_club table.')
 
+			player_id = self.get_id(player_name, 'player')
 
 		club_names = player_dict['clubs']
-
-		player_counter = 1
 
 		for club_name in club_names:
 
@@ -174,16 +182,17 @@ class database:
 			# get the club id of the player
 			club_id = self.get_id(club_name, 'club')
 
-			# !!! also update the player_club table using player_id, club_id, season, and player counter
-			insert_statement = "INSERT INTO player_club(player_id, club_id, season) "
-			insert_statement += "VALUES(" + str(player_id) + ", "
-			insert_statement += str(club_id) + ", "
-			insert_statement += "\"" + season + "\");"
+			try:
+				insert_statement = "INSERT INTO player_club(player_id, club_id, season) "
+				insert_statement += "VALUES(" + str(player_id) + ", "
+				insert_statement += str(club_id) + ", "
+				insert_statement += "\"" + season + "\");"
 
-			self.cursor.execute(insert_statement)
-			self.conn.commit()
+				self.cursor.execute(insert_statement)
+				self.conn.commit()
 
-			player_counter += 1
+			except IntegrityError:
+				print(player_name + ' ' + str(club_id) + ' ' + season + ' already in player_club.')
 
 	# get the stadium_name to obtain stadium_id from the stadium table
 	def insert_clubs(self, club_dict):
@@ -634,6 +643,9 @@ class database:
 
 		self.cursor.execute(query)
 		tuple_list = self.cursor.fetchall()
+
+		tuple_list = convert_from_tuple_list_to_dict(tuple_list)
+		print(tuple_list)
 		
 		list_of_dicts = self.convert_from_tuple_list_to_dict(tuple_list)
 		
