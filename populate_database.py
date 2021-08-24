@@ -50,6 +50,7 @@ def populate_match_table():
 	all_match_ids_in_db = db.get_all_match_ids_inserted()
 
 	match_info_list_of_list_of_dicts = results_retrieve_1(all_match_ids_in_db)
+	print(match_info_list_of_list_of_dicts)
 
 	for match_info_list_of_dicts in match_info_list_of_list_of_dicts:
 		try:
@@ -70,7 +71,7 @@ def populate_match_table():
 
 # populate_stadium_and_club_tables()
 # populate_manager_table()
-populate_player_table()
-# populate_match_table()
+# populate_player_table()
+populate_match_table()
 
 # # db.generate_standings()

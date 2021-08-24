@@ -80,7 +80,7 @@ def manager_retrieve_1():
 		managers_list_of_dicts = []
 
 		print('--------------------------------')
-		for i in range(len(managers) - 1, len(managers)):
+		for i in range(len(managers) - 4, len(managers)):
 			temp_dict = {}
 
 			# get the manager rows and links for the details to avoid

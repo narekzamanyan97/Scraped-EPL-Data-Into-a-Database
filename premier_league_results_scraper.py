@@ -27,8 +27,9 @@ def results_retrieve_1(all_match_ids):
 	driver = set_up_driver(urls['url_1'])
 
 	# iterate over the seasons
-	for j in range(0, len(all_seasons)):
+	for j in range(len(all_seasons) - 2, len(all_seasons) - 1):
 		try:
+			print(all_seasons[j])
 			# select the appropriate season from the dropdown
 			filter_season = WebDriverWait(driver, 15).until(
 					EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + all_seasons[j]  + "']"))
@@ -111,10 +112,10 @@ def results_retrieve_1(all_match_ids):
 			
 			# Iterating over the results to get the team names, scores, stadium names,
 			#	and then click at each result to get the details of the match
-			i = 0
+			i = 3
 
 			num_of_unique_ids = 0
-			while i < len(results):
+			while i < 5:
 				# select the appropriate season from the dropdown
 				filter_season = WebDriverWait(driver, 15).until(
 						EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + all_seasons[j]  + "']"))
@@ -135,7 +136,7 @@ def results_retrieve_1(all_match_ids):
 				results = WebDriverWait(driver, 10).until(
 					EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
 				)
-				while len(results) != original_len_results:
+				while len(results) < original_len_results:
 					driver.refresh()
 					time.sleep(5)
 					print(len(results))
@@ -176,7 +177,7 @@ def results_retrieve_1(all_match_ids):
 				# So we check whether the row has already appeared on the page or not
 				while is_row_new(unique_ids, id) != True or is_row_new(all_match_ids, id) != True:
 					duplicate_result_flag = True
-					if i < original_len_results:
+					if i < original_len_results and i < 5:
 						i += 1
 						print(i)
 						print(str(id) + ' exists.')
@@ -186,7 +187,7 @@ def results_retrieve_1(all_match_ids):
 						except IndexError:
 							break
 
-				if i < original_len_results:
+				if i < original_len_results and i < 5:
 					# holds a result information
 					result_dict = {}
 					result_dict['match id'] = id

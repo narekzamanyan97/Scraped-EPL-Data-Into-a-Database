@@ -91,6 +91,8 @@ class database:
 
 			# get the id of the manager that just got inserted into the table
 			manager_id = self.get_id(manager_name, 'manager')
+		else:
+			print(manager_name + ' already in manager table.')
 
 		# update the manager_club table
 		try:
@@ -101,6 +103,7 @@ class database:
 
 			self.cursor.execute(insert_statement)
 			self.conn.commit()
+
 		except IntegrityError:
 			print(manager_name + ' ' + str(club_id) + ' ' + season + ' already in manager_club.')
 
@@ -133,8 +136,6 @@ class database:
 		except KeyError:
 			height = 'Null'
 		
-		# !!! add a try catch statement to handle exception where the player already
-		#		exists
 		player_id = self.get_id(player_name, 'player')
 
 		# if the player name is not in the database (player_id='Null'), then insert
@@ -152,6 +153,8 @@ class database:
 			self.conn.commit()
 
 			player_id = self.get_id(player_name, 'player')
+		else:
+			print(player_name + ' already in player table.')
 
 		club_names = player_dict['clubs']
 
@@ -257,7 +260,8 @@ class database:
 		match_id = match_basic_info_dict['match id']
 		home_club_name = match_basic_info_dict['home']
 		away_club_name = match_basic_info_dict['away']
-		
+		season = match_basic_info_dict['season']
+
 		# get the home and away team ids
 		home_club_id = self.get_id(home_club_name, 'club')
 		away_club_id = self.get_id(away_club_name, 'club')
@@ -286,8 +290,7 @@ class database:
 
 		matchweek = date_dict['matchweek']
 
-		# !!! add the season after the stadium_id
-		insert_statement_match_ = "INSERT INTO match_(match_id, home_team_id, away_team_id, home_team_goals, away_team_goals, match_date, matchweek, referee, stadium_id) "
+		insert_statement_match_ = "INSERT INTO match_(match_id, home_team_id, away_team_id, home_team_goals, away_team_goals, match_date, matchweek, referee, stadium_id, season) "
 		insert_statement_match_ += "VALUES("
 		insert_statement_match_ += str(match_id) + ", "
 		insert_statement_match_ += str(home_club_id) + ", "
@@ -297,7 +300,8 @@ class database:
 		insert_statement_match_ += "\"" + str(match_date) + "\", "
 		insert_statement_match_ += str(matchweek) + ", "
 		insert_statement_match_ += "\"" + str(referee_name) + "\", "
-		insert_statement_match_ += str(stadium_id) + ");"
+		insert_statement_match_ += str(stadium_id) + ", "
+		insert_statement_match_ += "\"" + str(season) + "\");"
 
 		try:
 			print(insert_statement_match_)
@@ -307,6 +311,14 @@ class database:
 		except IntegrityError:
 			print('Duplicate entry exception')
 			raise
+
+		# !!! update the city of the stadium
+		update_city_of_stadium = "UPDATE stadium "
+		update_city_of_stadium += "SET city=\"" + city + "\" "
+		update_city_of_stadium += "WHERE stadium_id=" + str(stadium_id) + ";"
+
+		self.cursor.execute(update_city_of_stadium)
+		self.conn.commit()
 
 	# receives the stats of both teams, the match id, and the id of both
 	#	clubs match_id_and_club_names[0] = match_id 
@@ -322,18 +334,18 @@ class database:
 		club_away_id = self.get_id(club_away_name, 'club')
 
 		# use the helper function to get the match stats
-		possession_home, possession_away = insert_club_stats_helper(club_stats_dict, 'Possession', season)
-		shots_on_target_home, shots_on_target_away = insert_club_stats_helper(club_stats_dict, 'Shots on target', season)
-		shots_home, shots_away = insert_club_stats_helper(club_stats_dict, 'Shots', season)
-		touches_home, touches_away = insert_club_stats_helper(club_stats_dict, 'Touches', season)
-		passes_home, passes_away = insert_club_stats_helper(club_stats_dict, 'Passes', season)
-		tackles_home, tackles_away = insert_club_stats_helper(club_stats_dict, 'Tackles', season)
-		clearances_home, clearances_away = insert_club_stats_helper(club_stats_dict, 'Clearances', season)
-		corners_home, corners_away = insert_club_stats_helper(club_stats_dict, 'Corners', season)
-		offsides_home, offsides_away = insert_club_stats_helper(club_stats_dict, 'Offsides', season)
-		fouls_conceded_home, fouls_conceded_away = insert_club_stats_helper(club_stats_dict, 'Fouls conceded', season)
-		yellow_cards_home, yellow_cards_away = insert_club_stats_helper(club_stats_dict, 'Fouls conceded', season)
-		red_cards_home, red_cards_away = insert_club_stats_helper(club_stats_dict, 'Red cards', season)
+		possession_home, possession_away = self.insert_club_stats_helper(club_stats_dict, 'Possession', season)
+		shots_on_target_home, shots_on_target_away = self.insert_club_stats_helper(club_stats_dict, 'Shots on target', season)
+		shots_home, shots_away = self.insert_club_stats_helper(club_stats_dict, 'Shots', season)
+		touches_home, touches_away = self.insert_club_stats_helper(club_stats_dict, 'Touches', season)
+		passes_home, passes_away = self.insert_club_stats_helper(club_stats_dict, 'Passes', season)
+		tackles_home, tackles_away = self.insert_club_stats_helper(club_stats_dict, 'Tackles', season)
+		clearances_home, clearances_away = self.insert_club_stats_helper(club_stats_dict, 'Clearances', season)
+		corners_home, corners_away = self.insert_club_stats_helper(club_stats_dict, 'Corners', season)
+		offsides_home, offsides_away = self.insert_club_stats_helper(club_stats_dict, 'Offsides', season)
+		fouls_conceded_home, fouls_conceded_away = self.insert_club_stats_helper(club_stats_dict, 'Fouls conceded', season)
+		yellow_cards_home, yellow_cards_away = self.insert_club_stats_helper(club_stats_dict, 'Fouls conceded', season)
+		red_cards_home, red_cards_away = self.insert_club_stats_helper(club_stats_dict, 'Red cards', season)
 
 		# insert statement for the home side
 		insert_statement = "INSERT INTO club_stats(match_id, club_id, possession, shots, shots_on_target, touches, passes, tackles, clearances, corners, offsides, fouls_conceded, yellow_cards, red_cards) "

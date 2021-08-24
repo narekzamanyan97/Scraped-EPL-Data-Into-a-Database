@@ -118,6 +118,9 @@ def player_retrieve_1():
 			#	if it did, go to the start of the loop and try again, 
 			#	decrementing the counter by 1.
 
+			# !!! figure out another way to get all the players from a page
+			#		without if player_name != list_of_all_players_in_order[i]
+
 			# the player_rows frequently throws a stale element error.
 			#	keep looking for the element (3 tries)
 			# Sometimes player_row.text throws a StaleElementReferenceException
@@ -137,21 +140,6 @@ def player_retrieve_1():
 			player_row_text_list = player_row_text.splitlines()
 			player_name = player_row_text_list[0]
 
-			# # !!! remove this because we still need to update the team of the player
-			# # Checks whether the player is already inserted into the database.
-			# #		if it is, then increment the counter and check the next
-			# #		player on the player rows without refreshing the page.
-			# # !!! change == back to !=
-			# while is_player_new(list_of_all_inserted_players, player_name) == True:
-			# 	print(player_name)
-			# 	print('Player already in database')
-
-			# 	i += 1
-
-			# 	player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
-			# 	player_row_text = player_row.text
-			# 	player_row_text_list = player_row_text.splitlines()
-			# 	player_name = player_row_text_list[0]
 
 			# Check whether the player found in this row matches the player that
 			#		is supposed to be there. If not, then go back to the main loop
