@@ -42,7 +42,7 @@ def club_retrieve_1():
 
 		clubs_list_of_dicts = []
 
-		for i in range(12, len(club_rows_team) - (len(club_rows_team) - 14)):
+		for i in range(0, len(club_rows_team)):
 			# again, get the player rows and links for the details
 			club_rows_team = WebDriverWait(driver, 10).until(
 					EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table']/table/tbody[@class='allTimeDataContainer']/tr/td[@class='team']/a/div[@class='nameContainer']"))
@@ -73,7 +73,7 @@ def club_retrieve_1():
 
 			# print the club info
 			# for club_dict in clubs_list_of_dicts:
-			for key, value in clubs_list_of_dicts[i - 12].items():
+			for key, value in clubs_list_of_dicts[i].items():
 				print(key + '->' + value)
 
 			print('--------------------------------------')

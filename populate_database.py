@@ -77,8 +77,8 @@ def populate_match_table():
 		except IntegrityError:
 			print('Duplicate Key error raised from the insert_match_basic_info.')
 
-populate_stadium_and_club_tables()
-# populate_manager_table()
+# populate_stadium_and_club_tables()
+populate_manager_table()
 # populate_player_table()
 # populate_match_table()
 

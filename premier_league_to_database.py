@@ -89,11 +89,17 @@ class database:
 			self.cursor.execute(insert_statement)
 			self.conn.commit()
 
-			# get the id of the manager that just got inserted into the table
-			manager_id = self.get_id(manager_name, 'manager')
 		else:
 			print(manager_name + ' already in manager table.')
 
+	
+	def insert_manager_club(self, manager_name, club_name, season):
+		# get the id of the manager that just got inserted into the table
+		manager_id = self.get_id(manager_name, 'manager')
+
+		# get the id of the club
+		club_id = self.get_id(club_name, 'club')
+		
 		# update the manager_club table
 		try:
 			insert_statement = "INSERT INTO manager_club(manager_id, club_id, season) "
@@ -106,6 +112,7 @@ class database:
 
 		except IntegrityError:
 			print(manager_name + ' ' + str(club_id) + ' ' + season + ' already in manager_club.')
+
 
 	def insert_players(self, player_dict):
 		player_name = player_dict['player name']
