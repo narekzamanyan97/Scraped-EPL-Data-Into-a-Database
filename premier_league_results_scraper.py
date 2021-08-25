@@ -116,10 +116,10 @@ def results_retrieve_1(all_match_ids):
 			
 			# Iterating over the results to get the team names, scores, stadium names,
 			#	and then click at each result to get the details of the match
-			i = 0
+			i = 2
 
 			num_of_unique_ids = 0
-			while i < 1:
+			while i < 10:
 				# select the appropriate season from the dropdown
 				filter_season = WebDriverWait(driver, 15).until(
 						EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + all_seasons[j]  + "']"))
@@ -181,7 +181,7 @@ def results_retrieve_1(all_match_ids):
 				# So we check whether the row has already appeared on the page or not
 				while is_row_new(unique_ids, id) != True or is_row_new(all_match_ids, id) != True:
 					duplicate_result_flag = True
-					if i < original_len_results and i < 1:
+					if i < original_len_results and i < 10:
 						i += 1
 						print(i)
 						print(str(id) + ' exists.')
@@ -191,7 +191,7 @@ def results_retrieve_1(all_match_ids):
 						except IndexError:
 							break
 
-				if i < original_len_results and i < 1:
+				if i < original_len_results and i < 10:
 					# holds a result information
 					result_dict = {}
 					result_dict['match id'] = id
@@ -259,7 +259,7 @@ def results_retrieve_1(all_match_ids):
 					results_list_of_dicts.append(line_ups)
 					results_list_of_dicts.append(team_stats)
 					results_list_of_dicts.append(stadium_city_dict)
-					
+
 					# reset the stadium_city_dict
 					stadium_city_dict = {}
 					
@@ -331,52 +331,47 @@ def results_retrieve_2(driver, result_row):
 	club_names.append(away_club_name)
 
 	print('###########################################################')
+
+	# try:
+	# retrieve the events of the home side, which include goals (by penalty), 
+	#	own goals, and red cards
+	events_home_xpath = "//div[@class='matchEvents matchEventsContainer']/div[@class='home']/div[@class='event']"
+
+	stats = extract_event(driver, events_home_xpath, stats, True)
+
+	# except TimeoutException as ex:
+	# 	print('')
 	
-	# !!! have a function that handles these try-catch blocks
-	try:
-		# retrieve the events of the home side, which include goals (by penalty), 
-		#	own goals, and red cards
-		events_home_xpath = "//div[@class='matchEvents matchEventsContainer']/div[@class='home']/div[@class='event']"
 
-		stats = extract_event(driver, events_home_xpath, stats, True)
-
-	except TimeoutException as ex:
-		print('')
+	# try:
+	# retrieve the events of the away side, which include goals (by penalty), 
+	#	own goals, and red cards
+	events_away_xpath = "//div[@class='matchEvents matchEventsContainer']/div[@class='away']/div[@class='event']"
 	
+	stats = extract_event(driver, events_away_xpath, stats, False)
 
-	try:
-		# retrieve the events of the away side, which include goals (by penalty), 
-		#	own goals, and red cards
-		events_away_xpath = "//div[@class='matchEvents matchEventsContainer']/div[@class='away']/div[@class='event']"
-		
-		stats = extract_event(driver, events_away_xpath, stats, False)
+	# except TimeoutException as ex:
+	# 	print('')
 
-	except TimeoutException as ex:
-		print('')
-
-	try:
-		# retrieve the assists of the home side
-		assists_home_xpath = "//div[@class='assists']/div[@class='matchAssistsContainer']/div[@class='home']/div[@class='event']"
-		
-		stats = extract_event(driver, assists_home_xpath, stats, True)
-
-	except TimeoutException as ex:
-		print('')
-
-
-	try:
-		# retrieve the assists of the away side
-		assists_away_xpath = "//div[@class='assists']/div[@class='matchAssistsContainer']/div[@class='away']/div[@class='event']"
-
-		stats = extract_event(driver, assists_away_xpath, stats, False)
-		print(stats)
-
-	except TimeoutException as ex:
-		print('')
-
+	# try:
+	# retrieve the assists of the home side
+	assists_home_xpath = "//div[@class='assists']/div[@class='matchAssistsContainer']/div[@class='home']/div[@class='event']"
 	
-	# print('*****************************************************************')
+	stats = extract_event(driver, assists_home_xpath, stats, True)
 
+	# except TimeoutException as ex:
+	# 	print('')
+
+
+	# try:
+	# retrieve the assists of the away side
+	assists_away_xpath = "//div[@class='assists']/div[@class='matchAssistsContainer']/div[@class='away']/div[@class='event']"
+
+	stats = extract_event(driver, assists_away_xpath, stats, False)
+	print(stats)
+
+	# except TimeoutException as ex:
+	# 	print('')
 
 
 	match_date = WebDriverWait(driver, 10).until(

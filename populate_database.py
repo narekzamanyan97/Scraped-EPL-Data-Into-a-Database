@@ -17,7 +17,7 @@ def populate_stadium_and_club_tables():
 	club_list_of_dicts = club_retrieve_1()
 
 	# iterate through the list to work with the individual club dictionaries
-	#	that contains club and stadium information
+	#	that contain club and stadium information
 	for club_dict in club_list_of_dicts:
 		print(club_dict)
 		db.insert_stadiums(club_dict)
@@ -52,17 +52,16 @@ def populate_match_table():
 	match_info_list_of_list_of_dicts = results_retrieve_1(all_match_ids_in_db)
 	# print(match_info_list_of_list_of_dicts)
 
+	# !!! get all the stadium names for which the city is null. Then check it against
+	#		the match_info_list_of_dicts[5] not to use update_stadium_city 
+	#		redundantly.
+	# stadiums_and_cities_dict = ...
+
 	for match_info_list_of_dicts in match_info_list_of_list_of_dicts:
 		try:
-			# !!! first, insert the city name of the stadium into stadium table
-			print('********************************************************')
-			print('********************************************************')
-			print('********************************************************')
-			print(match_info_list_of_dicts[5])
+			# if the city is null, then call the update_stadium_city function
 			db.update_stadium_city(match_info_list_of_dicts[5])
-			print('********************************************************')
-			print('********************************************************')
-			print('********************************************************')
+			# update the stadiums_and_cities_dict
 			db.insert_match_basic_info(match_info_list_of_dicts[0], match_info_list_of_dicts[1])
 
 			match_id_and_club_names = []
@@ -78,9 +77,9 @@ def populate_match_table():
 		except IntegrityError:
 			print('Duplicate Key error raised from the insert_match_basic_info.')
 
-# populate_stadium_and_club_tables()
+populate_stadium_and_club_tables()
 # populate_manager_table()
 # populate_player_table()
-populate_match_table()
+# populate_match_table()
 
 # # db.generate_standings()

@@ -199,15 +199,14 @@ class database:
 
 	# get the stadium_name to obtain stadium_id from the stadium table
 	def insert_clubs(self, club_dict):
-		insert_statement = "INSERT INTO club (stadium_id, club_name, website) "
-
 		club_name = club_dict['club name']
 		website = club_dict['website']
 
 		# get the stadium id from the stadium table using get_id function
 		stadium_name = club_dict['stadium name']
 		stadium_id = self.get_id(stadium_name, 'stadium')
-
+		
+		insert_statement = "INSERT INTO club (stadium_id, club_name, website) "
 		insert_statement += "VALUES(" + str(stadium_id) + ", "
 		insert_statement += "\"" + str(club_name) + "\", "
 		insert_statement += "\"" + str(website) + "\");"
@@ -218,13 +217,21 @@ class database:
 
 	def insert_stadiums(self, stadium_dict):
 		stadium_name = stadium_dict['stadium name']
-		try:
+		capacity_keys = [key for key, val in stadium_dict.items() if 'capacity' in key or 'Capacity' in key]
+		print(capacity_keys)
+		capacity = stadium_dict[capacity_keys[0]]
+
+		if 'Capacity' in stadium_dict.keys():
 			capacity = stadium_dict['Capacity']
-		except KeyError:
-			# West Brom's stadium has 'The Hawthorns capacity' as its capacity
+		# West Brom's stadium has 'The Hawthorns capacity' as its capacity
+		elif 'The Hawthorns capacity' in stadium_dict.keys():
 			capacity = stadium_dict['The Hawthorns capacity']
+		# AFC Bournemouth's stadium has the capacity key below
+		elif 'Viality Stadium capacity 2018/19' in stadium_dict.keys():
+			capacity = stadium_dict['Viality Stadium capacity 2018/19']
 
 		capacity = capacity.replace(',', '')
+		
 		try:
 			record_pl_attendance = stadium_dict['Record PL attendance']
 		except KeyError as kerr:
@@ -233,13 +240,15 @@ class database:
 		address = stadium_dict['Stadium address']
 		pitch_size = stadium_dict['Pitch size']
 		built = stadium_dict['Built']
-		try:
+		
+		if 'Phone' in stadium_dict.keys():
 			phone = stadium_dict['Phone']
-		except KeyError:
-			try:
-				phone = stadium_dict['Phone - International']
-			except KeyError:
-				phone = stadium_dict['International Phone']
+		elif 'Phone - International' in stadium_dict.keys():
+			phone = stadium_dict['Phone - International']
+		elif 'International Phone' in stadium_dict.keys():
+			phone = stadium_dict['International Phone']
+		elif 'Phone - UK' in stadium_dict.keys():
+			phone = stadium_dict['Phone - UK']
 
 		insert_statement = "INSERT INTO stadium (stadium_name, capacity, record_pl_attendance, address, pitch_size, built, phone) "
 		insert_statement += "VALUES(\"" + str(stadium_name) + "\", "
@@ -844,8 +853,6 @@ class database:
 			# extract the last 5 match results
 			matchweek = 38
 			for result in list_of_dicts_last_5:
-				
-				# !!! get the results based on team name club_name
 				if result['winner'] == club_name:
 					form_last_5_dict[club_name][matchweek] = 'W'
 				elif result['winner'] != 'draw':
@@ -896,14 +903,6 @@ class database:
 			print(row_dict['team_points'], end="  ")
 			print(row_dict['form'], end="  ")
 			print()
-
-		# print(team_points)
-		# print(wins_dict)
-		# print(draws_dict)
-		# print(lost_dict)
-		# print(goals_for_dict)
-		# print(goals_against_dict)
-		# print(goal_difference_dict)
 
 # !!! get the missing players from from the player_stats and insert them into the
 #		players table

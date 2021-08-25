@@ -42,7 +42,7 @@ def club_retrieve_1():
 
 		clubs_list_of_dicts = []
 
-		for i in range(0, len(club_rows_team)):
+		for i in range(12, len(club_rows_team) - (len(club_rows_team) - 14)):
 			# again, get the player rows and links for the details
 			club_rows_team = WebDriverWait(driver, 10).until(
 					EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table']/table/tbody[@class='allTimeDataContainer']/tr/td[@class='team']/a/div[@class='nameContainer']"))
@@ -73,7 +73,7 @@ def club_retrieve_1():
 
 			# print the club info
 			# for club_dict in clubs_list_of_dicts:
-			for key, value in clubs_list_of_dicts[i].items():
+			for key, value in clubs_list_of_dicts[i - 12].items():
 				print(key + '->' + value)
 
 			print('--------------------------------------')
@@ -122,57 +122,63 @@ def club_retrieve_3(driver):
 	stadium_button = WebDriverWait(driver, 10).until(
 		EC.presence_of_all_elements_located((By.XPATH, "//nav[@class='heroPageLinks']/ul/li/a"))
 	)
-	print('line 122')
 
 	# click on the stadium button
 	driver.execute_script("arguments[0].click();", stadium_button[6])
-
-	# get the stadium information button
-	stadium_info_button = WebDriverWait(driver, 10).until(
-		EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='tablist']/li"))
-	)
-
-	# click on the stadium information button
-	driver.execute_script("arguments[0].click();", stadium_info_button[1])
-
 	
-	# get the stadium details
-	stadium_details = WebDriverWait(driver, 10).until(
-		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='articleTabContent']/div[@class='articleTab active']/p"))
-	)
-
 	temp_dict = {}
 	
-	print('line 143')
-	for detail in stadium_details:
-		type_and_detail = detail.text.split(':')
-		try:
-			type_ = type_and_detail[0]
-			type_ = type_.strip()
-			# for consistency
-			if type_ == 'Opened':
-				type_ = 'Built'
-			elif type_ == 'Tottenham Hotspur Stadium capacity':
-				type_ = 'Capacity'
+	try:
+		# get the stadium information button
+		stadium_info_button = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='tablist']/li"))
+		)
 
-			detail = type_and_detail[1]
+		# click on the stadium information button
+		driver.execute_script("arguments[0].click();", stadium_info_button[1])
+	
+		# get the stadium details
+		stadium_details = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='articleTabContent']/div[@class='articleTab active']/p"))
+		)
 
-			# Fulham's stadium's capacity has text inside the parenthesis
-			#	following the actual capacity.
-			if '(due to' in detail:
-				detail = detail.partition('(')[0]
-			# Newcastle Utd's phone has exta info
-			elif '(calls cost 7p per' in detail:
-				detail = detail.partition('calls cost')[0]
-			# SHeffield Utd also has unnecessary info
-			elif 'John Street Stand' in detail:
-				continue
+		for detail in stadium_details:
+			type_and_detail = detail.text.split(':')
+			try:
+				type_ = type_and_detail[0]
+				type_ = type_.strip()
+				# for consistency
+				if type_ == 'Opened':
+					type_ = 'Built'
+				elif type_ == 'Tottenham Hotspur Stadium capacity':
+					type_ = 'Capacity'
 
-			detail = detail.strip()
+				detail = type_and_detail[1]
 
-			temp_dict[type_] = detail
-		except IndexError:
-			break
+				# Fulham's stadium's capacity has text inside the parenthesis
+				#	following the actual capacity.
+				if '(due to' in detail:
+					detail = detail.partition('(')[0]
+				# Newcastle Utd's phone has exta info
+				elif '(calls cost 7p per' in detail:
+					detail = detail.partition('calls cost')[0]
+				# Sheffield Utd also has unnecessary info
+				elif 'John Street Stand' in detail:
+					continue
+
+				detail = detail.strip()
+
+				temp_dict[type_] = detail
+			except IndexError:
+				break
+	except TimeoutException:
+		print('Club has no stadium information.')
+		temp_dict['Capacity'] = 'Null'
+		temp_dict['Record PL attendance'] = 'Null'
+		temp_dict['Built'] = 'Null'
+		temp_dict['Pitch size'] = 'Null'
+		temp_dict['Stadium address'] = 'Null'
+		temp_dict['Phone'] = 'Null'
 
 	# go back to the previous page
 	driver.execute_script("window.history.go(-1)")
