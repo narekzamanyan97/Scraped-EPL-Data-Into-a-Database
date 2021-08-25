@@ -25,8 +25,8 @@ def all_seasons_manager_retrieve():
 
 	managers_list_of_dicts = []
 
-
-	for i in range(0, len(all_seasons_managers)):
+	counter = 0
+	for i in range(10, len(all_seasons_managers)):
 		temp_dict = {}
 
 		# get the row of the manager
@@ -42,15 +42,15 @@ def all_seasons_manager_retrieve():
 		manager_name = all_seasons_managers[i].text.splitlines()[0]
 
 		temp_dict['manager name'] = manager_name
-		print(temp_dict)
+		# print(temp_dict)
 		temp_dict.update(manager_retrieve_2(driver, all_seasons_manager_button[i]))
 		
-		
-		
 		managers_list_of_dicts.append(temp_dict)
-
+		print(managers_list_of_dicts[counter])
+		counter += 1
 		print('----------------------------------')
 		
+	return managers_list_of_dicts
 
 # get the manager's name and club, then call another fucntion to get the
 #	button to click to get the details
@@ -58,6 +58,7 @@ def manager_retrieve_1():
 	# set up the driver
 	driver = set_up_driver(urls['url_1'])
 
+	counter = 0
 	for j in range(0, len(all_seasons) - (len(all_seasons) - 1)):
 		# select the previous season from the dropdown
 		filter_season = WebDriverWait(driver, SECONDS_TO_WAIT).until(
@@ -80,7 +81,7 @@ def manager_retrieve_1():
 		managers_list_of_dicts = []
 
 		print('--------------------------------')
-		for i in range(0, len(managers)):
+		for i in range(0, len(managers) - (len(managers) - 5)):
 			temp_dict = {}
 
 			# get the manager rows and links for the details to avoid
@@ -104,12 +105,15 @@ def manager_retrieve_1():
 			temp_dict['manager club'] = manager_club
 			temp_dict['season'] = all_seasons[j]
 
+			# Since we are separating the logic of retrieve_manager_1 and all_seasons_manager_retrive,
+			#		we don't need to call the retrieve_manager_2()
 			# call manager_retrieve_2() which clicks on the manager row
-			temp_dict.update(manager_retrieve_2(driver, managers_button[i]))
+			# temp_dict.update(manager_retrieve_2(driver, managers_button[i]))
 
 			managers_list_of_dicts.append(temp_dict)
 			
-			print(managers_list_of_dicts)
+			print(managers_list_of_dicts[counter])
+			counter += 1
 
 	print('--------------------------------')
 	return managers_list_of_dicts

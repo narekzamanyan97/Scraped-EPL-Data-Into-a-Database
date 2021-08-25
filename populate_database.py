@@ -26,12 +26,21 @@ def populate_stadium_and_club_tables():
 	connection.close()
 
 def populate_manager_table():
+	# all_managers_list_of_dicts = all_seasons_manager_retrieve()
+
+	# for all_managers_dict in all_managers_list_of_dicts:
+	# 	db.insert_managers(all_managers_dict)
+	
 	managers_list_of_dicts = manager_retrieve_1()
 
-	# !!! also call the all_seasons_manager_retrieve() function before moving on
-
 	for managers_dict in managers_list_of_dicts:
-		db.insert_managers(managers_dict)
+		manager_name = managers_dict['manager name']
+		club_name = managers_dict['manager club']
+		season = managers_dict['season']
+
+		db.insert_manager_club(manager_name, club_name, season)
+
+
 	# close the connection
 	connection.close()
 

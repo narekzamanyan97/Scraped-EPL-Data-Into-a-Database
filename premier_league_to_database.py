@@ -28,7 +28,6 @@ class database:
 	def insert_managers(self, managers_dict):
 		country = managers_dict['Country of Birth']
 		manager_name = managers_dict['manager name']
-		season = managers_dict['season']
 
 		status = managers_dict['Status']
 		if status == 'Active':
@@ -64,13 +63,6 @@ class database:
 
 		epl_seasons = managers_dict['Premier League Seasons']
 		epl_debut_match = managers_dict['Premier League Debut Match']
-
-
-		club_name = managers_dict['manager club']
-
-		club_id = self.get_id(club_name, 'club')
-
-		print('manager_name = ' + manager_name)
 
 		# use the get_id function to see if the manager already is in the database
 		manager_id = self.get_id(manager_name, 'manager')
