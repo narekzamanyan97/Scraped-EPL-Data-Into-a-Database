@@ -89,6 +89,9 @@ class database:
 		# get the id of the manager that just got inserted into the table
 		manager_id = self.get_id(manager_name, 'manager')
 
+		if club_name == "Bournemouth":
+			club_name = "AFC Bournemouth"
+			
 		# get the id of the club
 		club_id = self.get_id(club_name, 'club')
 		

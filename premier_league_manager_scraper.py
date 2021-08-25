@@ -57,9 +57,12 @@ def all_seasons_manager_retrieve():
 def manager_retrieve_1():
 	# set up the driver
 	driver = set_up_driver(urls['url_1'])
-
-	counter = 0
-	for j in range(0, len(all_seasons) - (len(all_seasons) - 1)):
+	
+	managers_list_of_dicts = []
+	
+	for j in range(23, len(all_seasons)):
+		print(all_seasons[j])
+		counter = 0
 		# select the previous season from the dropdown
 		filter_season = WebDriverWait(driver, SECONDS_TO_WAIT).until(
 				EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + all_seasons[j]  + "']"))
@@ -67,7 +70,7 @@ def manager_retrieve_1():
 
 		# choose the appropriate season from the dropdown list
 		driver.execute_script("arguments[0].click();", filter_season[0])	
-
+		time.sleep(5)
 		# get the manager rows and links for the details
 		managers = WebDriverWait(driver, 10).until(														
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table']/table/tbody[@class='dataContainer']/tr"))
@@ -78,10 +81,8 @@ def manager_retrieve_1():
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table']/table/tbody[@class='dataContainer']/tr/td/a[@class='managerName']"))
 		)
 
-		managers_list_of_dicts = []
-
 		print('--------------------------------')
-		for i in range(0, len(managers) - (len(managers) - 5)):
+		for i in range(0, len(managers)):
 			temp_dict = {}
 
 			# get the manager rows and links for the details to avoid
