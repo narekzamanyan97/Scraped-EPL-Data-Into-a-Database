@@ -91,7 +91,7 @@ class database:
 
 		if club_name == "Bournemouth":
 			club_name = "AFC Bournemouth"
-			
+
 		# get the id of the club
 		club_id = self.get_id(club_name, 'club')
 		
@@ -161,7 +161,6 @@ class database:
 		club_names = player_dict['clubs']
 
 		for club_name in club_names:
-
 			# some club names end with '(loan)'. If that is the case, then remove 
 			#	the 'loan' substring
 			if '(loan)' in club_name:
@@ -198,7 +197,10 @@ class database:
 
 			except IntegrityError:
 				print(player_name + ' ' + str(club_id) + ' ' + season + ' already in player_club.')
-
+		
+		# see if the career table is ever empty. Remove later.
+		if len(club_names) == 0:
+			print(player_name + ' has no clubs in the career table.')
 	# get the stadium_name to obtain stadium_id from the stadium table
 	def insert_clubs(self, club_dict):
 		club_name = club_dict['club name']

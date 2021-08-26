@@ -26,10 +26,10 @@ def populate_stadium_and_club_tables():
 	connection.close()
 
 def populate_manager_table():
-	# all_managers_list_of_dicts = all_seasons_manager_retrieve()
+	all_managers_list_of_dicts = all_seasons_manager_retrieve()
 
-	# for all_managers_dict in all_managers_list_of_dicts:
-	# 	db.insert_managers(all_managers_dict)
+	for all_managers_dict in all_managers_list_of_dicts:
+		db.insert_managers(all_managers_dict)
 	
 	managers_list_of_dicts = manager_retrieve_1()
 
@@ -87,8 +87,8 @@ def populate_match_table():
 			print('Duplicate Key error raised from the insert_match_basic_info.')
 
 # populate_stadium_and_club_tables()
-populate_manager_table()
-# populate_player_table()
+# populate_manager_table()
+populate_player_table()
 # populate_match_table()
 
 # # db.generate_standings()

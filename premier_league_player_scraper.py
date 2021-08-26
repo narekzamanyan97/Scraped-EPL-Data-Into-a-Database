@@ -28,11 +28,17 @@ urls = {
 
 SECONDS_TO_WAIT = 15
 
+# !!! add a parameter that includes all the players in the player_club table.
+#		Then check whether the player's club data is in the player_club. If it is,
+#		then skip the player. If it is not, then add all the season-club pairs.
 # get the player's name, position, and country, then click on the row
 def player_retrieve_1():
 	season_counter = -1
 
-	for j in range(len(all_seasons) - 2, len(all_seasons) - 1):
+
+	unique_player_names = []
+
+	for j in range(1, len(all_seasons) - (len(all_seasons) - 2)):
 		print(all_seasons[j])
 		season_counter += 1
 		# call the get_all_the_player_rows() from player_row_scraper to
@@ -68,16 +74,24 @@ def player_retrieve_1():
 
 		counter = 0
 
+		# !!! make it so that all the season information is retrieved.
+		#		then check the database whether that season is present in the
+		#		player_club table. If it is, do not click on the player, just move
+		#		on to the next player. If it is not, then click on the player and
+		#		get all the season's information (the clubs he played for).
+
 		# Use this list to make sure no duplicate names are inserted into the 
 		#	player table, as the scraper sometimes clicks on the same player row
 		unique_player_names = []
 
 		original_row_amount = len(player_rows)
-
-		i = 0
+		
+		starting_counter = 15
+		i = starting_counter
 		# get the basic player information from the 
-		while i < len(player_rows) - (len(player_rows) - 3):
+		while i < len(player_rows) - (len(player_rows) - 520):
 			print(all_seasons[j])
+			print(len(player_rows))
 
 			driver.refresh()
 
@@ -109,13 +123,6 @@ def player_retrieve_1():
 			except TimeoutException:
 				print('There is no advertisement button. Moving on!')
 
-			# !!! The scraper jumps on players, or counts the same player twice.
-			#	check whether the name of the player has aleary appeared or not
-			#	if it did, go to the start of the loop and try again, 
-			#	decrementing the counter by 1.
-
-			# !!! figure out another way to get all the players from a page
-			#		without if player_name != list_of_all_players_in_order[i]
 
 			# the player_rows frequently throws a stale element error.
 			#	keep looking for the element (3 tries)
@@ -137,16 +144,38 @@ def player_retrieve_1():
 			player_name = player_row_text_list[0]
 
 
-			# Check whether the player found in this row matches the player that
-			#		is supposed to be there. If not, then go back to the main loop
-			#		and scrape the page again.
-			if player_name != list_of_all_players_in_order[i]:
-				# 	i += 1
-				print(player_name)
-				print(list_of_all_players_in_order[i])
-				print('Index Pointing to Wrong Player. Try Again!')
-				continue		 	
+			# # Check whether the player found in this row matches the player that
+			# #		is supposed to be there. If not, then go back to the main loop
+			# #		and scrape the page again.
+			# if player_name != list_of_all_players_in_order[i]:
+			# 	# 	i += 1
+			# 	print(player_name)
+			# 	print(list_of_all_players_in_order[i])
+			# 	print('Index Pointing to Wrong Player. Try Again!')
+			# 	continue
 
+			did_duplicate_occur = False
+			# if the player has already been scraped, move on to the text player
+			while is_player_new(unique_player_names, player_name) == False:
+				did_duplicate_occur = True
+				print('Player already retrieved.')
+				i += 1
+				print(i)
+				try:
+					player_row_text = player_row.text
+				except StaleElementReferenceException:
+					player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
+					player_row_text = player_row.text
+				except AttributeError:
+					player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
+					player_row_text = player_row.text
+
+				player_row_text_list = player_row_text.splitlines()
+				player_name = player_row_text_list[0]
+
+			# check whether the player has not been retrieved yet.
+			# 		if not, then append it to the unique_player_names and get the
+			#		player data		 	
 			unique_player_names.append(player_name)
 
 			player_position_and_country = player_row_text_list[1].split()
@@ -180,7 +209,10 @@ def player_retrieve_1():
 			players_list_of_dicts.append(temp_dict)
 			print('-----------------------------------------------------')
 
-			i += 1
+			if did_duplicate_occur == True:
+				i = starting_counter
+			else:
+				i += 1
 
 	return players_list_of_dicts
 
@@ -226,8 +258,11 @@ def player_retrieve_2(driver, player_row_button, season):
 		season_club_1 = 'Null'
 		season_club_2 = 'Null'
 
-		clubs_list = []
+		# !! changing the clubs_lists into a dictionary to store all seasons' data
+		# 		for a player
+		clubs_dict = {}
 
+		# !!! add all the seasons to the dictionary
 		for k in range(0, len(player_career)):
 			# If the player is transfered from one PL club to another in the
 			#		winter transfer window, then we must have two clubs for the 
@@ -235,27 +270,43 @@ def player_retrieve_2(driver, player_row_button, season):
 			#		for Arsenal and Chelsea in 2017-2018 season.
 			season_1 = player_career[k]
 			season_1_list = season_1.text.splitlines()
-			print(season_1_list)
+			
 			season_years = season_1_list[0]
 			season_formatted = season_for_career_table[season]
-			if season_years == season_formatted:
-				# if this is the first occurance of the season
-				if season_found_1 == False:
-					season_found_1 = True
-					clubs_list.append(season_1_list[1])
-					# season_club_1 = season_1_list[1]
+			
+			club_name_list = []
+			club_name = season_1_list[1]
+
+			club_name_list.append(club_name)
+			print(season_years + ' ' + club_name)
+
+			# check whether the season is already in the dictionary. If it is,
+			#		append the club of the season to the existing list.		
+			if season_years in clubs_dict.keys():
+				clubs_dict[season_years].append(club_name)
+			else:
+				clubs_dict[season_years] = club_name_list
+
+
+			# if season_years == season_formatted:
+			# 	# if this is the first occurance of the season
+			# 	if season_found_1 == False:
+			# 		season_found_1 = True
+			# 		clubs_list.append(season_1_list[1])
+			# 		# season_club_1 = season_1_list[1]
 					
-				else:
-					season_found_2 = True
-					clubs_list.append(season_1_list[1])
-					# season_club_2 = season_1_list[1]
-					break
+			# 	else:
+			# 		season_found_2 = True
+			# 		clubs_list.append(season_1_list[1])
+			# 		# season_club_2 = season_1_list[1]
+			# 		break
 
 	# Some players have no Career table populated
 	except TimeoutException:
 		print()
+		clubs_dict = {}
 
-	dict_to_return['clubs'] = clubs_list
+	dict_to_return['clubs'] = clubs_dict
 
 	# Some players have no nationality
 	try:
