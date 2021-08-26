@@ -158,45 +158,49 @@ class database:
 		else:
 			print(player_name + ' already in player table.')
 
+		# player_dict['clubs'] is a dictionary
 		club_names = player_dict['clubs']
 
-		for club_name in club_names:
-			# some club names end with '(loan)'. If that is the case, then remove 
-			#	the 'loan' substring
-			if '(loan)' in club_name:
-				# remove the '(loan)' from the club name
-				club_name = club_name.replace('(loan)', '')
-			# the 'L' in loan can be capitalized
-			elif '(Loan)' in club_name:
-				club_name = club_name.replace('(Loan)', '')
 
-			# remove U21 from the club_name
-			if 'U21' in club_name:
-				club_name = club_name.replace('U21', '')
 
-			# remove trailing spaces
-			club_name = club_name.strip()
+		for season, club_name_list in club_names.items():
+			for club_name in club_name_list:
+				# some club names end with '(loan)'. If that is the case, then remove 
+				#	the 'loan' substring
+				if '(loan)' in club_name:
+					# remove the '(loan)' from the club name
+					club_name = club_name.replace('(loan)', '')
+				# the 'L' in loan can be capitalized
+				elif '(Loan)' in club_name:
+					club_name = club_name.replace('(Loan)', '')
 
-			# For the player Lars Dendoncker, the club name has the '&' instead of
-			#	'and for Brighton and Hove Albion'
-			if club_name == 'Brighton & Hove Albion':
-				print('Changing the Brighton name')
-				club_name = 'Brighton and Hove Albion'
+				# remove U21 from the club_name
+				if 'U21' in club_name:
+					club_name = club_name.replace('U21', '')
 
-			# get the club id of the player
-			club_id = self.get_id(club_name, 'club')
+				# remove trailing spaces
+				club_name = club_name.strip()
 
-			try:
-				insert_statement = "INSERT INTO player_club(player_id, club_id, season) "
-				insert_statement += "VALUES(" + str(player_id) + ", "
-				insert_statement += str(club_id) + ", "
-				insert_statement += "\"" + season + "\");"
+				# For the player Lars Dendoncker, the club name has the '&' instead of
+				#	'and for Brighton and Hove Albion'
+				if club_name == 'Brighton & Hove Albion':
+					print('Changing the Brighton name')
+					club_name = 'Brighton and Hove Albion'
 
-				self.cursor.execute(insert_statement)
-				self.conn.commit()
+				# get the club id of the player
+				club_id = self.get_id(club_name, 'club')
 
-			except IntegrityError:
-				print(player_name + ' ' + str(club_id) + ' ' + season + ' already in player_club.')
+				try:
+					insert_statement = "INSERT INTO player_club(player_id, club_id, season) "
+					insert_statement += "VALUES(" + str(player_id) + ", "
+					insert_statement += str(club_id) + ", "
+					insert_statement += "\"" + season + "\");"
+
+					self.cursor.execute(insert_statement)
+					self.conn.commit()
+
+				except IntegrityError:
+					print(player_name + ' ' + str(club_name) + ' ' + season + ' already in player_club.')
 		
 		# see if the career table is ever empty. Remove later.
 		if len(club_names) == 0:

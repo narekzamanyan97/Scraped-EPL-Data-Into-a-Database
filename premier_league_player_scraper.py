@@ -89,7 +89,7 @@ def player_retrieve_1():
 		starting_counter = 15
 		i = starting_counter
 		# get the basic player information from the 
-		while i < len(player_rows) - (len(player_rows) - 520):
+		while i < len(player_rows) - (len(player_rows) - 16):
 			print(all_seasons[j])
 			print(len(player_rows))
 
@@ -278,7 +278,11 @@ def player_retrieve_2(driver, player_row_button, season):
 			club_name = season_1_list[1]
 
 			club_name_list.append(club_name)
+			# change the format of season_years from YYYY/YYYY to YYYY/YY
+			season_years = season_years[:5] + season_years[7:]
 			print(season_years + ' ' + club_name)
+
+
 
 			# check whether the season is already in the dictionary. If it is,
 			#		append the club of the season to the existing list.		
