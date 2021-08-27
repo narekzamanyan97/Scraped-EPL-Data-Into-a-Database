@@ -31,10 +31,13 @@ SECONDS_TO_WAIT = 15
 # !!! add a parameter that includes all the players in the player_club table.
 #		Then check whether the player's club data is in the player_club. If it is,
 #		then skip the player. If it is not, then add all the season-club pairs.
+# @parameters:
+#	player_club_list = all the rows of player_club used to check whether the player's
+#		information is already in the database or not. If it is, do not click on
+#		the player row button.
 # get the player's name, position, and country, then click on the row
-def player_retrieve_1():
+def player_retrieve_1(player_club_list):
 	season_counter = -1
-
 
 	unique_player_names = []
 
@@ -86,10 +89,10 @@ def player_retrieve_1():
 
 		original_row_amount = len(player_rows)
 		
-		starting_counter = 15
+		starting_counter = 16
 		i = starting_counter
 		# get the basic player information from the 
-		while i < len(player_rows) - (len(player_rows) - 16):
+		while i < len(player_rows) - (len(player_rows) - 26):
 			print(all_seasons[j])
 			print(len(player_rows))
 
@@ -291,20 +294,6 @@ def player_retrieve_2(driver, player_row_button, season):
 			else:
 				clubs_dict[season_years] = club_name_list
 
-
-			# if season_years == season_formatted:
-			# 	# if this is the first occurance of the season
-			# 	if season_found_1 == False:
-			# 		season_found_1 = True
-			# 		clubs_list.append(season_1_list[1])
-			# 		# season_club_1 = season_1_list[1]
-					
-			# 	else:
-			# 		season_found_2 = True
-			# 		clubs_list.append(season_1_list[1])
-			# 		# season_club_2 = season_1_list[1]
-			# 		break
-
 	# Some players have no Career table populated
 	except TimeoutException:
 		print()
@@ -345,5 +334,12 @@ def player_retrieve_2(driver, player_row_button, season):
 
 	return dict_to_return
 
+def is_player_data_in_player_club(player_club_list, player_name, season):
+	is_in_database = False
+	for player_club_row in player_club_list:
+		if player_club_list['player_name'] == player_name:
+			if player_club_list['season'] == season:
+				is_in_database = True
+				return is_in_database
 
-# Jan Bednarek plays in Southampton
+	return is_in_database

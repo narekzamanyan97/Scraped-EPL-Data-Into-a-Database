@@ -612,6 +612,18 @@ class database:
 			except KeyError:
 				return 0, 0
 
+	def get_player_clubs(self):
+		query = "SELECT p.player_name, p_c.season "
+		query += "FROM player_club AS p_c INNER JOIN player as p ON p_c.player_id=p.player_id;"
+
+		self.cursor.execute(query)
+		tuple_list = self.cursor.fetchall()
+		player_club_list_of_dicts = self.convert_from_tuple_list_to_dict(tuple_list)
+
+		for player_club_dict in player_club_list_of_dicts:
+			print(player_club_dict)
+
+
 	def get_top_players(self, number_of_rows, type_of_stat):
 		query = "SELECT p.player_name, count(p_p.player_id) as number_of_goals FROM player as p, player_performance as p_p "
 		query += "WHERE p.player_id=p_p.player_id and p_p.type_of_stat=1"
