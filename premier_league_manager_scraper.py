@@ -5,7 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 from set_up_driver import *
-from custom_functions import *
+from helper_functions import *
 
 SECONDS_TO_WAIT = 15
 

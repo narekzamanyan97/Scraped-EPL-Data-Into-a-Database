@@ -15,7 +15,7 @@ from set_up_driver import *
 
 from premier_league_player_scraper import *
 
-from custom_functions import *
+from helper_functions import *
 
 urls = {
 	'url_1': 'https://www.premierleague.com/players',

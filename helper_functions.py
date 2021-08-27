@@ -125,3 +125,20 @@ def is_player_new(list_of_players, player_name):
 		return False
 	except ValueError:
 		return True
+
+
+# return true if the given player and season have already been inserted into the
+#		player_club table. Return false otherwise.
+# @parameters:
+#		player_club_list = all the rows of player_club table as a list of dicts
+#		player_name = the name of the player
+#		season = the season
+def is_player_data_in_player_club(player_club_list, player_name, season):
+	is_in_database = False
+	for player_club_row in player_club_list:
+		if player_club_row['player_name'] == player_name:
+			if player_club_row['season'] == season:
+				is_in_database = True
+				return is_in_database
+
+	return is_in_database

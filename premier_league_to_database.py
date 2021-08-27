@@ -620,8 +620,7 @@ class database:
 		tuple_list = self.cursor.fetchall()
 		player_club_list_of_dicts = self.convert_from_tuple_list_to_dict(tuple_list)
 
-		for player_club_dict in player_club_list_of_dicts:
-			print(player_club_dict)
+		return player_club_list_of_dicts
 
 
 	def get_top_players(self, number_of_rows, type_of_stat):

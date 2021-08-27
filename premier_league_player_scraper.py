@@ -14,7 +14,7 @@ from set_up_driver import *
 
 from player_row_scraper import *
 
-from custom_functions import *
+from helper_functions import *
 
 
 # from premier_league_to_database import *
@@ -44,13 +44,15 @@ def player_retrieve_1(player_club_list):
 	for j in range(1, len(all_seasons) - (len(all_seasons) - 2)):
 		print(all_seasons[j])
 		season_counter += 1
+
+		# No need for this
 		# call the get_all_the_player_rows() from player_row_scraper to
 		#	get the correct order of all the players and check this scraper
 		#	to match the correct order.
-		list_of_all_players_in_order = get_all_the_player_rows(all_seasons[j])
+		# list_of_all_players_in_order = get_all_the_player_rows(all_seasons[j])
 	
-		print('***********************')
-		print(len(list_of_all_players_in_order))
+		# print('***********************')
+		# print(len(list_of_all_players_in_order))
 
 
 		# set up the driver
@@ -89,10 +91,11 @@ def player_retrieve_1(player_club_list):
 
 		original_row_amount = len(player_rows)
 		
-		starting_counter = 16
+		starting_counter = 15
 		i = starting_counter
+		last_index = 20
 		# get the basic player information from the 
-		while i < len(player_rows) - (len(player_rows) - 26):
+		while i < len(player_rows) - (len(player_rows) - last_index):
 			print(all_seasons[j])
 			print(len(player_rows))
 
@@ -146,35 +149,32 @@ def player_retrieve_1(player_club_list):
 			player_row_text_list = player_row_text.splitlines()
 			player_name = player_row_text_list[0]
 
-
-			# # Check whether the player found in this row matches the player that
-			# #		is supposed to be there. If not, then go back to the main loop
-			# #		and scrape the page again.
-			# if player_name != list_of_all_players_in_order[i]:
-			# 	# 	i += 1
-			# 	print(player_name)
-			# 	print(list_of_all_players_in_order[i])
-			# 	print('Index Pointing to Wrong Player. Try Again!')
-			# 	continue
-
 			did_duplicate_occur = False
-			# if the player has already been scraped, move on to the text player
-			while is_player_new(unique_player_names, player_name) == False:
-				did_duplicate_occur = True
-				print('Player already retrieved.')
+			# if the player has already been scraped, move on to the next player
+			# 	or if the player_season combination (the club is not relevant) is
+			#	already present in the player_club table, move on the the next player.
+			while (is_player_new(unique_player_names, player_name) == False or is_player_data_in_player_club(player_club_list, player_name, all_seasons[j])) and i < last_index:
+				
+				# print so that we know the reason the code skips the player
+				if is_player_new(unique_player_names, player_name) == False and is_player_data_in_player_club(player_club_list, player_name, all_seasons[j]) == False:
+					print('Player already retrieved.')
+					did_duplicate_occur = True
+				elif is_player_data_in_player_club(player_club_list, player_name, all_seasons[j]) == True:
+					print('Player-season combination already in player_club.')
+
 				i += 1
 				print(i)
-				try:
-					player_row_text = player_row.text
-				except StaleElementReferenceException:
-					player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
-					player_row_text = player_row.text
-				except AttributeError:
-					player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
-					player_row_text = player_row.text
+				
+				# get the next player row without refreshing the page.
+				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
+				player_row_text = player_row.text
 
 				player_row_text_list = player_row_text.splitlines()
 				player_name = player_row_text_list[0]
+				print(player_name)
+
+			if i >= last_index:
+				continue
 
 			# check whether the player has not been retrieved yet.
 			# 		if not, then append it to the unique_player_names and get the
@@ -212,7 +212,7 @@ def player_retrieve_1(player_club_list):
 			players_list_of_dicts.append(temp_dict)
 			print('-----------------------------------------------------')
 
-			if did_duplicate_occur == True:
+			if did_duplicate_occur == True and i < last_index:
 				i = starting_counter
 			else:
 				i += 1
@@ -333,13 +333,3 @@ def player_retrieve_2(driver, player_row_button, season):
 	driver.execute_script("window.history.go(-1)")
 
 	return dict_to_return
-
-def is_player_data_in_player_club(player_club_list, player_name, season):
-	is_in_database = False
-	for player_club_row in player_club_list:
-		if player_club_list['player_name'] == player_name:
-			if player_club_list['season'] == season:
-				is_in_database = True
-				return is_in_database
-
-	return is_in_database

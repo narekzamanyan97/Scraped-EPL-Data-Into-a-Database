@@ -46,7 +46,12 @@ def populate_manager_table():
 
 
 def populate_player_table():
-	player_list_of_dicts = player_retrieve_1()
+	# retrieve all the rows from player_clubs table
+	player_club_list_of_dicts = db.get_player_clubs()
+	for dict_ in player_club_list_of_dicts:
+		print(dict_)
+
+	player_list_of_dicts = player_retrieve_1(player_club_list_of_dicts)
 	
 	for player_dict in player_list_of_dicts:
 		db.insert_players(player_dict)
@@ -88,8 +93,7 @@ def populate_match_table():
 
 # populate_stadium_and_club_tables()
 # populate_manager_table()
-# populate_player_table()
-db.get_player_clubs()
+populate_player_table()
 # populate_match_table()
 
 # # db.generate_standings()

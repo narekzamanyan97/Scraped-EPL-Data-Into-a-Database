@@ -13,7 +13,7 @@ import re
 
 from set_up_driver import *
 
-from custom_functions import *
+from helper_functions import *
 
 urls = {
 	'url_1': 'https://www.premierleague.com/results?co=1&se=363&cl=-1',
