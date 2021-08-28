@@ -41,7 +41,7 @@ def player_retrieve_1(player_club_list):
 
 	unique_player_names = []
 
-	for j in range(1, len(all_seasons) - (len(all_seasons) - 2)):
+	for j in range(4, len(all_seasons) - (len(all_seasons) - 5)):
 		print(all_seasons[j])
 		season_counter += 1
 
@@ -90,10 +90,11 @@ def player_retrieve_1(player_club_list):
 		unique_player_names = []
 
 		original_row_amount = len(player_rows)
-		
-		starting_counter = 15
+
+		starting_counter = 431
+		last_index = 450
+
 		i = starting_counter
-		last_index = 20
 		# get the basic player information from the 
 		while i < len(player_rows) - (len(player_rows) - last_index):
 			print(all_seasons[j])
@@ -150,6 +151,7 @@ def player_retrieve_1(player_club_list):
 			player_name = player_row_text_list[0]
 
 			did_duplicate_occur = False
+
 			# if the player has already been scraped, move on to the next player
 			# 	or if the player_season combination (the club is not relevant) is
 			#	already present in the player_club table, move on the the next player.
@@ -165,14 +167,17 @@ def player_retrieve_1(player_club_list):
 				i += 1
 				print(i)
 				
-				# get the next player row without refreshing the page.
-				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
-				player_row_text = player_row.text
+				if i < last_index:
+					# get the next player row without refreshing the page.
+					player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
+					player_row_text = player_row.text
 
-				player_row_text_list = player_row_text.splitlines()
-				player_name = player_row_text_list[0]
-				print(player_name)
+					player_row_text_list = player_row_text.splitlines()
+					player_name = player_row_text_list[0]
+					print(player_name)
 
+			# make sure to exit the loop if the while loop above has incremented
+			#		i above 
 			if i >= last_index:
 				continue
 
