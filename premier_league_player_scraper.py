@@ -41,7 +41,7 @@ def player_retrieve_1(player_club_list):
 
 	unique_player_names = []
 
-	for j in range(4, len(all_seasons) - (len(all_seasons) - 5)):
+	for j in range(5, len(all_seasons) - (len(all_seasons) - 6)):
 		print(all_seasons[j])
 		season_counter += 1
 
@@ -91,8 +91,9 @@ def player_retrieve_1(player_club_list):
 
 		original_row_amount = len(player_rows)
 
-		starting_counter = 431
-		last_index = 450
+
+		starting_counter = 590
+		last_index = len(player_rows)
 
 		i = starting_counter
 		# get the basic player information from the 
@@ -100,6 +101,7 @@ def player_retrieve_1(player_club_list):
 			print(all_seasons[j])
 			print(len(player_rows))
 
+			last_index = len(player_rows)
 			driver.refresh()
 
 			print(i)

@@ -140,7 +140,7 @@ class database:
 		
 		# Some players have label.substitute as the position. In that case,
 		#		insert 'Null' for the position.
-		if len(position) >= 12:
+		if len(position) > 12:
 			position = 'Null'
 
 		player_id = self.get_id(player_name, 'player')

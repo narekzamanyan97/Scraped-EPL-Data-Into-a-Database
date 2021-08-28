@@ -104,6 +104,8 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index, season='20
 		el_not_stale = False
 		while el_not_stale == False and tries < 3:
 			try:
+				print('element ' + str(len(element)))
+				print('index ' + str(index))
 				el = element[index]
 				
 				return el
@@ -113,6 +115,13 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index, season='20
 					EC.presence_of_all_elements_located((By.XPATH, xpath))
 				)
 				tries += 1
+			except IndexError:
+				# in this case the element is stale, find it again
+				element = WebDriverWait(driver, seconds_to_wait).until(
+					EC.presence_of_all_elements_located((By.XPATH, xpath))
+				)
+				tries += 1
+				print(str(index) + ' index out of range of ' + str(len(element)))
 	else:
 		return element
 
