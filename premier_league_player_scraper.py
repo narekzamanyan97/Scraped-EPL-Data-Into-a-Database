@@ -41,7 +41,7 @@ def player_retrieve_1(player_club_list):
 
 	unique_player_names = []
 
-	for j in range(5, len(all_seasons) - (len(all_seasons) - 6)):
+	for j in range(15, len(all_seasons) - (len(all_seasons) - 16)):
 		print(all_seasons[j])
 		season_counter += 1
 
@@ -73,7 +73,15 @@ def player_retrieve_1(player_club_list):
 
 		# get the player rows to start the for loop
 		player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
-		player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=all_seasons[j])
+		stale_element_exception_occurred = True
+
+		while stale_element_exception_occurred == True:
+			try:
+				player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=all_seasons[j])
+				stale_element_exception_occurred = False
+			except StaleElementReferenceException:
+				print('**********************************************Stale element exception.')
+
 
 		players_list_of_dicts = []
 
@@ -92,8 +100,8 @@ def player_retrieve_1(player_club_list):
 		original_row_amount = len(player_rows)
 
 
-		starting_counter = 590
-		last_index = len(player_rows)
+		starting_counter = 300
+		last_index = 400
 
 		i = starting_counter
 		# get the basic player information from the 
@@ -101,7 +109,6 @@ def player_retrieve_1(player_club_list):
 			print(all_seasons[j])
 			print(len(player_rows))
 
-			last_index = len(player_rows)
 			driver.refresh()
 
 			print(i)
@@ -115,6 +122,8 @@ def player_retrieve_1(player_club_list):
 			#	update
 			player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
 			
+			# last_index = len(player_rows)
+
 			# often the number of rows found varies. The actual number is 863
 			#	if the presence_of_all_el_located throws an IndexError
 			#	(list index out of range), then we should refresh the page and
@@ -122,6 +131,7 @@ def player_retrieve_1(player_club_list):
 			try:
 				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
 			except IndexError:
+				print('continue*******************')
 				continue
 
 			# exit the advertisement screen
@@ -140,14 +150,16 @@ def player_retrieve_1(player_club_list):
 			#	above. So the returned element is stale, even though it was not
 			#	stale right before returing it from the function
 			# Try and catch the exception, and call the funciton in the catch (except) 
-			try:
-				player_row_text = player_row.text
-			except StaleElementReferenceException:
+			stale_el_exc_occ = True
+			while stale_el_exc_occ == True:
 				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
-				player_row_text = player_row.text
-			except AttributeError:
-				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
-				player_row_text = player_row.text
+				try:
+					player_row_text = player_row.text
+					stale_el_exc_occ = False
+				except StaleElementReferenceException:
+					print('*******************************stale_el_exc_occ.')
+				except AttributeError:
+					print('*******************************AttributeError.')
 
 			player_row_text_list = player_row_text.splitlines()
 			player_name = player_row_text_list[0]
@@ -170,19 +182,31 @@ def player_retrieve_1(player_club_list):
 				print(i)
 				
 				if i < last_index:
+					print('i = ' + str(i))
+					print('last_index = ' + str(last_index))
 					# get the next player row without refreshing the page.
-					player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
-					player_row_text = player_row.text
+					stale_el_exc = True
+					while stale_el_exc == True:
+						player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
+						try:
+							player_row_text = player_row.text
+							stale_el_exc = False
+						except StaleElementReferenceException:
+							print('************************************************Stale el exc.')
+						except AttributeError:
+							print()
 
 					player_row_text_list = player_row_text.splitlines()
 					player_name = player_row_text_list[0]
 					print(player_name)
+				else:
+					continue
 
 			# make sure to exit the loop if the while loop above has incremented
 			#		i above 
 			if i >= last_index:
 				continue
-
+	
 			# check whether the player has not been retrieved yet.
 			# 		if not, then append it to the unique_player_names and get the
 			#		player data		 	
