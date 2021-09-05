@@ -46,15 +46,22 @@ def populate_manager_table():
 
 
 def populate_player_table():
-	# retrieve all the rows from player_clubs table
-	player_club_list_of_dicts = db.get_player_clubs()
-	for dict_ in player_club_list_of_dicts:
-		print(dict_)
-
-	player_list_of_dicts = player_retrieve_1(player_club_list_of_dicts)
 	
-	for player_dict in player_list_of_dicts:
-		db.insert_players(player_dict)
+
+
+	for j in range(29, 31):
+		# retrieve all the rows from player_clubs table corresponding to the given season
+		season = all_seasons[j]
+		print(season)
+		player_club_list_of_dicts = db.get_player_clubs(season)
+		
+		for dict_ in player_club_list_of_dicts:
+		 	print(dict_)
+	
+		player_list_of_dicts = player_retrieve_1(player_club_list_of_dicts, j)
+		
+		for player_dict in player_list_of_dicts:
+			db.insert_players(player_dict)
 
 	# close the connection
 	connection.close()

@@ -72,7 +72,6 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index, season='20
 			elif index == -2:
 				el_found = True
 			else:
-				print('right before printing 30.')
 				print(len(element))
 				# scroll down to the bottom of the page to include all the players
 				driver.refresh()

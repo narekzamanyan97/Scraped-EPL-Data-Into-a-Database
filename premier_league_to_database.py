@@ -617,9 +617,9 @@ class database:
 			except KeyError:
 				return 0, 0
 
-	def get_player_clubs(self):
+	def get_player_clubs(self, season):
 		query = "SELECT p.player_name, p_c.season "
-		query += "FROM player_club AS p_c INNER JOIN player as p ON p_c.player_id=p.player_id;"
+		query += "FROM player_club AS p_c INNER JOIN player as p ON p_c.player_id=p.player_id WHERE p_c.season=\"" + str(season) + "\";"
 
 		self.cursor.execute(query)
 		tuple_list = self.cursor.fetchall()

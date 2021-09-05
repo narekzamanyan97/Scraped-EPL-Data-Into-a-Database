@@ -36,12 +36,12 @@ SECONDS_TO_WAIT = 15
 #		information is already in the database or not. If it is, do not click on
 #		the player row button.
 # get the player's name, position, and country, then click on the row
-def player_retrieve_1(player_club_list):
+def player_retrieve_1(player_club_list, start_range):
 	season_counter = -1
 
 	unique_player_names = []
 
-	for j in range(15, len(all_seasons) - (len(all_seasons) - 16)):
+	for j in range(start_range, len(all_seasons) - (len(all_seasons) - start_range - 1)):
 		print(all_seasons[j])
 		season_counter += 1
 
@@ -99,20 +99,18 @@ def player_retrieve_1(player_club_list):
 
 		original_row_amount = len(player_rows)
 
+		starting_counter = 0
 
-		starting_counter = 300
-		last_index = 400
+		last_index = len(player_rows)
 
 		i = starting_counter
 		# get the basic player information from the 
 		while i < len(player_rows) - (len(player_rows) - last_index):
 			print(all_seasons[j])
+			print('start_range = ' + str(start_range))
 			print(len(player_rows))
-
+			
 			driver.refresh()
-
-			print(i)
-			print(counter)
 
 			# get the player_rows for the for loop, so we can count the
 			#	number of players
@@ -122,7 +120,7 @@ def player_retrieve_1(player_club_list):
 			#	update
 			player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
 			
-			# last_index = len(player_rows)
+			last_index = len(player_rows)
 
 			# often the number of rows found varies. The actual number is 863
 			#	if the presence_of_all_el_located throws an IndexError
@@ -151,7 +149,7 @@ def player_retrieve_1(player_club_list):
 			#	stale right before returing it from the function
 			# Try and catch the exception, and call the funciton in the catch (except) 
 			stale_el_exc_occ = True
-			while stale_el_exc_occ == True:
+			while stale_el_exc_occ == True and i < last_index:
 				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
 				try:
 					player_row_text = player_row.text
@@ -173,10 +171,11 @@ def player_retrieve_1(player_club_list):
 				
 				# print so that we know the reason the code skips the player
 				if is_player_new(unique_player_names, player_name) == False and is_player_data_in_player_club(player_club_list, player_name, all_seasons[j]) == False:
-					print('Player already retrieved.')
+					# print('Player already retrieved.')
 					did_duplicate_occur = True
 				elif is_player_data_in_player_club(player_club_list, player_name, all_seasons[j]) == True:
-					print('Player-season combination already in player_club.')
+					# print('Player-season combination already in player_club.')
+					print()
 
 				i += 1
 				print(i)
@@ -186,7 +185,7 @@ def player_retrieve_1(player_club_list):
 					print('last_index = ' + str(last_index))
 					# get the next player row without refreshing the page.
 					stale_el_exc = True
-					while stale_el_exc == True:
+					while stale_el_exc == True and i < last_index:
 						player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j])
 						try:
 							player_row_text = player_row.text
@@ -198,7 +197,7 @@ def player_retrieve_1(player_club_list):
 
 					player_row_text_list = player_row_text.splitlines()
 					player_name = player_row_text_list[0]
-					print(player_name)
+					# print(player_name)
 				else:
 					continue
 
