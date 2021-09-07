@@ -46,7 +46,7 @@ season_for_career_table = {'1992/93': '1992/1993', '1993/94': '1993/1994', '1994
 #		once to find it, as the chances are it is not there.
 #		Same with the shirt number, a lot of players don't have their
 #		shirt number specified
-def presence_of_all_el_located(driver, xpath, seconds_to_wait, index, season='2020/21'):
+def presence_of_all_el_located(driver, xpath, seconds_to_wait, index, season='2020/21', is_by_season_and_club=False):
 	tries = 0
 	el_found = False
 	
@@ -67,7 +67,10 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index, season='20
 			)
 
 			# make sure there are the right number of player rows before continuing
-			if index >= -1 and len(element) >= num_of_player_rows - margin_of_error:
+			# If the caller is the player_retrieve_by_season_and_club function, then
+			#		there are barely 30 players on the page for the club for the given
+			#		season. So do not take the number of players into consideration)
+			if (index >= -1 and len(element) >= num_of_player_rows - margin_of_error) or is_by_season_and_club==True:
 				el_found = True
 			elif index == -2:
 				el_found = True

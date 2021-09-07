@@ -28,9 +28,125 @@ urls = {
 
 SECONDS_TO_WAIT = 15
 
-# !!! add a parameter that includes all the players in the player_club table.
-#		Then check whether the player's club data is in the player_club. If it is,
-#		then skip the player. If it is not, then add all the season-club pairs.
+def player_retrieve_by_season_and_club(player_club_list=[]):
+	driver = set_up_driver(urls['url_1'])
+	print('after setting up the driver')
+	for j in range(0, 1):
+		if all_seasons[j] < '1995/96':
+			number_of_clubs = 22
+		else:
+			number_of_clubs = 20
+
+		# iterate over the 
+		for i in range(0, number_of_clubs):
+			# select the appropriate season from the dropdown
+			filter_season = WebDriverWait(driver, 15).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + all_seasons[j]  + "']"))
+			)
+
+			# choose the appropriate season from the dropdown list
+			driver.execute_script("arguments[0].click();", filter_season[0])
+			
+			print('after filter season')
+			time.sleep(5)
+
+			filter_club = WebDriverWait(driver, 15).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList' and @data-dropdown-list='clubs']/li[@role='option' and @data-option-index=\"" + str(i) + "\"]"))
+			)
+
+			# choose the next club from the season
+			driver.execute_script("arguments[0].click();", filter_club[0])
+			print('after filter club')
+			time.sleep(5)
+
+			# get the player rows and links for the details after the page
+			#	update
+			player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
+
+			# get the player_rows for the for loop, so we can count the
+			#	number of players
+			player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=all_seasons[j], is_by_season_and_club=True)
+			
+
+			player_index = 0
+
+			last_index = len(player_rows)
+
+			print(last_index)
+			
+			# loop through the player rows and obtain player data
+			while player_index < last_index:
+				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j], is_by_season_and_club=True)
+
+
+				# get the text from the player row.
+				player_row_text = player_row.text
+
+				player_row_text_list = player_row_text.splitlines()
+				player_name = player_row_text_list[0]
+
+				last_index = len(player_rows)
+
+				print(last_index)
+
+				while (is_player_new(unique_player_names, player_name) == False or is_player_data_in_player_club(player_club_list, player_name, all_seasons[j])) and player_index < last_index:
+					# print so that we know the reason the code skips the player
+					if is_player_new(unique_player_names, player_name) == False and is_player_data_in_player_club(player_club_list, player_name, all_seasons[j]) == False:
+						# print('Player already retrieved.')
+						did_duplicate_occur = True
+					elif is_player_data_in_player_club(player_club_list, player_name, all_seasons[j]) == True:
+						# print('Player-season combination already in player_club.')
+						print()
+
+					if i < last_index:
+						print('i = ' + str(i))
+						print('last_index = ' + str(last_index))
+			
+						# get the next player row without refreshing the page.
+						player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j], is_by_season_and_club=True)
+						player_row_text = player_row.text
+
+						player_row_text_list = player_row_text.splitlines()
+						player_name = player_row_text_list[0]
+					else:
+						continue
+
+				if player_index >= last_index:
+					continue
+	
+				# check whether the player has not been retrieved yet.
+				# 		if not, then append it to the unique_player_names and get the
+				#		player data		 	
+				unique_player_names.append(player_name)
+
+				player_position_and_country = player_row_text_list[1].split()
+				player_position = player_position_and_country[0]
+				
+				# get the country of the player: some player rows are missing the 
+				#	country column
+				try:
+					player_country = player_position_and_country[1]
+				except IndexError:
+					player_country = 'Null'
+				
+				temp_dict = {}
+
+			
+				counter += 1
+
+				# add the player info to a dictionary
+				temp_dict['player name'] = player_name
+				temp_dict['position'] = player_position
+				temp_dict['country'] = player_country
+				temp_dict['season'] = all_seasons[j]
+
+				player_row_buttons_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a"
+				player_row_button = presence_of_all_el_located(driver, player_row_buttons_xpath, SECONDS_TO_WAIT, i, season=all_seasons[j], is_by_season_and_club=True)
+				# add the player's detailed info to the temp_dict 
+				player_details_dict = player_retrieve_2(driver, player_row_button, all_seasons[j])
+
+				player_index += 1
+
 # @parameters:
 #	player_club_list = all the rows of player_club used to check whether the player's
 #		information is already in the database or not. If it is, do not click on
@@ -44,16 +160,6 @@ def player_retrieve_1(player_club_list, start_range):
 	for j in range(start_range, len(all_seasons) - (len(all_seasons) - start_range - 1)):
 		print(all_seasons[j])
 		season_counter += 1
-
-		# No need for this
-		# call the get_all_the_player_rows() from player_row_scraper to
-		#	get the correct order of all the players and check this scraper
-		#	to match the correct order.
-		# list_of_all_players_in_order = get_all_the_player_rows(all_seasons[j])
-	
-		# print('***********************')
-		# print(len(list_of_all_players_in_order))
-
 
 		# set up the driver
 		driver = set_up_driver(urls['url_1'])
@@ -87,11 +193,6 @@ def player_retrieve_1(player_club_list, start_range):
 
 		counter = 0
 
-		# !!! make it so that all the season information is retrieved.
-		#		then check the database whether that season is present in the
-		#		player_club table. If it is, do not click on the player, just move
-		#		on to the next player. If it is not, then click on the player and
-		#		get all the season's information (the clubs he played for).
 
 		# Use this list to make sure no duplicate names are inserted into the 
 		#	player table, as the scraper sometimes clicks on the same player row
@@ -238,6 +339,7 @@ def player_retrieve_1(player_club_list, start_range):
 			player_details_dict = player_retrieve_2(driver, player_row_button, all_seasons[j])
 			temp_dict.update(player_details_dict)
 			print(temp_dict)
+
 			# add the temp_dict to the list later to be returned from the function
 			players_list_of_dicts.append(temp_dict)
 			print('-----------------------------------------------------')

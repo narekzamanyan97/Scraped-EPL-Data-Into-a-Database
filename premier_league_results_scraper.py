@@ -31,7 +31,7 @@ def results_retrieve_1(all_match_ids):
 	stadium_city_dict = {}
 
 	# iterate over the seasons
-	for j in range(len(all_seasons) - 2, len(all_seasons) - 1):
+	for j in range(0, len(all_seasons) - (len(all_seasons) - 1)):
 		try:
 			print(all_seasons[j])
 			# select the appropriate season from the dropdown
@@ -103,6 +103,10 @@ def results_retrieve_1(all_match_ids):
 					EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
 				)
 				
+
+			# !!! Tottenham played in London Stadium. I have it, so no changes may be
+			#		needed
+
 			original_len_results = len(results)
 			print('original results: ' + str(len(results)))
 			# 	stadiums = WebDriverWait(driver, 10).until(
@@ -116,10 +120,13 @@ def results_retrieve_1(all_match_ids):
 			
 			# Iterating over the results to get the team names, scores, stadium names,
 			#	and then click at each result to get the details of the match
-			i = 2
+			start_index = 0
+			last_index = 4
+
+			i = start_index
 
 			num_of_unique_ids = 0
-			while i < 10:
+			while i < last_index:
 				# select the appropriate season from the dropdown
 				filter_season = WebDriverWait(driver, 15).until(
 						EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + all_seasons[j]  + "']"))
@@ -140,7 +147,7 @@ def results_retrieve_1(all_match_ids):
 				results = WebDriverWait(driver, 10).until(
 					EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
 				)
-				while len(results) < original_len_results:
+				while len(results) < number_of_matchweeks:
 					driver.refresh()
 					time.sleep(5)
 					print(len(results))
@@ -181,7 +188,7 @@ def results_retrieve_1(all_match_ids):
 				# So we check whether the row has already appeared on the page or not
 				while is_row_new(unique_ids, id) != True or is_row_new(all_match_ids, id) != True:
 					duplicate_result_flag = True
-					if i < original_len_results and i < 10:
+					if i < original_len_results and i < last_index:
 						i += 1
 						print(i)
 						print(str(id) + ' exists.')
@@ -191,7 +198,7 @@ def results_retrieve_1(all_match_ids):
 						except IndexError:
 							break
 
-				if i < original_len_results and i < 10:
+				if i < original_len_results and i < last_index:
 					# holds a result information
 					result_dict = {}
 					result_dict['match id'] = id
@@ -485,6 +492,14 @@ def results_retrieve_3(driver):
 
 	print(formation_home + ' : ' + formation_away)
 
+	# get all the players from both squads, then check whether the players are in the db
+	#	if not, call !!! another function !!! to click on the player and insert the player
+	#	info.
+	# !!! Filter players both by club and by year to get all the players in player_scraper 
+	# player_buttons = WebDriverWait(driver, 10).until(
+	# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList']/li[@class='player']/a"))
+	# )
+
 	line_ups_home = extract_player_information(squad_home_number, squad_home_info, True)
 	line_ups_away = extract_player_information(squad_away_number, squad_away_info, False)
 
@@ -570,12 +585,20 @@ def extract_player_information(squad_number, squad_info, is_home_side):
 
 		temp_dict['Is Home Side'] = is_home_side
 		
-		# get the player's number
-		player_number = number[1]
-		temp_dict['Shirt Number'] = player_number
+		# Some players in the old results have no number
+		try:
+			# get the player's number
+			player_number = number[1]
+			temp_dict['Shirt Number'] = player_number
+		except IndexError:
+			temp_dict['Shirt Number'] = 'Null'
 		
 		# get the player's name from the list
 		player_name = info[0]
+
+
+		# !!! check if the player is already in db. If not, click on the player and
+		#		retrieve his information
 
 		# Fill in the dictionary to be added to squad_home_dict
 		if starting_11_counter <= 11:

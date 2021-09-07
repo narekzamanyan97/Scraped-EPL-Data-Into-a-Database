@@ -49,7 +49,7 @@ def populate_player_table():
 	
 
 
-	for j in range(29, 31):
+	for j in range(0, 30):
 		# retrieve all the rows from player_clubs table corresponding to the given season
 		season = all_seasons[j]
 		print(season)
@@ -100,7 +100,8 @@ def populate_match_table():
 
 # populate_stadium_and_club_tables()
 # populate_manager_table()
-populate_player_table()
+# populate_player_table()
 # populate_match_table()
+player_retrieve_by_season_and_club()
 
 # # db.generate_standings()

@@ -230,50 +230,58 @@ class database:
 
 	def insert_stadiums(self, stadium_dict):
 		stadium_name = stadium_dict['stadium name']
-		capacity_keys = [key for key, val in stadium_dict.items() if 'capacity' in key or 'Capacity' in key]
-		print(capacity_keys)
-		capacity = stadium_dict[capacity_keys[0]]
-
-		if 'Capacity' in stadium_dict.keys():
-			capacity = stadium_dict['Capacity']
-		# West Brom's stadium has 'The Hawthorns capacity' as its capacity
-		elif 'The Hawthorns capacity' in stadium_dict.keys():
-			capacity = stadium_dict['The Hawthorns capacity']
-		# AFC Bournemouth's stadium has the capacity key below
-		elif 'Viality Stadium capacity 2018/19' in stadium_dict.keys():
-			capacity = stadium_dict['Viality Stadium capacity 2018/19']
-
-		capacity = capacity.replace(',', '')
 		
-		try:
-			record_pl_attendance = stadium_dict['Record PL attendance']
-		except KeyError as kerr:
-			record_pl_attendance = 'Null'
+		stadium_id = self.get_id(stadium_name, 'stadium')
 
-		address = stadium_dict['Stadium address']
-		pitch_size = stadium_dict['Pitch size']
-		built = stadium_dict['Built']
-		
-		if 'Phone' in stadium_dict.keys():
-			phone = stadium_dict['Phone']
-		elif 'Phone - International' in stadium_dict.keys():
-			phone = stadium_dict['Phone - International']
-		elif 'International Phone' in stadium_dict.keys():
-			phone = stadium_dict['International Phone']
-		elif 'Phone - UK' in stadium_dict.keys():
-			phone = stadium_dict['Phone - UK']
+		# if the stadium is not in the database
+		if stadium_id == 'Null':
 
-		insert_statement = "INSERT INTO stadium (stadium_name, capacity, record_pl_attendance, address, pitch_size, built, phone) "
-		insert_statement += "VALUES(\"" + str(stadium_name) + "\", "
-		insert_statement += "" + str(capacity) + ", "
-		insert_statement += "\"" + str(record_pl_attendance) + "\", "
-		insert_statement +=	"\"" + str(address) + "\", "
-		insert_statement += "\"" + str(pitch_size) + "\", "
-		insert_statement += "" + str(built) + ", "
-		insert_statement += "\"" + str(phone) + "\");"
+			capacity_keys = [key for key, val in stadium_dict.items() if 'capacity' in key or 'Capacity' in key]
+			print(capacity_keys)
+			capacity = stadium_dict[capacity_keys[0]]
 
-		self.cursor.execute(insert_statement)
-		self.conn.commit()
+			if 'Capacity' in stadium_dict.keys():
+				capacity = stadium_dict['Capacity']
+			# West Brom's stadium has 'The Hawthorns capacity' as its capacity
+			elif 'The Hawthorns capacity' in stadium_dict.keys():
+				capacity = stadium_dict['The Hawthorns capacity']
+			# AFC Bournemouth's stadium has the capacity key below
+			elif 'Viality Stadium capacity 2018/19' in stadium_dict.keys():
+				capacity = stadium_dict['Viality Stadium capacity 2018/19']
+
+			capacity = capacity.replace(',', '')
+			
+			try:
+				record_pl_attendance = stadium_dict['Record PL attendance']
+			except KeyError as kerr:
+				record_pl_attendance = 'Null'
+
+			address = stadium_dict['Stadium address']
+			pitch_size = stadium_dict['Pitch size']
+			built = stadium_dict['Built']
+			
+			if 'Phone' in stadium_dict.keys():
+				phone = stadium_dict['Phone']
+			elif 'Phone - International' in stadium_dict.keys():
+				phone = stadium_dict['Phone - International']
+			elif 'International Phone' in stadium_dict.keys():
+				phone = stadium_dict['International Phone']
+			elif 'Phone - UK' in stadium_dict.keys():
+				phone = stadium_dict['Phone - UK']
+
+			insert_statement = "INSERT INTO stadium (stadium_name, capacity, record_pl_attendance, address, pitch_size, built, phone) "
+			insert_statement += "VALUES(\"" + str(stadium_name) + "\", "
+			insert_statement += "" + str(capacity) + ", "
+			insert_statement += "\"" + str(record_pl_attendance) + "\", "
+			insert_statement +=	"\"" + str(address) + "\", "
+			insert_statement += "\"" + str(pitch_size) + "\", "
+			insert_statement += "" + str(built) + ", "
+			insert_statement += "\"" + str(phone) + "\");"
+
+			self.cursor.execute(insert_statement)
+			self.conn.commit()
+		else:
+			print('Stadium ' + stadium_name + ' already in the database.')
 
 	# takes in the match information and date of the match (including
 	#	the referee's name), and inserts the information into the match_
@@ -463,26 +471,29 @@ class database:
 		for key_player_name, player_stats_dict in player_stats_dict_of_dicts.items():
 			player_name = key_player_name
 			player_id = self.get_id(player_name, 'player')
-			if player_id != 'Null':
-				is_in_starting_11 = player_stats_dict['Starting 11']
-				substitution_on = player_stats_dict['Substitution On']
-				substitution_off = player_stats_dict['Substitution Off']
-				yellow_card = player_stats_dict['Yellow Card']
-				red_card = player_stats_dict['Red Card']
+			
+			is_in_starting_11 = player_stats_dict['Starting 11']
+			substitution_on = player_stats_dict['Substitution On']
+			substitution_off = player_stats_dict['Substitution Off']
+			yellow_card = player_stats_dict['Yellow Card']
+			red_card = player_stats_dict['Red Card']
 
-				insert_statement = "INSERT INTO player_stats(player_id, match_id, is_in_starting_11, substitution_on, substitution_off, yellow_card, red_card) "
-				insert_statement += "VALUES(" + str(player_id) + ", "
-				insert_statement += str(match_id) + ", "
-				insert_statement += str(is_in_starting_11) + ", "
-				insert_statement += "\"" + str(substitution_on) + "\", "
-				insert_statement += "\"" + str(substitution_off) + "\", "
-				insert_statement += "\"" + str(yellow_card) + "\", "
-				insert_statement += "\"" + str(red_card) + "\");"
-				
+			insert_statement = "INSERT INTO player_stats(player_id, match_id, is_in_starting_11, substitution_on, substitution_off, yellow_card, red_card) "
+			insert_statement += "VALUES(" + str(player_id) + ", "
+			insert_statement += str(match_id) + ", "
+			insert_statement += str(is_in_starting_11) + ", "
+			insert_statement += "\"" + str(substitution_on) + "\", "
+			insert_statement += "\"" + str(substitution_off) + "\", "
+			insert_statement += "\"" + str(yellow_card) + "\", "
+			insert_statement += "\"" + str(red_card) + "\");"
+
+			if player_id != 'Null':				
 				self.cursor.execute(insert_statement)
 				self.conn.commit()
 			else:
 				print('************************Null player_id')
+				print('inserting ' + player_name + ' into db.')
+				
 				print(player_name)
 
 	def update_stadium_city(self, stadium_city_dict):
