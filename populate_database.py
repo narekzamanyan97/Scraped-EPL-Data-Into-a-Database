@@ -46,25 +46,38 @@ def populate_manager_table():
 
 
 def populate_player_table():
-	
-
-
-	for j in range(0, 30):
-		# retrieve all the rows from player_clubs table corresponding to the given season
-		season = all_seasons[j]
-		print(season)
-		player_club_list_of_dicts = db.get_player_clubs(season)
+	# # using the player_retrive_1 function to scrape player rows, filtering based on
+	# #			season only
+	# for j in range(0, 30):
+	# 	# retrieve all the rows from player_clubs table corresponding to the given season
+	# 	season = all_seasons[j]
+	# 	print(season)
+	# 	player_club_list_of_dicts = db.get_player_clubs(season)
 		
-		for dict_ in player_club_list_of_dicts:
-		 	print(dict_)
+	# 	# for dict_ in player_club_list_of_dicts:
+	# 	#  	print(dict_)
 	
-		player_list_of_dicts = player_retrieve_1(player_club_list_of_dicts, j)
+	# 	player_list_of_dicts = player_retrieve_1(player_club_list_of_dicts, j)
+		
+	# 	for player_dict in player_list_of_dicts:
+	# 		db.insert_players(player_dict)
+
+	# using the player_retrieve_by_season_and_club function to filter based on
+	#			season and club
+	
+	# Iterate over the seasons, and after a season's data is scraped, insert that data
+	#		into the database, and move on to the next iteration.
+	for j in range(1, 2):
+		season = all_seasons[j]
+		player_club_list_of_dicts = db.get_player_clubs(season)
+
+		player_list_of_dicts = player_retrieve_by_season_and_club(player_club_list_of_dicts, j)
 		
 		for player_dict in player_list_of_dicts:
 			db.insert_players(player_dict)
 
-	# close the connection
-	connection.close()
+		# close the connection
+		connection.close()
 
 
 def populate_match_table():
@@ -102,6 +115,6 @@ def populate_match_table():
 # populate_manager_table()
 # populate_player_table()
 # populate_match_table()
-player_retrieve_by_season_and_club()
+populate_player_table()
 
 # # db.generate_standings()
