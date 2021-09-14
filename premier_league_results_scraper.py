@@ -23,7 +23,7 @@ urls = {
 # 	Argument:
 #		list of all the match_ids available in the table. This is to save time
 #		and skip over the match_ids that have already been considered before
-def results_retrieve_1(all_match_ids):
+def results_retrieve_1(all_match_ids, season_index):
 	driver = set_up_driver(urls['url_1'])
 
 	# define a dictionary for the stadiums and their cities. The stadium name
@@ -31,7 +31,7 @@ def results_retrieve_1(all_match_ids):
 	stadium_city_dict = {}
 
 	# iterate over the seasons
-	for j in range(0, len(all_seasons) - (len(all_seasons) - 1)):
+	for j in range(season_index, season_index + 1):
 		try:
 			print(all_seasons[j])
 			# select the appropriate season from the dropdown
@@ -70,6 +70,7 @@ def results_retrieve_1(all_match_ids):
 
 			number_of_results = len(results)
 			number_of_stadiums = len(stadiums)
+			print("***************")
 			print(number_of_results)
 			
 			counter = 1
@@ -88,13 +89,15 @@ def results_retrieve_1(all_match_ids):
 			# make sure the script gets >= 380 (# of matches in a premier league season)
 			#	results before proceeding
 			# or >= 462 results for matches in season <= 1994/95
-			if all_seasons[j] <= '1994/95':
+			if j <= 2:
 				number_of_matchweeks = 462
 			else:
 				number_of_matchweeks = 380
+			
 			while len(results) < number_of_matchweeks:
 				driver.refresh()
 				time.sleep(5)
+				print('**************************************************************99')
 				print(len(results))
 				# scroll down to the bottom of the page to include all the players
 				driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -102,10 +105,6 @@ def results_retrieve_1(all_match_ids):
 				results = WebDriverWait(driver, 10).until(
 					EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
 				)
-				
-
-			# !!! Tottenham played in London Stadium. I have it, so no changes may be
-			#		needed
 
 			original_len_results = len(results)
 			print('original results: ' + str(len(results)))
@@ -120,8 +119,8 @@ def results_retrieve_1(all_match_ids):
 			
 			# Iterating over the results to get the team names, scores, stadium names,
 			#	and then click at each result to get the details of the match
-			start_index = 0
-			last_index = 4
+			start_index = 6
+			last_index = 7
 
 			i = start_index
 
@@ -150,7 +149,10 @@ def results_retrieve_1(all_match_ids):
 				while len(results) < number_of_matchweeks:
 					driver.refresh()
 					time.sleep(5)
-					print(len(results))
+
+					print('*********************************************152')
+					# print(len(results))
+					# print(number_of_matchweeks)
 					# scroll down to the bottom of the page to include all the players
 					driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 					time.sleep(5)
@@ -181,13 +183,17 @@ def results_retrieve_1(all_match_ids):
 					break
 
 				id = int(id)
-				print(i)
+				print('i =========================== ' + str(i))
 				print('results ' + str(len(results)))
 
 				# The rows of the page are being duplicated after the scrollTo
 				# So we check whether the row has already appeared on the page or not
-				while is_row_new(unique_ids, id) != True or is_row_new(all_match_ids, id) != True:
-					duplicate_result_flag = True
+				while (is_row_new(unique_ids, id) != True or is_row_new(all_match_ids, id) != True) and i < last_index:
+					if is_row_new(all_match_ids, id) != True:
+						duplicate_result_flag = True
+	
+					print('***********************************************192')
+					print('i = ' + str(i))
 					if i < original_len_results and i < last_index:
 						i += 1
 						print(i)
@@ -197,6 +203,10 @@ def results_retrieve_1(all_match_ids):
 							id = int(id)
 						except IndexError:
 							break
+					else:
+						print('else')
+
+					i += 1
 
 				if i < original_len_results and i < last_index:
 					# holds a result information
@@ -294,7 +304,7 @@ def results_retrieve_1(all_match_ids):
 					#		the scraper duplicates random results, and continuing
 					#		after duplication would cause the script to skip other
 					#		results
-					if duplicate_result_flag == True:
+					if duplicate_result_flag == True and i < last_index:
 						i = 0
 					else:
 						i += 1
@@ -345,40 +355,23 @@ def results_retrieve_2(driver, result_row):
 	events_home_xpath = "//div[@class='matchEvents matchEventsContainer']/div[@class='home']/div[@class='event']"
 
 	stats = extract_event(driver, events_home_xpath, stats, True)
-
-	# except TimeoutException as ex:
-	# 	print('')
 	
-
-	# try:
 	# retrieve the events of the away side, which include goals (by penalty), 
 	#	own goals, and red cards
 	events_away_xpath = "//div[@class='matchEvents matchEventsContainer']/div[@class='away']/div[@class='event']"
 	
 	stats = extract_event(driver, events_away_xpath, stats, False)
 
-	# except TimeoutException as ex:
-	# 	print('')
-
-	# try:
 	# retrieve the assists of the home side
 	assists_home_xpath = "//div[@class='assists']/div[@class='matchAssistsContainer']/div[@class='home']/div[@class='event']"
 	
 	stats = extract_event(driver, assists_home_xpath, stats, True)
 
-	# except TimeoutException as ex:
-	# 	print('')
-
-
-	# try:
 	# retrieve the assists of the away side
 	assists_away_xpath = "//div[@class='assists']/div[@class='matchAssistsContainer']/div[@class='away']/div[@class='event']"
 
 	stats = extract_event(driver, assists_away_xpath, stats, False)
 	print(stats)
-
-	# except TimeoutException as ex:
-	# 	print('')
 
 
 	match_date = WebDriverWait(driver, 10).until(
@@ -643,7 +636,7 @@ def extract_player_information(squad_number, squad_info, is_home_side):
 # Check whether the row with the given id has already been appeared on the page
 def is_row_new(list_of_ids, id):
 	try:
-		print(id)
+		# print(id)
 		x = list_of_ids.index(id)
 		return False
 	except ValueError:

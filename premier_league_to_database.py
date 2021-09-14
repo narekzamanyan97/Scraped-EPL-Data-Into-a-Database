@@ -210,6 +210,7 @@ class database:
 		# see if the career table is ever empty. Remove later.
 		if len(club_names) == 0:
 			print(player_name + ' has no clubs in the career table.')
+	
 	# get the stadium_name to obtain stadium_id from the stadium table
 	def insert_clubs(self, club_dict):
 		club_name = club_dict['club name']
@@ -282,6 +283,8 @@ class database:
 			self.conn.commit()
 		else:
 			print('Stadium ' + stadium_name + ' already in the database.')
+
+
 
 	# takes in the match information and date of the match (including
 	#	the referee's name), and inserts the information into the match_
@@ -493,7 +496,7 @@ class database:
 			else:
 				print('************************Null player_id')
 				print('inserting ' + player_name + ' into db.')
-				
+
 				print(player_name)
 
 	def update_stadium_city(self, stadium_city_dict):
@@ -638,6 +641,15 @@ class database:
 
 		return player_club_list_of_dicts
 
+	# get the city information of each stadium. 
+	def get_stadiums(self):
+		query = "SELECT stadium_name, city FROM stadium;"
+
+		self.cursor.execute(query)
+		tuple_list = self.cursor.fetchall()
+		stadium_list_of_dicts = self.convert_from_tuple_list_to_dict(tuple_list)
+
+		return stadium_list_of_dicts
 
 	def get_top_players(self, number_of_rows, type_of_stat):
 		query = "SELECT p.player_name, count(p_p.player_id) as number_of_goals FROM player as p, player_performance as p_p "

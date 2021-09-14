@@ -28,7 +28,7 @@ urls = {
 
 SECONDS_TO_WAIT = 15
 
-def player_retrieve_by_season_and_club(player_club_list=[], season_index):
+def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 	driver = set_up_driver(urls['url_1'])
 	print('after setting up the driver')
 
@@ -84,6 +84,7 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index):
 			
 			# loop through the player rows and obtain player data
 			while player_index < last_index:
+				print('season index = ' + str(season_index))
 				# select the appropriate season from the dropdown
 				filter_season = WebDriverWait(driver, 15).until(
 					EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + all_seasons[j]  + "']"))
@@ -120,6 +121,7 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index):
 				print(last_index)
 
 				while (is_player_new(unique_player_names, player_name) == False or is_player_data_in_player_club(player_club_list, player_name, all_seasons[j])) and player_index < last_index:
+					print('season index = ' + str(season_index))
 					print('*************** ' + player_name)
 					# print so that we know the reason the code skips the player
 					if is_player_new(unique_player_names, player_name) == False and is_player_data_in_player_club(player_club_list, player_name, all_seasons[j]) == False:

@@ -67,34 +67,59 @@ def populate_player_table():
 	
 	# Iterate over the seasons, and after a season's data is scraped, insert that data
 	#		into the database, and move on to the next iteration.
-	for j in range(1, 2):
+	# !!! do j = 4 again (1996/97)
+	for j in range(0, 5):
 		season = all_seasons[j]
 		player_club_list_of_dicts = db.get_player_clubs(season)
 
 		player_list_of_dicts = player_retrieve_by_season_and_club(player_club_list_of_dicts, j)
 		
 		for player_dict in player_list_of_dicts:
-			db.insert_players(player_dict)
+			db.insert_players(player_dicst)
 
-		# close the connection
-		connection.close()
+	# close the connection
+	connection.close()
 
 
 def populate_match_table():
 	all_match_ids_in_db = db.get_all_match_ids_inserted()
 
-	match_info_list_of_list_of_dicts = results_retrieve_1(all_match_ids_in_db)
+	all_stadiums_and_cities_list_of_dicts = db.get_stadiums()
+
+	print(all_stadiums_and_cities_list_of_dicts)
+
+	# iterate over the seasons and get their results
+	for j in range(0, 1):
+		match_info_list_of_list_of_dicts = results_retrieve_1(all_match_ids_in_db, j)
+	
 	# print(match_info_list_of_list_of_dicts)
 
-	# !!! get all the stadium names for which the city is null. Then check it against
-	#		the match_info_list_of_dicts[5] not to use update_stadium_city 
-	#		redundantly.
+	# !!! highbury (arsenal's stadiu) is not there. Add the stadium, add the old stadiums
+	#		too
+
 	# stadiums_and_cities_dict = ...
 
 	for match_info_list_of_dicts in match_info_list_of_list_of_dicts:
 		try:
-			# if the city is null, then call the update_stadium_city function
-			db.update_stadium_city(match_info_list_of_dicts[5])
+			
+			for stadium_name, city in match_info_list_of_dicts[5].items():
+				print('stadium_name = ' + stadium_name)
+				print('city = ' + city)
+
+				# iterate through the stadium_city list of dictionaries
+				for stadium_city_dict in all_stadiums_and_cities_list_of_dicts:
+
+					# if the dictionary is of the given stadium
+					if stadium_city_dict['stadium_name'] == stadium_name:
+						print('stadium_city_dict: ' + str(stadium_city_dict))
+
+						# if the city is null, then call the update_stadium_city function
+						if stadium_city_dict['city'] == None:
+							print('Updating the city of the stadium.')
+							db.update_stadium_city(match_info_list_of_dicts[5])
+						else:
+							print('The stadium already has the city info.')
+
 			# update the stadiums_and_cities_dict
 			db.insert_match_basic_info(match_info_list_of_dicts[0], match_info_list_of_dicts[1])
 
@@ -114,7 +139,6 @@ def populate_match_table():
 # populate_stadium_and_club_tables()
 # populate_manager_table()
 # populate_player_table()
-# populate_match_table()
-populate_player_table()
+populate_match_table()
 
 # # db.generate_standings()
