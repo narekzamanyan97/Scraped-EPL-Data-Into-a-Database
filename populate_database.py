@@ -89,52 +89,54 @@ def populate_match_table():
 	print(all_stadiums_and_cities_list_of_dicts)
 
 	# iterate over the seasons and get their results
-	for j in range(0, 1):
+	for j in range(2, 6):
 		match_info_list_of_list_of_dicts = results_retrieve_1(all_match_ids_in_db, j)
-	
-	# print(match_info_list_of_list_of_dicts)
 
-	# !!! highbury (arsenal's stadiu) is not there. Add the stadium, add the old stadiums
-	#		too
+		for match_info_list_of_dicts in match_info_list_of_list_of_dicts:
+			try:
+				print('*********************************************************')
+				for stadium_name, city in match_info_list_of_dicts[5].items():
+					print('stadium_name = ' + stadium_name)
+					print('city = ' + city)
 
-	# stadiums_and_cities_dict = ...
+					stadium_was_found = False
+					# iterate through the stadium_city list of dictionaries
+					for stadium_city_dict in all_stadiums_and_cities_list_of_dicts:
 
-	for match_info_list_of_dicts in match_info_list_of_list_of_dicts:
-		try:
-			
-			for stadium_name, city in match_info_list_of_dicts[5].items():
-				print('stadium_name = ' + stadium_name)
-				print('city = ' + city)
+						# if the dictionary is of the given stadium
+						if stadium_city_dict['stadium_name'] == stadium_name:
 
-				# iterate through the stadium_city list of dictionaries
-				for stadium_city_dict in all_stadiums_and_cities_list_of_dicts:
+							stadium_was_found = True
+							print('stadium_city_dict: ' + str(stadium_city_dict))
 
-					# if the dictionary is of the given stadium
-					if stadium_city_dict['stadium_name'] == stadium_name:
-						print('stadium_city_dict: ' + str(stadium_city_dict))
+							# if the city is null, then call the update_stadium_city function
+							if stadium_city_dict['city'] == None:
+								print('Updating the city of the stadium.')
+								db.update_stadium_city(match_info_list_of_dicts[5])
+							else:
+								print('The stadium already has the city info.')
+				
+					# the stadium was not found, so add it to the stadium table, using
+					#		the stadium_name and city
+					if stadium_was_found == False:
+						print('inserting the old stadium.')
+						db.insert_old_stadium(stadium_name, city)
 
-						# if the city is null, then call the update_stadium_city function
-						if stadium_city_dict['city'] == None:
-							print('Updating the city of the stadium.')
-							db.update_stadium_city(match_info_list_of_dicts[5])
-						else:
-							print('The stadium already has the city info.')
+				# update the stadiums_and_cities_dict
+				db.insert_match_basic_info(match_info_list_of_dicts[0], match_info_list_of_dicts[1])
 
-			# update the stadiums_and_cities_dict
-			db.insert_match_basic_info(match_info_list_of_dicts[0], match_info_list_of_dicts[1])
-
-			match_id_and_club_names = []
-			match_id_and_club_names.append(match_info_list_of_dicts[0]['match id'])
-			match_id_and_club_names.append(match_info_list_of_dicts[0]['home'])
-			match_id_and_club_names.append(match_info_list_of_dicts[0]['away'])
-			match_id_and_club_names.append(match_info_list_of_dicts[0]['season'])
+				match_id_and_club_names = []
+				match_id_and_club_names.append(match_info_list_of_dicts[0]['match id'])
+				match_id_and_club_names.append(match_info_list_of_dicts[0]['home'])
+				match_id_and_club_names.append(match_info_list_of_dicts[0]['away'])
+				match_id_and_club_names.append(match_info_list_of_dicts[0]['season'])
 
 
-			db.insert_player_performance(match_info_list_of_dicts[2], match_id_and_club_names[0])
-			db.insert_player_stats(match_info_list_of_dicts[3], match_id_and_club_names[0])
-			db.insert_club_stats(match_info_list_of_dicts[4], match_id_and_club_names)
-		except IntegrityError:
-			print('Duplicate Key error raised from the insert_match_basic_info.')
+				db.insert_player_performance(match_info_list_of_dicts[2], match_id_and_club_names[0])
+				db.insert_player_stats(match_info_list_of_dicts[3], match_id_and_club_names[0])
+				db.insert_club_stats(match_info_list_of_dicts[4], match_id_and_club_names)
+			except IntegrityError:
+				print('Duplicate Key error raised from the insert_match_basic_info.')
 
 # populate_stadium_and_club_tables()
 # populate_manager_table()

@@ -284,7 +284,16 @@ class database:
 		else:
 			print('Stadium ' + stadium_name + ' already in the database.')
 
+	# !!! This function is to insert old an old stadium into the stadium table, which will
+	#		not have any details except for the city, and stadium_name
+	#		to be use
+	def insert_old_stadium(self, old_stadium_name, city):
+		insert_statement = "INSERT INTO stadium(stadium_name, city) "
+		insert_statement += "VALUES(\"" + old_stadium_name + "\", "
+		insert_statement += "\"" + city + "\");"
 
+		self.cursor.execute(insert_statement)
+		self.conn.commit()
 
 	# takes in the match information and date of the match (including
 	#	the referee's name), and inserts the information into the match_
@@ -418,9 +427,9 @@ class database:
 		for player_name, performance_array_of_arrays in player_performance_dict.items():
 			print(player_name)
 			player_id = self.get_id(player_name, 'player')
+			
 			# some players have not appeared in the player's page, and thus have
 			#	no player_id
-
 			if player_id == 'Null':
 				print(player_name + ' has no player_id')
 

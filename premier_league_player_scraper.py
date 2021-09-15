@@ -36,6 +36,7 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 	
 	players_list_of_dicts = []
 
+	# iterate over the seasons
 	for j in range(season_index, season_index + 1):
 
 		if all_seasons[j] < '1995/96':
@@ -63,8 +64,6 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 
 			# choose the next club from the season
 			driver.execute_script("arguments[0].click();", filter_club[0])
-			
-			print('after filter club')
 			time.sleep(5)
 
 			# get the player rows and links for the details after the page

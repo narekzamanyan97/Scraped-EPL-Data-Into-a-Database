@@ -42,272 +42,293 @@ def results_retrieve_1(all_match_ids, season_index):
 			# choose the appropriate season from the dropdown list
 			driver.execute_script("arguments[0].click();", filter_season[0])
 
-			# Scroll down to load more results to include all the results
-			driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-			time.sleep(5)
-
-			# Stadiums contains the following information:
-			# 	stadium_name
-			#	city
-			stadiums = WebDriverWait(driver, 10).until(
-				EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='stadiumName']"))
-			)
-
-			# Find the list of results on the page
-			# The results contains the following information:
-			# 	team_name_1 
-			# 	team_1_goals-team_2_goals
-			#	team_name_2
-			results = WebDriverWait(driver, 10).until(
-				EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
-			)
-
-			# Since the browser duplicates result rows when scrolling down, we need to use the ids
-			#	of the rows on the page
-			div_ids = WebDriverWait(driver, 10).until(
-				EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']"))
-			)
-
-			number_of_results = len(results)
-			number_of_stadiums = len(stadiums)
-			print("***************")
-			print(number_of_results)
-			
-			counter = 1
+			# make sure the script gets >= 38 (# of matches in a premier league season for a given club)
+			#	results before proceeding
+			# or >= 42 results for matches in season for a given club <= 1994/95
+			if j <= 2:
+				number_of_matchweeks = 42
+				number_of_clubs = 22
+			else:
+				number_of_matchweeks = 38
+				number_of_clubs = 20
 
 			unique_ids = []
-
-			number_of_results = len(div_ids)
 
 			# holds all the results
 			results_list_of_dicts = []
 			results_list_of_list_of_dicts = []
 
-			original_len_results = len(results)
-			
-
-			# make sure the script gets >= 380 (# of matches in a premier league season)
-			#	results before proceeding
-			# or >= 462 results for matches in season <= 1994/95
-			if j <= 2:
-				number_of_matchweeks = 462
-			else:
-				number_of_matchweeks = 380
-			
-			while len(results) < number_of_matchweeks:
-				driver.refresh()
-				time.sleep(5)
-				print('**************************************************************99')
-				print(len(results))
-				# scroll down to the bottom of the page to include all the players
-				driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-				time.sleep(5)
-				results = WebDriverWait(driver, 10).until(
-					EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
-				)
-
-			original_len_results = len(results)
-			print('original results: ' + str(len(results)))
-			# 	stadiums = WebDriverWait(driver, 10).until(
-			# 		EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='stadiumName']"))
-			# 	)
-			# 	results = WebDriverWait(driver, 10).until(
-			# 		EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
-			# 	)
-
-			# time.sleep(5)
-			
-			# Iterating over the results to get the team names, scores, stadium names,
-			#	and then click at each result to get the details of the match
-			start_index = 6
-			last_index = 7
-
-			i = start_index
-
-			num_of_unique_ids = 0
-			while i < last_index:
-				# select the appropriate season from the dropdown
-				filter_season = WebDriverWait(driver, 15).until(
-						EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + all_seasons[j]  + "']"))
-				)
+			# iterate over the clubs
+			for club_index in range(0, number_of_clubs):
 				
-				# choose the appropriate season from the dropdown list
-				driver.execute_script("arguments[0].click();", filter_season[0])
-	
-				print('*******************************' + str(num_of_unique_ids))
-				duplicate_result_flag = False		
-			
+				# filter using the next club
+				filter_club = WebDriverWait(driver, 15).until(
+					EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList' and @data-dropdown-list='teams']/li[@role='option' and @data-option-index=\"" + str(club_index) + "\"]"))
+				)
+
+				# choose the next club from the season
+				driver.execute_script("arguments[0].click();", filter_club[0])
+				time.sleep(5)
+
 				# Scroll down to load more results to include all the results
 				driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 				time.sleep(5)
-				
-				# # make sure the script gets 380 (# of matches in a premier league season)
-				# #	results before proceeding
+
+				# Stadiums contains the following information:
+				# 	stadium_name
+				#	city
+				stadiums = WebDriverWait(driver, 10).until(
+					EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='stadiumName']"))
+				)
+
+				# Find the list of results on the page
+				# The results contains the following information:
+				# 	team_name_1 
+				# 	team_1_goals-team_2_goals
+				#	team_name_2
 				results = WebDriverWait(driver, 10).until(
 					EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
 				)
+
+				# Since the browser duplicates result rows when scrolling down, we need to use the ids
+				#	of the rows on the page
+				div_ids = WebDriverWait(driver, 10).until(
+					EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']"))
+				)
+
+				number_of_results = len(results)
+				number_of_stadiums = len(stadiums)
+				print(number_of_results)
+				
+				counter = 1
+
+				
+
+				number_of_results = len(div_ids)
+				original_len_results = len(results)
+							
 				while len(results) < number_of_matchweeks:
 					driver.refresh()
 					time.sleep(5)
+					print(len(results))
 
-					print('*********************************************152')
-					# print(len(results))
-					# print(number_of_matchweeks)
 					# scroll down to the bottom of the page to include all the players
 					driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 					time.sleep(5)
+					results = WebDriverWait(driver, 10).until(
+						EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
+					)
 
+				original_len_results = len(results)
+				print('original results: ' + str(len(results)))				
+
+				num_of_unique_ids = 0
+
+				start_index = 0
+				i = start_index
+				last_index = len(results)
+
+				# Iterating over the results to get the team names, scores, stadium names,
+				#	and then click at each result to get the details of the match
+				while i < last_index:
+					# select the appropriate season from the dropdown
+					filter_season = WebDriverWait(driver, 20).until(
+							EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + all_seasons[j]  + "']"))
+					)
+					
+					# choose the appropriate season from the dropdown list
+					driver.execute_script("arguments[0].click();", filter_season[0])
+		
+					# filter using the next club
+					filter_club = WebDriverWait(driver, 15).until(
+						EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList' and @data-dropdown-list='teams']/li[@role='option' and @data-option-index=\"" + str(club_index) + "\"]"))
+					)
+
+					# choose the next club from the season
+					driver.execute_script("arguments[0].click();", filter_club[0])
+					time.sleep(5)
+
+
+					duplicate_result_flag = False		
+				
+					# Scroll down to load more results to include all the results
+					driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+					time.sleep(5)
+					
+
+					# # make sure the script gets 380 (# of matches in a premier league season)
+					# #	results before proceeding
+					results = WebDriverWait(driver, 10).until(
+						EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
+					)
+
+					# if j == 1:
+					# 	last_index = len(results)
+					# else:
+					# 	last_index = 120
+					last_index = len(results)
+
+					while len(results) < number_of_matchweeks:
+						driver.refresh()
+						time.sleep(5)
+
+						# print(len(results))
+						# print(number_of_matchweeks)
+						# scroll down to the bottom of the page to include all the players
+						driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+						time.sleep(5)
+
+						stadiums = WebDriverWait(driver, 10).until(
+							EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='stadiumName']"))
+						)
+						results = WebDriverWait(driver, 10).until(
+							EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
+						)
+
+
+					# Since the page is updated (after clicking on a link and going back), we need to
+					#	find the result elements again
 					stadiums = WebDriverWait(driver, 10).until(
 						EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='stadiumName']"))
 					)
 					results = WebDriverWait(driver, 10).until(
 						EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
 					)
+					div_ids = WebDriverWait(driver, 10).until(
+						EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']"))
+					)
+
+					try:
+						id = div_ids[i].get_attribute("data-matchid")
+					except IndexError:
+						break
+
+					id = int(id)
+					print('i =========================== ' + str(i))
+					print('results ' + str(len(results)))
+
+					# The rows of the page are being duplicated after the scrollTo
+					# So we check whether the row has already appeared on the page or not
+					while (is_row_new(unique_ids, id) != True or is_row_new(all_match_ids, id) != True) and i < last_index:
+						if is_row_new(all_match_ids, id) != True:
+							duplicate_result_flag = True
+		
+						print('***********************************************j = ' + str(j))
+						print('i = ' + str(i))
+						print('last index = ' + str(last_index))
+						if i < original_len_results and i < last_index:
+							i += 1
+							print(i)
+							print(str(id) + ' exists.')
+							try:
+								id = div_ids[i].get_attribute("data-matchid")
+								id = int(id)
+							except IndexError:
+								break
+						else:
+							print('else')
 
 
-				# Since the page is updated (after clicking on a link and going back), we need to
-				#	find the result elements again
-				stadiums = WebDriverWait(driver, 10).until(
-					EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='stadiumName']"))
-				)
-				results = WebDriverWait(driver, 10).until(
-					EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
-				)
-				div_ids = WebDriverWait(driver, 10).until(
-					EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']"))
-				)
-
-				try:
-					id = div_ids[i].get_attribute("data-matchid")
-				except IndexError:
-					break
-
-				id = int(id)
-				print('i =========================== ' + str(i))
-				print('results ' + str(len(results)))
-
-				# The rows of the page are being duplicated after the scrollTo
-				# So we check whether the row has already appeared on the page or not
-				while (is_row_new(unique_ids, id) != True or is_row_new(all_match_ids, id) != True) and i < last_index:
-					if is_row_new(all_match_ids, id) != True:
-						duplicate_result_flag = True
-	
-					print('***********************************************192')
-					print('i = ' + str(i))
 					if i < original_len_results and i < last_index:
-						i += 1
-						print(i)
-						print(str(id) + ' exists.')
-						try:
-							id = div_ids[i].get_attribute("data-matchid")
-							id = int(id)
-						except IndexError:
-							break
-					else:
-						print('else')
+						# holds a result information
+						result_dict = {}
+						result_dict['match id'] = id
 
-					i += 1
+						# add the season to the result_dict
+						result_dict['season'] = all_seasons[j]
 
-				if i < original_len_results and i < last_index:
-					# holds a result information
-					result_dict = {}
-					result_dict['match id'] = id
+						num_of_unique_ids += 1
 
-					# add the season to the result_dict
-					result_dict['season'] = all_seasons[j]
+						unique_ids.append(id)
+						# truncated is an array of strings with the following format:
+						# ['team_name_1', 'team_1_goals-team_2_goals', 'team_name_2']
+						# truncated = result.text.splitlines()
+						truncated = results[i].text.splitlines()
 
-					num_of_unique_ids += 1
+						# since the team names are the short versions, ignore them
+						#	on the scoresheet. Only retrieve the scores
+						scoresheet = truncated[1]
 
-					unique_ids.append(id)
-					# truncated is an array of strings with the following format:
-					# ['team_name_1', 'team_1_goals-team_2_goals', 'team_name_2']
-					# truncated = result.text.splitlines()
-					truncated = results[i].text.splitlines()
+						# scores is an array of 2 elements with the number of goals for each
+						# 	team. e.g. ['2-0']
+						scores = scoresheet.splitlines()
+						# scores now is an array with the number of goals as its elements
+						#	e.g. [2, 0]
+						scores = scores[0].split('-')
+						score_team_1 = scores[0]
+						score_team_2 = scores[1]
 
-					# since the team names are the short versions, ignore them
-					#	on the scoresheet. Only retrieve the scores
-					scoresheet = truncated[1]
+						# Get the text from the stadium attribute
+						stadium = stadiums[i].text
 
-					# scores is an array of 2 elements with the number of goals for each
-					# 	team. e.g. ['2-0']
-					scores = scoresheet.splitlines()
-					# scores now is an array with the number of goals as its elements
-					#	e.g. [2, 0]
-					scores = scores[0].split('-')
-					score_team_1 = scores[0]
-					score_team_2 = scores[1]
+						# remove the newlines and trailing spaces and separate the name of the stadium
+						#	and the name of the city by comma
+						stadium = stadium.replace('\n', '')
+						stadium = stadium.strip()
+						stadium = stadium.split(',')
+						stadium[1] = stadium[1].strip()
 
-					# Get the text from the stadium attribute
-					stadium = stadiums[i].text
+						stadium_name = stadium[0]
+						city = stadium[1]
 
-					# remove the newlines and trailing spaces and separate the name of the stadium
-					#	and the name of the city by comma
-					stadium = stadium.replace('\n', '')
-					stadium = stadium.strip()
-					stadium = stadium.split(',')
-					stadium[1] = stadium[1].strip()
+						
+						counter += 1
 
-					stadium_name = stadium[0]
-					city = stadium[1]
+						result_dict['home goals'] = score_team_1
+						result_dict['away goals'] = score_team_2
+						result_dict['stadium name'] = stadium_name
+						result_dict['city'] = city
 
-					
-					counter += 1
+						stadium_city_dict[stadium_name] = city
 
-					result_dict['home goals'] = score_team_1
-					result_dict['away goals'] = score_team_2
-					result_dict['stadium name'] = stadium_name
-					result_dict['city'] = city
+						results_list_of_dicts.append(result_dict)
+						
+						# call results_retrieve_2 to get the match details, such as scorers and assists, 
+						#	red cards, penalty scorers, own goals, etc.
+						team_names, player_stats, match_date, line_ups, team_stats = results_retrieve_2(driver, div_ids[i])
 
-					stadium_city_dict[stadium_name] = city
+						print(team_names[0] + " " + score_team_1 + "-" + score_team_2 + " " + team_names[1] + " @ " + str(stadium_name) + ", " + str(city))
+						
+						result_dict['home'] = team_names[0]
+						result_dict['away'] = team_names[1]
 
-					results_list_of_dicts.append(result_dict)
-					
-					# call results_retrieve_2 to get the match details, such as scorers and assists, 
-					#	red cards, penalty scorers, own goals, etc.
-					team_names, player_stats, match_date, line_ups, team_stats = results_retrieve_2(driver, div_ids[i])
+						results_list_of_dicts.append(match_date)
+						results_list_of_dicts.append(player_stats)
+						results_list_of_dicts.append(line_ups)
+						results_list_of_dicts.append(team_stats)
+						results_list_of_dicts.append(stadium_city_dict)
 
-					print(team_names[0] + " " + score_team_1 + "-" + score_team_2 + " " + team_names[1] + " @ " + str(stadium_name) + ", " + str(city))
-					
-					result_dict['home'] = team_names[0]
-					result_dict['away'] = team_names[1]
+						# reset the stadium_city_dict
+						stadium_city_dict = {}
+						
 
-					results_list_of_dicts.append(match_date)
-					results_list_of_dicts.append(player_stats)
-					results_list_of_dicts.append(line_ups)
-					results_list_of_dicts.append(team_stats)
-					results_list_of_dicts.append(stadium_city_dict)
+						print('*****************************************************************')
+						print('*****************************************************************')
+						# results_list_of_dicts's elements are:
+						#	[0] = basic match info (match_id, sides, goals, stadium)
+						#	[1] = date information, including matchweek, and referee
+						#	[2] = player events, including goal scorers with times,
+						#			red cards, penalty, own goal info.
+						# 	[3] = line_ups and player performances
+						#	[4] = club performances
+						for dict_ in results_list_of_dicts:
+							print(dict_)
+							print('--------------------------------------------')
 
-					# reset the stadium_city_dict
-					stadium_city_dict = {}
-					
+						print('*****************************************************************')
+						print('*****************************************************************')
 
-					print('*****************************************************************')
-					print('*****************************************************************')
-					# results_list_of_dicts's elements are:
-					#	[0] = basic match info (match_id, sides, goals, stadium)
-					#	[1] = date information, including matchweek, and referee
-					#	[2] = player events, including goal scorers with times,
-					#			red cards, penalty, own goal info.
-					# 	[3] = line_ups and player performances
-					#	[4] = club performances
-					for dict_ in results_list_of_dicts:
-						print(dict_)
-						print('--------------------------------------------')
+						results_list_of_list_of_dicts.append(results_list_of_dicts)
+						results_list_of_dicts = []
 
-					print('*****************************************************************')
-					print('*****************************************************************')
-
-					results_list_of_list_of_dicts.append(results_list_of_dicts)
-					results_list_of_dicts = []
-
-					# if there was a duplicate, start from the first result since
-					#		the scraper duplicates random results, and continuing
-					#		after duplication would cause the script to skip other
-					#		results
-					if duplicate_result_flag == True and i < last_index:
-						i = 0
-					else:
-						i += 1
+						# if there was a duplicate, start from the first result since
+						#		the scraper duplicates random results, and continuing
+						#		after duplication would cause the script to skip other
+						#		results
+						if duplicate_result_flag == True and i < last_index:
+							i = start_index
+						else:
+							i += 1
 
 
 			return results_list_of_list_of_dicts
@@ -522,8 +543,8 @@ def results_retrieve_4(driver):
 		stats_list = []
 
 		# The format of the stats is:
-		# 28.8 Possession % 71.2
-		# 3 Shots on target 7
+		# 28.8 Possession % 101.2
+		# 3 Shots on target 10
 		# 		 ....
 		# 11 Fouls conceded 12
 		for team_stats in teams_stats:
@@ -535,7 +556,7 @@ def results_retrieve_4(driver):
 		
 		# convert the stats_list into a dictionary, where the keys are the types of
 		#	the statistic along with home/away, and the values are the numbers
-		#	e.g. {... 'Shots on target home': '3', 'Shots on target away': '7'}
+		#	e.g. {... 'Shots on target home': '3', 'Shots on target away': '10'}
 		for i in range(0, len(stats_list)):
 			first_space = stats_list[i].index(' ')
 			if i == 0:
@@ -676,7 +697,7 @@ def process_events_data(string_array, is_home):
 	# Return a dictionary of goal scorers and assists
 	# 	the first element of the array determines home or away
 	#   the second element is the type of the event the followinig minutes represent
-	#	e.g. stats = {'Frank Lampard': ['home', 'goal', '53', '67', '90 +6']}
+	#	e.g. stats = {'Frank Lampard': ['home', 'goal', '53', '1010', '90 +10']}
 	#   e.g. stats = {'Ryan Giggs': ['away', 'red card', '45 +2']}
 	for char_index in range(0, length_of_string):
 		if(player_name_and_time[char_index].isdigit() == True):
