@@ -211,6 +211,19 @@ class database:
 		if len(club_names) == 0:
 			print(player_name + ' has no clubs in the career table.')
 	
+	# This is a test function to insert player_id and player_name into a test table and see if there are
+	#		any players that share the same first and last names
+	def insert_into_duplicate_players(self, player_id, player_name):
+		insert_statement = "INSERT INTO check_duplicate_player(player_id, player_name) "
+		insert_statement += "VALUES(\"" + player_id + "\", "
+		insert_statement += "\"" + player_name + "\");"
+
+		try:
+			self.cursor.execute(insert_statement)
+			self.conn.commit()
+		except IntegrityError:
+			print(player_id + ' already in check_duplicate_player.')
+
 	# get the stadium_name to obtain stadium_id from the stadium table
 	def insert_clubs(self, club_dict):
 		club_name = club_dict['club name']
@@ -288,12 +301,17 @@ class database:
 	#		not have any details except for the city, and stadium_name
 	#		to be use
 	def insert_old_stadium(self, old_stadium_name, city):
-		insert_statement = "INSERT INTO stadium(stadium_name, city) "
-		insert_statement += "VALUES(\"" + old_stadium_name + "\", "
-		insert_statement += "\"" + city + "\");"
+		stadium_id = self.get_id(old_stadium_name, 'stadium')
 
-		self.cursor.execute(insert_statement)
-		self.conn.commit()
+		if stadium_id == 'Null':
+			insert_statement = "INSERT INTO stadium(stadium_name, city) "
+			insert_statement += "VALUES(\"" + old_stadium_name + "\", "
+			insert_statement += "\"" + city + "\");"
+
+			self.cursor.execute(insert_statement)
+			self.conn.commit()
+		else:
+			print('Stadium ' + old_stadium_name + ' already in the database.')
 
 	# takes in the match information and date of the match (including
 	#	the referee's name), and inserts the information into the match_
@@ -504,9 +522,10 @@ class database:
 				self.conn.commit()
 			else:
 				print('************************Null player_id')
-				print('inserting ' + player_name + ' into db.')
-
+				# print('inserting ' + player_name + ' into db.')
 				print(player_name)
+
+
 
 	def update_stadium_city(self, stadium_city_dict):
 		key_list = list(stadium_city_dict.keys())

@@ -75,7 +75,7 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index, season='20
 			elif index == -2:
 				el_found = True
 			else:
-				print(len(element))
+				# print(len(element))
 				# scroll down to the bottom of the page to include all the players
 				driver.refresh()
 				time.sleep(5)
@@ -107,8 +107,8 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index, season='20
 		el_not_stale = False
 		while el_not_stale == False and tries < 3:
 			try:
-				print('element ' + str(len(element)))
-				print('index ' + str(index))
+				# print('element ' + str(len(element)))
+				# print('index ' + str(index))
 				el = element[index]
 				
 				return el

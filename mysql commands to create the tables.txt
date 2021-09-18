@@ -36,7 +36,7 @@ create table player(
 	date_of_birth date,
 	height int(3),
 
-	constraint PLAYER_ID_PK PRIMARY KEY(player_id),
+	constraint PLAYER_ID_PK PRIMARY KEY(player_id)
 );
 
 create table manager(
@@ -177,3 +177,5 @@ create table player_club(
 		references club(club_id) on delete cascade
 			on update cascade
 );
+
+

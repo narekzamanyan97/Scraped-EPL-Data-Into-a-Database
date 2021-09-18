@@ -82,14 +82,14 @@ def populate_player_table():
 
 
 def populate_match_table():
-	all_match_ids_in_db = db.get_all_match_ids_inserted()
-
-	all_stadiums_and_cities_list_of_dicts = db.get_stadiums()
-
-	print(all_stadiums_and_cities_list_of_dicts)
-
 	# iterate over the seasons and get their results
-	for j in range(2, 6):
+	for j in range(9, 10):
+		all_match_ids_in_db = db.get_all_match_ids_inserted()
+
+		all_stadiums_and_cities_list_of_dicts = db.get_stadiums()
+	
+		print(all_stadiums_and_cities_list_of_dicts)
+
 		match_info_list_of_list_of_dicts = results_retrieve_1(all_match_ids_in_db, j)
 
 		for match_info_list_of_dicts in match_info_list_of_list_of_dicts:
@@ -141,6 +141,10 @@ def populate_match_table():
 # populate_stadium_and_club_tables()
 # populate_manager_table()
 # populate_player_table()
-populate_match_table()
+# populate_match_table
+for j in range(1, 5):
+	players_dict = player_duplicate_check(j)
 
+	for player_id, player_name in players_dict.items():
+		db.insert_into_duplicate_players(player_id, player_name)
 # # db.generate_standings()
