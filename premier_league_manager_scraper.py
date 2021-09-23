@@ -14,6 +14,82 @@ urls = {
 	'url_1': 'https://www.premierleague.com/managers?se=363&cl=-1',
 }
 
+def manager_duplicate_check(season_index):
+		# set up the driver
+	driver = set_up_driver(urls['url_all'])
+
+
+
+
+
+	managers_list_of_dicts = []
+
+	counter = 0
+	
+	# iterate through the seasons
+	for j in range(season_index, season_index + 1):
+	
+		# select the appropriate season from the dropdown
+		filter_season = WebDriverWait(driver, 5).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + all_seasons[j]  + "']"))
+		)
+
+		# choose the appropriate season from the dropdown list
+		driver.execute_script("arguments[0].click();", filter_season[0])
+		
+		time.sleep(5)
+
+		all_seasons_managers =  WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//table/tbody[@class='dataContainer']/tr"))
+		)
+
+		# get the row manager id
+		all_seasons_manager_ids =  WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//table/tbody[@class='dataContainer']/tr/td/a[@class='managerName']"))
+		)
+
+		# iterate through the managers
+		for i in range(0, len(all_seasons_managers)):
+			temp_dict = {}
+
+			# get the row of the manager
+			all_seasons_managers =  WebDriverWait(driver, 10).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//table/tbody[@class='dataContainer']/tr"))
+			)
+
+			# get the name button rows for the manager
+			all_seasons_manager_button =  WebDriverWait(driver, 10).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//table/tbody[@class='dataContainer']/tr/td/a[@class='managerName']"))
+			)
+
+			manager_name = all_seasons_managers[i].text.splitlines()[0]
+
+			temp_dict['manager name'] = manager_name
+					
+			# get the row manager id
+			all_seasons_manager_ids =  WebDriverWait(driver, 10).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//table/tbody[@class='dataContainer']/tr/td/a[@class='managerName']"))
+			)
+
+			href = all_seasons_manager_ids[i].get_attribute('href')
+
+			print(href)
+
+			# get the id of the manager from the link
+			href = href.split('managers/', 1)[1]
+			manager_id = href.split('/')[0]
+
+			print(manager_id)
+			temp_dict['manager_id'] = manager_id
+
+			managers_list_of_dicts.append(temp_dict)
+			print(managers_list_of_dicts[counter])
+			counter += 1
+			print('----------------------------------')
+		
+	return managers_list_of_dicts
+
+
 def all_seasons_manager_retrieve():
 	# set up the driver
 	driver = set_up_driver(urls['url_all'])

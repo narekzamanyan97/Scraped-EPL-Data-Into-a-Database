@@ -1,3 +1,5 @@
+-- !!! Change the schema
+
 create table stadium(
 	stadium_id int(2) not null auto_increment,
 
@@ -14,20 +16,19 @@ create table stadium(
 );
 
 create table club(
-	club_id int(2) not null auto_increment,
+	club_name varchar(50) not null,
 	stadium_id int(2),
 
-	club_name varchar(50) not null,
 	website varchar(50) not null,
 
-	constraint CLUB_ID_PK PRIMARY KEY (club_id),
+	constraint CLUB_ID_PK PRIMARY KEY (club_name),
 	constraint CLUB_STADIUM_ID_FK FOREIGN KEY (stadium_id)
 		references stadium(stadium_id) on delete set null
 			on update cascade	
 );
 
 create table player(
-	player_id int(4) not null auto_increment,
+	player_id varchar(20) not null auto_increment,
 
 	player_name varchar(50),
 	player_number int(2),
@@ -177,5 +178,3 @@ create table player_club(
 		references club(club_id) on delete cascade
 			on update cascade
 );
-
-

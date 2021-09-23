@@ -37,6 +37,8 @@ def player_duplicate_check(season_index):
 
 	players_dict = {}
 
+	# !!!convert this function to check whether there are duplicates for managers too.
+
 	# iterate over the seasons
 	for j in range(season_index, season_index + 1):
 		if all_seasons[j] < '1995/96':
@@ -161,6 +163,13 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 
 			print(last_index)
 			
+
+			# get the player_id (data-player) provided by the website
+			player_id_els = WebDriverWait(driver, 15).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img"))
+			)
+
+
 			# loop through the player rows and obtain player data
 			while player_index < last_index:
 				print('season index = ' + str(season_index))
@@ -189,6 +198,8 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, player_index, season=all_seasons[j], is_by_season_and_club=True)
 
 
+
+
 				# get the text from the player row.
 				player_row_text = player_row.text
 
@@ -199,6 +210,12 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 
 				print(last_index)
 
+				# get the id of the player from the row
+				player_id = player_id.get_attribute('data-player')
+
+				print(player_name + '            ' + str(player_id))
+
+				# !!! Change this so that you only check the player_id (provided by the website) rather than the name of the player 
 				while (is_player_new(unique_player_names, player_name) == False or is_player_data_in_player_club(player_club_list, player_name, all_seasons[j])) and player_index < last_index:
 					print('season index = ' + str(season_index))
 					print('*************** ' + player_name)

@@ -224,6 +224,22 @@ class database:
 		except IntegrityError:
 			print(player_id + ' already in check_duplicate_player.')
 
+
+	# This is a test function to insert manager_id and manager_name into a test table and see if there are
+	#		any different managers that share the same first and last names
+	def insert_into_duplicate_managers(self, manager_id, manager_name):
+		insert_statement = "INSERT INTO check_duplicate_manager(manager_id, manager_name) "
+		insert_statement += "VALUES(\"" + manager_id + "\", "
+		insert_statement += "\"" + manager_name + "\");"
+
+		print(insert_statement)
+
+		try:
+			self.cursor.execute(insert_statement)
+			self.conn.commit()
+		except IntegrityError:
+			print(manager_id + ' already in check_duplicate_manager.')
+
 	# get the stadium_name to obtain stadium_id from the stadium table
 	def insert_clubs(self, club_dict):
 		club_name = club_dict['club name']
