@@ -114,7 +114,7 @@ def player_duplicate_check(season_index):
 def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 	driver = set_up_driver(urls['url_1'])
 
-	unique_player_names = []
+	unique_player_ids = []
 	
 	players_list_of_dicts = []
 
@@ -127,7 +127,7 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 			number_of_clubs = 20
 
 		# iterate over the clubs
-		for i in range(0, number_of_clubs):
+		for i in range(0, 1):
 			print('Season index = ' + str(season_index))
 			# select the appropriate season from the dropdown
 			filter_season = WebDriverWait(driver, 15).until(
@@ -168,7 +168,6 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 			player_id_els = WebDriverWait(driver, 15).until(
 				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img"))
 			)
-
 
 			# loop through the player rows and obtain player data
 			while player_index < last_index:
@@ -216,11 +215,11 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 				print(player_name + '            ' + str(player_id))
 
 				# !!! Change this so that you only check the player_id (provided by the website) rather than the name of the player 
-				while (is_player_new(unique_player_names, player_name) == False or is_player_data_in_player_club(player_club_list, player_name, all_seasons[j])) and player_index < last_index:
+				while (is_player_new(unique_player_ids, player_id) == False or is_player_data_in_player_club(player_club_list, player_id, all_seasons[j])) and player_index < last_index:
 					print('season index = ' + str(season_index))
-					print('*************** ' + player_name)
+					print('*************** ' + player_id)
 					# print so that we know the reason the code skips the player
-					if is_player_new(unique_player_names, player_name) == False and is_player_data_in_player_club(player_club_list, player_name, all_seasons[j]) == False:
+					if is_player_new(unique_player_ids, player_name) == False and is_player_data_in_player_club(player_club_list, player_name, all_seasons[j]) == False:
 						print('Player already retrieved.')
 						did_duplicate_occur = True
 					elif is_player_data_in_player_club(player_club_list, player_name, all_seasons[j]) == True:
@@ -248,11 +247,11 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 					continue
 
 			
-				print('*************** ' + player_name)
+				print('*************** ' + player_id)
 				# check whether the player has not been retrieved yet.
 				# 		if not, then append it to the unique_player_names and get the
 				#		player data		 	
-				unique_player_names.append(player_name)
+				unique_player_names.append(player_id)
 
 				player_position_and_country = player_row_text_list[1].split()
 				player_position = player_position_and_country[0]

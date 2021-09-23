@@ -98,6 +98,7 @@ def all_seasons_manager_retrieve():
 		EC.presence_of_all_elements_located((By.XPATH, "//table/tbody[@class='dataContainer']/tr"))
 	)
 
+	# !!! change the season too to the one provided by the website
 
 	managers_list_of_dicts = []
 

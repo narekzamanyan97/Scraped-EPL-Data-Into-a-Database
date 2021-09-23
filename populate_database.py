@@ -23,6 +23,7 @@ def populate_stadium_and_club_tables():
 		print(club_dict)
 		db.insert_stadiums(club_dict)
 		db.insert_clubs(club_dict)
+	
 	# close the connection
 	connection.close()
 
@@ -73,7 +74,7 @@ def populate_player_table():
 	# Iterate over the seasons, and after a season's data is scraped, insert that data
 	#		into the database, and move on to the next iteration.
 	# !!! do j = 4 again (1996/97)
-	for j in range(4, 15):
+	for j in range(0, 1):
 		season = all_seasons[j]
 		player_club_list_of_dicts = db.get_player_clubs(season)
 
@@ -146,7 +147,7 @@ def populate_match_table():
 
 # populate_stadium_and_club_tables()
 # populate_manager_table()
-# populate_player_table()
+populate_player_table()
 # populate_match_table
 # for j in range(1, 5):
 # 	players_dict = player_duplicate_check(j)
@@ -155,10 +156,10 @@ def populate_match_table():
 # 		db.insert_into_duplicate_players(player_id, player_name)
 
 
-for season_index in range(20, len(all_seasons)):
-	managers_list_of_dicts = manager_duplicate_check(season_index)
+# for season_index in range(20, len(all_seasons)):
+# 	managers_list_of_dicts = manager_duplicate_check(season_index)
 
-	for managers_dict in managers_list_of_dicts:
-		db.insert_into_duplicate_managers(managers_dict['manager_id'], managers_dict['manager name'])
+# 	for managers_dict in managers_list_of_dicts:
+# 		db.insert_into_duplicate_managers(managers_dict['manager_id'], managers_dict['manager name'])
 
 # # db.generate_standings()
