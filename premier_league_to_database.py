@@ -110,6 +110,8 @@ class database:
 
 
 	def insert_players(self, player_dict):
+		# !!! update this function so that the player_id (provided by the website) is also being inserted
+		player_id = player_dict['player id']
 		player_name = player_dict['player name']
 		position = player_dict['position']
 		country = player_dict['country']
@@ -143,13 +145,15 @@ class database:
 		if len(position) > 12:
 			position = 'Null'
 
-		player_id = self.get_id(player_name, 'player')
+		# no need for this. we get the id
+		# player_id = self.get_id(player_name, 'player')
 
 		# if the player name is not in the database (player_id='Null'), then insert
 		#		the player
-		if player_id == 'Null':
-			insert_statement = "INSERT INTO player(player_name, player_number, position, country, date_of_birth, height) "
-			insert_statement += "VALUES(\"" + player_name + "\", "
+		try:
+			insert_statement = "INSERT INTO player(player_id, player_name, player_number, position, country, date_of_birth, height) "
+			insert_statement += "VALUES(\"" + player_id + "\", "
+			insert_statement += "\"" + player_name + "\", "
 			insert_statement += str(shirt_number) + ", "
 			insert_statement += "\"" + position + "\", "
 			insert_statement += "\"" + country + "\", "
@@ -159,9 +163,8 @@ class database:
 			self.cursor.execute(insert_statement)
 			self.conn.commit()
 
-			player_id = self.get_id(player_name, 'player')
-		else:
-			print(player_name + ' already in player table.')
+		except IntegrityError:
+			print(player_id + ': ' + player_name + ' already in player table.')
 
 		# player_dict['clubs'] is a dictionary
 		club_names = player_dict['clubs']
@@ -197,7 +200,7 @@ class database:
 
 				try:
 					insert_statement = "INSERT INTO player_club(player_id, club_id, season) "
-					insert_statement += "VALUES(" + str(player_id) + ", "
+					insert_statement += "VALUES(\"" + player_id + "\", "
 					insert_statement += str(club_id) + ", "
 					insert_statement += "\"" + season + "\");"
 
@@ -676,8 +679,8 @@ class database:
 				return 0, 0
 
 	def get_player_clubs(self, season):
-		query = "SELECT p.player_id, p_c.season "
-		query += "FROM player_club WHERE p_c.season=\"" + str(season) + "\";"
+		query = "SELECT player_id, season "
+		query += "FROM player_club WHERE season=\"" + str(season) + "\";"
 
 		self.cursor.execute(query)
 		tuple_list = self.cursor.fetchall()

@@ -159,7 +159,7 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 
 			player_index = 0
 
-			last_index = len(player_rows)
+			last_index = 2
 
 			print(last_index)
 			
@@ -205,9 +205,17 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 				player_row_text_list = player_row_text.splitlines()
 				player_name = player_row_text_list[0]
 
-				last_index = len(player_rows)
+				# last_index = len(player_rows)
 
 				print(last_index)
+
+				# get the player_id (data-player) provided by the website
+				player_id_els = WebDriverWait(driver, 15).until(
+					EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img"))
+				)
+
+				# get the id of the current player
+				player_id = player_id_els[player_index]
 
 				# get the id of the player from the row
 				player_id = player_id.get_attribute('data-player')
@@ -219,10 +227,10 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 					print('season index = ' + str(season_index))
 					print('*************** ' + player_id)
 					# print so that we know the reason the code skips the player
-					if is_player_new(unique_player_ids, player_name) == False and is_player_data_in_player_club(player_club_list, player_name, all_seasons[j]) == False:
+					if is_player_new(unique_player_ids, player_id) == False and is_player_data_in_player_club(player_club_list, player_id, all_seasons[j]) == False:
 						print('Player already retrieved.')
 						did_duplicate_occur = True
-					elif is_player_data_in_player_club(player_club_list, player_name, all_seasons[j]) == True:
+					elif is_player_data_in_player_club(player_club_list, player_id, all_seasons[j]) == True:
 						print('Player-season combination already in player_club.')
 						print()
 
@@ -232,14 +240,27 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 						print('player_index = ' + str(player_index))
 						print('last_index = ' + str(last_index))
 			
-						# get the next player row without refreshing the page.
-						player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, player_index, season=all_seasons[j], is_by_season_and_club=True)
+						# # get the next player row without refreshing the page.
+						# player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, player_index, season=all_seasons[j], is_by_season_and_club=True)
 						
 
-						player_row_text = player_row.text
+						# player_row_text = player_row.text
 
-						player_row_text_list = player_row_text.splitlines()
-						player_name = player_row_text_list[0]
+						# player_row_text_list = player_row_text.splitlines()
+						# player_name = player_row_text_list[0]
+
+						# get the next player's id without refreshing the page
+						# get the player_id (data-player) provided by the website
+						player_id_els = WebDriverWait(driver, 15).until(
+							EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img"))
+						)
+
+						# get the id of the current player
+						player_id = player_id_els[player_index]
+
+						# get the id of the player from the row
+						player_id = player_id.get_attribute('data-player')
+
 					else:
 						continue
 
@@ -251,7 +272,7 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 				# check whether the player has not been retrieved yet.
 				# 		if not, then append it to the unique_player_names and get the
 				#		player data		 	
-				unique_player_names.append(player_id)
+				unique_player_ids.append(player_id)
 
 				player_position_and_country = player_row_text_list[1].split()
 				player_position = player_position_and_country[0]
@@ -266,6 +287,7 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 				temp_dict = {}
 
 				# add the player info to a dictionary
+				temp_dict['player id'] = player_id
 				temp_dict['player name'] = player_name
 				temp_dict['position'] = player_position
 				temp_dict['country'] = player_country
