@@ -462,6 +462,7 @@ def results_retrieve_2(driver, result_row):
 
 		match_referee = match_referee[0].text
 		match_date['referee'] = match_referee
+	
 	# the match detail info is not there. Add dummy data to the club_names, stats, and
 	#		match date
 	except TimeoutException:
@@ -548,8 +549,16 @@ def results_retrieve_3(driver):
 	# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList']/li[@class='player']/a"))
 	# )
 
-	line_ups_home = extract_player_information(squad_home_number, squad_home_info, True)
-	line_ups_away = extract_player_information(squad_away_number, squad_away_info, False)
+	player_home_ids = WebDriverWait(driver, 5).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList home']/li[@class='player']/a/img"))
+	)
+
+	player_away_ids = WebDriverWait(driver, 5).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList']/li[@class='player']/a/img"))
+	)
+
+	line_ups_home = extract_player_information(squad_home_number, squad_home_info, True, player_home_ids)
+	line_ups_away = extract_player_information(squad_away_number, squad_away_info, False, player_away_ids)
 
 	# extend the line_ups home with the line_ups_away to get both teams' line-ups of the match
 	line_ups_home.update(line_ups_away)
@@ -630,24 +639,29 @@ def results_retrieve_4(driver):
 # take in the rows of the squad, squad_number for the player's shirt number,
 #	squad_info for the player's information in the match
 # organize the data into a dictionary and return it
-def extract_player_information(squad_number, squad_info, is_home_side):
+def extract_player_information(squad_number, squad_info, is_home_side, ids):
 	squad_dict = {}
 
 	starting_11_counter = 1
 	
 	# extract the player performance (such as substition on/off, yellow/red cards, etc)
 	#	from the line-ups table on the screen
-	for number, info in zip(squad_number, squad_info):
+	for number, info, id_element in zip(squad_number, squad_info, ids):
 		# Make a list out of the data by splitting the newlines that divide 
 		#	the information
 		number = number.text.splitlines()
 		info = info.text.splitlines()
+		player_id = id_element.get_attribute('data-player')
 		
 		player_info_dict = {}
 		
+		# get the player's name from the list
+		player_name = info[0]
+
 		# recreate the temporary dictionary to store another players information
 		temp_dict = {}
 
+		temp_dict['player name'] = player_name
 		temp_dict['Is Home Side'] = is_home_side
 		
 		# Some players in the old results have no number
@@ -658,9 +672,12 @@ def extract_player_information(squad_number, squad_info, is_home_side):
 		except IndexError:
 			temp_dict['Shirt Number'] = 'Null'
 		
-		# get the player's name from the list
-		player_name = info[0]
+		
 
+		for inf in info:
+			print('**********************************')
+			print(inf)
+			print('**********************************')
 
 		# !!! check if the player is already in db. If not, click on the player and
 		#		retrieve his information
@@ -698,7 +715,7 @@ def extract_player_information(squad_number, squad_info, is_home_side):
 		if 'Pen. Scored' not in temp_dict:
 			temp_dict['Pen. Scored'] = 'Null' 
 
-		squad_dict[player_name] = temp_dict
+		squad_dict[player_id] = temp_dict
 
 		starting_11_counter += 1
 

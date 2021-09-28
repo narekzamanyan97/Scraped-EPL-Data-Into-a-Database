@@ -458,21 +458,19 @@ class database:
 	def insert_player_performance(self, player_performance_dict, match_id):
 
 		# iterate through the player performances
-		for player_name, performance_array_of_arrays in player_performance_dict.items():
-			print(player_name)
-			player_id = self.get_id(player_name, 'player')
-			
-			# some players have not appeared in the player's page, and thus have
-			#	no player_id
-			if player_id == 'Null':
-				print(player_name + ' has no player_id')
+		for player_id, performance_array_of_arrays in player_performance_dict.items():	
+			# # some players have not appeared in the player's page, and thus have
+			# #	no player_id
+			# if player_id == 'Null':
+			# 	print(player_name + ' has no player_id')
 
-				# insert the player
-				insert_player_statement = "INSERT INTO player(player_name) "
-				insert_player_statement += "VALUES(\"" + player_name + "\");"
+			# 	# insert the player
+			# 	insert_player_statement = "INSERT INTO player(player_name) "
+			# 	insert_player_statement += "VALUES(\"" + player_name + "\");"
 
-				self.cursor.execute(insert_statement)
-				self.conn.commit()
+			# 	self.cursor.execute(insert_statement)
+			# 	self.conn.commit()
+
 
 			# goal (goal) = 1
 			# goal penalty = 2
@@ -495,6 +493,8 @@ class database:
 				elif performance_array[1] == 'Second Yellow Card (Red Card)':
 					type_of_stat = 6
 
+				player_name = performance_array[0]
+
 				minutes = []
 				for i in range(2, len(performance_array)):
 					minutes.append(performance_array[i])
@@ -514,10 +514,8 @@ class database:
 	#	dictionary of dictionaries for player stats, with the key of the 
 	#	outer dictionary being the name of the player
 	def insert_player_stats(self, player_stats_dict_of_dicts, match_id):
-		for key_player_name, player_stats_dict in player_stats_dict_of_dicts.items():
-			player_name = key_player_name
-			player_id = self.get_id(player_name, 'player')
-			
+		for player_id, player_stats_dict in player_stats_dict_of_dicts.items():
+			player_name = player_stats_dict['player name']			
 			is_in_starting_11 = player_stats_dict['Starting 11']
 			substitution_on = player_stats_dict['Substitution On']
 			substitution_off = player_stats_dict['Substitution Off']
@@ -532,14 +530,10 @@ class database:
 			insert_statement += "\"" + str(substitution_off) + "\", "
 			insert_statement += "\"" + str(yellow_card) + "\", "
 			insert_statement += "\"" + str(red_card) + "\");"
-
-			if player_id != 'Null':				
-				self.cursor.execute(insert_statement)
-				self.conn.commit()
-			else:
-				print('************************Null player_id')
-				# print('inserting ' + player_name + ' into db.')
-				print(player_name)
+				
+			print(insert_statement)
+			self.cursor.execute(insert_statement)
+			self.conn.commit()
 
 
 
