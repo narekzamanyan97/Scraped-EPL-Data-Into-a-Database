@@ -49,32 +49,29 @@ def populate_manager_table():
 
 # gets player data using the scraper functions and inserts them into the player table
 def populate_player_table():
-	# # using the player_retrive_1 function to scrape player rows, filtering based on
-	# #			season only
-	# for j in range(0, 30):
-	# 	# retrieve all the rows from player_clubs table corresponding to the given season
-	# 	season = all_seasons[j]
-	# 	print(season)
-	# 	player_club_list_of_dicts = db.get_player_clubs(season)
+	# using the player_retrive_1 function to scrape player rows, filtering based on
+	#			season only
+	for j in range(30, len(all_seasons)):
+		# retrieve all the rows from player_clubs table corresponding to the given season
+		season = all_seasons[j]
+		print(season)
+		player_club_list_of_dicts = db.get_player_clubs(season)
 		
-	# 	# for dict_ in player_club_list_of_dicts:
-	# 	#  	print(dict_)
+		# for dict_ in player_club_list_of_dicts:
+		#  	print(dict_)
 	
-	# 	player_list_of_dicts = player_retrieve_1(player_club_list_of_dicts, j)
+		player_list_of_dicts = player_retrieve_1(player_club_list_of_dicts, j)
 		
-	# 	for player_dict in player_list_of_dicts:
-	# 		db.insert_players(player_dict)
+		for player_dict in player_list_of_dicts:
+			db.insert_players(player_dict)
 
 	# using the player_retrieve_by_season_and_club function to filter based on
 	#			season and club
-	
-
-	# !!! get player_clubs, but make sure the player_id is the one provided by the database
 
 	# Iterate over the seasons, and after a season's data is scraped, insert that data
 	#		into the database, and move on to the next iteration.
 	# !!! do j = 4 again (1996/97)
-	for j in range(0, 1):
+	for j in range(5, len(all_seasons)):
 		season = all_seasons[j]
 		player_club_list_of_dicts = db.get_player_clubs(season)
 

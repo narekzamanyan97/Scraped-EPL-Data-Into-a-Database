@@ -145,9 +145,6 @@ class database:
 		if len(position) > 12:
 			position = 'Null'
 
-		# no need for this. we get the id
-		# player_id = self.get_id(player_name, 'player')
-
 		# if the player name is not in the database (player_id='Null'), then insert
 		#		the player
 		try:
@@ -208,7 +205,7 @@ class database:
 					self.conn.commit()
 
 				except IntegrityError:
-					print(player_name + ' ' + str(club_name) + ' ' + season + ' already in player_club.')
+					print(player_id + ' ' + str(club_name) + ' ' + season + ' already in player_club.')
 		
 		# see if the career table is ever empty. Remove later.
 		if len(club_names) == 0:

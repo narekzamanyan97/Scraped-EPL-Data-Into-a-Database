@@ -127,7 +127,7 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 			number_of_clubs = 20
 
 		# iterate over the clubs
-		for i in range(0, 1):
+		for i in range(0, number_of_clubs):
 			print('Season index = ' + str(season_index))
 			# select the appropriate season from the dropdown
 			filter_season = WebDriverWait(driver, 15).until(
@@ -159,7 +159,7 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 
 			player_index = 0
 
-			last_index = 2
+			last_index = len(player_rows)
 
 			print(last_index)
 			
@@ -205,7 +205,7 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 				player_row_text_list = player_row_text.splitlines()
 				player_name = player_row_text_list[0]
 
-				# last_index = len(player_rows)
+				last_index = len(player_rows)
 
 				print(last_index)
 
@@ -240,14 +240,14 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 						print('player_index = ' + str(player_index))
 						print('last_index = ' + str(last_index))
 			
-						# # get the next player row without refreshing the page.
-						# player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, player_index, season=all_seasons[j], is_by_season_and_club=True)
+						# get the next player row without refreshing the page.
+						player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, player_index, season=all_seasons[j], is_by_season_and_club=True)
 						
 
-						# player_row_text = player_row.text
+						player_row_text = player_row.text
 
-						# player_row_text_list = player_row_text.splitlines()
-						# player_name = player_row_text_list[0]
+						player_row_text_list = player_row_text.splitlines()
+						player_name = player_row_text_list[0]
 
 						# get the next player's id without refreshing the page
 						# get the player_id (data-player) provided by the website
@@ -316,9 +316,10 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 def player_retrieve_1(player_club_list, start_range):
 	season_counter = -1
 
-	unique_player_names = []
+	unique_player_ids = []
 
-	for j in range(start_range, len(all_seasons) - (len(all_seasons) - start_range - 1)):
+	# Iterate over the seasons
+	for j in range(start_range, start_range + 1):
 		print(all_seasons[j])
 		season_counter += 1
 
@@ -354,20 +355,25 @@ def player_retrieve_1(player_club_list, start_range):
 
 		counter = 0
 
+		# get the player_id (data-player) provided by the website
+		player_id_els = WebDriverWait(driver, 15).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img"))
+		)
 
 		# Use this list to make sure no duplicate names are inserted into the 
 		#	player table, as the scraper sometimes clicks on the same player row
-		unique_player_names = []
+		unique_player_ids = []
 
-		original_row_amount = len(player_rows)
+		original_row_amount = 0
 
-		starting_counter = 0
+		starting_counter = len(player_rows)
 
 		last_index = len(player_rows)
 
 		i = starting_counter
-		# get the basic player information from the 
-		while i < len(player_rows) - (len(player_rows) - last_index):
+
+		# iterate over the players
+		while i < last_index:
 			print(all_seasons[j])
 			print('start_range = ' + str(start_range))
 			print(len(player_rows))
@@ -421,22 +427,36 @@ def player_retrieve_1(player_club_list, start_range):
 				except AttributeError:
 					print('*******************************AttributeError.')
 
+
+			# get the player_id (data-player) provided by the website
+			player_id_els = WebDriverWait(driver, 15).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img"))
+			)
+			
+			# get the id of the current player
+			player_id = player_id_els[i]
+
+			# get the id of the player from the row
+			player_id = player_id.get_attribute('data-player')
+
 			player_row_text_list = player_row_text.splitlines()
 			player_name = player_row_text_list[0]
+
+			print(player_name + '   ' + player_id)
 
 			did_duplicate_occur = False
 
 			# if the player has already been scraped, move on to the next player
 			# 	or if the player_season combination (the club is not relevant) is
 			#	already present in the player_club table, move on the the next player.
-			while (is_player_new(unique_player_names, player_name) == False or is_player_data_in_player_club(player_club_list, player_name, all_seasons[j])) and i < last_index:
-				
+			while (is_player_new(unique_player_ids, player_id) == False or is_player_data_in_player_club(player_club_list, player_id, all_seasons[j])) and i < last_index:
+				print(player_name + '   ' + player_id)
 				# print so that we know the reason the code skips the player
-				if is_player_new(unique_player_names, player_name) == False and is_player_data_in_player_club(player_club_list, player_name, all_seasons[j]) == False:
-					# print('Player already retrieved.')
+				if is_player_new(unique_player_ids, player_id) == False and is_player_data_in_player_club(player_club_list, player_id, all_seasons[j]) == False:
+					print('Player already retrieved.')
 					did_duplicate_occur = True
-				elif is_player_data_in_player_club(player_club_list, player_name, all_seasons[j]) == True:
-					# print('Player-season combination already in player_club.')
+				elif is_player_data_in_player_club(player_club_list, player_id, all_seasons[j]) == True:
+					print('Player-season combination already in player_club.')
 					print()
 
 				i += 1
@@ -457,8 +477,17 @@ def player_retrieve_1(player_club_list, start_range):
 						except AttributeError:
 							print()
 
+
 					player_row_text_list = player_row_text.splitlines()
 					player_name = player_row_text_list[0]
+
+
+					# get the id of the current player
+					player_id = player_id_els[i]
+
+					# get the id of the player from the row
+					player_id = player_id.get_attribute('data-player')
+
 					# print(player_name)
 				else:
 					continue
@@ -471,7 +500,7 @@ def player_retrieve_1(player_club_list, start_range):
 			# check whether the player has not been retrieved yet.
 			# 		if not, then append it to the unique_player_names and get the
 			#		player data		 	
-			unique_player_names.append(player_name)
+			unique_player_ids.append(player_id)
 
 			player_position_and_country = player_row_text_list[1].split()
 			player_position = player_position_and_country[0]
@@ -489,6 +518,7 @@ def player_retrieve_1(player_club_list, start_range):
 			counter += 1
 
 			# add the player info to a dictionary
+			temp_dict['player id'] = player_id
 			temp_dict['player name'] = player_name
 			temp_dict['position'] = player_position
 			temp_dict['country'] = player_country

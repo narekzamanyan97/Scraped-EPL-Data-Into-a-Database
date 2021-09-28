@@ -131,9 +131,9 @@ def presence_of_all_el_located(driver, xpath, seconds_to_wait, index, season='20
 
 # check whether the has already been inserted into the database (whether it is
 #		in list_of_players) or not
-def is_player_new(list_of_players, player_name):
+def is_player_new(list_of_players, player_id):
 	try:
-		x = list_of_players.index(player_name)
+		x = list_of_players.index(player_id)
 		return False
 	except ValueError:
 		return True
@@ -148,7 +148,7 @@ def is_player_new(list_of_players, player_name):
 def is_player_data_in_player_club(player_club_list, player_id, season):
 	is_in_database = False
 	for player_club_row in player_club_list:
-		if player_club_row['player_name'] == player_name:
+		if player_club_row['player_id'] == player_id:
 			if player_club_row['season'] == season:
 				is_in_database = True
 				return is_in_database
