@@ -501,11 +501,12 @@ class database:
 
 				for minute in minutes:
 					insert_statement = "INSERT INTO player_performance(player_id, match_id, type_of_stat, minute) "
-					insert_statement += "VALUES(" + str(player_id) + ", "
+					insert_statement += "VALUES(\"" + str(player_id) + "\", "
 					insert_statement += str(match_id) + ", "
 					insert_statement += str(type_of_stat) + ", "
 					insert_statement += "\"" + minute + "\");"
 
+					# print(insert_statement)
 					self.cursor.execute(insert_statement)
 					self.conn.commit()
 
@@ -523,7 +524,7 @@ class database:
 			red_card = player_stats_dict['Red Card']
 
 			insert_statement = "INSERT INTO player_stats(player_id, match_id, is_in_starting_11, substitution_on, substitution_off, yellow_card, red_card) "
-			insert_statement += "VALUES(" + str(player_id) + ", "
+			insert_statement += "VALUES(\"" + str(player_id) + "\", "
 			insert_statement += str(match_id) + ", "
 			insert_statement += str(is_in_starting_11) + ", "
 			insert_statement += "\"" + str(substitution_on) + "\", "
@@ -531,7 +532,7 @@ class database:
 			insert_statement += "\"" + str(yellow_card) + "\", "
 			insert_statement += "\"" + str(red_card) + "\");"
 				
-			print(insert_statement)
+			# print(insert_statement)
 			self.cursor.execute(insert_statement)
 			self.conn.commit()
 

@@ -59,7 +59,7 @@ def results_retrieve_1(all_match_ids, season_index):
 			results_list_of_list_of_dicts = []
 
 			# iterate over the clubs
-			for club_index in range(0, 1):
+			for club_index in range(2, 4):
 				
 				# filter using the next club
 				filter_club = WebDriverWait(driver, 15).until(
@@ -126,6 +126,7 @@ def results_retrieve_1(all_match_ids, season_index):
 
 				start_index = 0
 				i = start_index
+
 				last_index = len(results)
 
 				# Iterating over the results to get the team names, scores, stadium names,
@@ -290,13 +291,12 @@ def results_retrieve_1(all_match_ids, season_index):
 						
 						# call results_retrieve_2 to get the match details, such as scorers and assists, 
 						#	red cards, penalty scorers, own goals, etc.
-						team_names, player_stats, match_date, line_ups, team_stats = results_retrieve_2(driver, div_ids[i])
+						team_names, player_stats, match_date, line_ups, team_stats = results_retrieve_2(driver, div_ids[i], all_seasons[j])
 
 						# # if the team names returned is empty, add the names from the result row.
 						# if bool(team_names) == False:
 						# 	team_names.append(home_club_name)
 						# 	team_names.append(away_club_name)
-
 
 						print(team_names[0] + " " + score_team_1 + "-" + score_team_2 + " " + team_names[1] + " @ " + str(stadium_name) + ", " + str(city))
 						
@@ -358,7 +358,7 @@ def results_retrieve_1(all_match_ids, season_index):
 #	the name of the goal scorers, assists ...
 #	the dictionaries returned by results_retrieve_3/4, so that
 #	results_retrieve_1 can access them
-def results_retrieve_2(driver, result_row):
+def results_retrieve_2(driver, result_row, season):
 	# click on the result row to open the details of the match
 	driver.execute_script("arguments[0].click();", result_row)
 	stats = {}
@@ -386,28 +386,37 @@ def results_retrieve_2(driver, result_row):
 
 		print('###########################################################')
 
+
+		# call the retrive_3 function to get the line_ups, player stats, and the
+		#		mapping of link_ids and player_ids 
+		line_ups, club_names, id_mapping = results_retrieve_3(driver)
+
+		# call results_retrieve_3 function to get the team stats of the match
+		team_stats = results_retrieve_4(driver, season)
+
 		# try:
 		# retrieve the events of the home side, which include goals (by penalty), 
 		#	own goals, and red cards
 		events_home_xpath = "//div[@class='matchEvents matchEventsContainer']/div[@class='home']/div[@class='event']"
 
-		stats = extract_event(driver, events_home_xpath, stats, True)
+		stats = extract_event(driver, events_home_xpath, stats, id_mapping, True)
 		
+
 		# retrieve the events of the away side, which include goals (by penalty), 
 		#	own goals, and red cards
 		events_away_xpath = "//div[@class='matchEvents matchEventsContainer']/div[@class='away']/div[@class='event']"
 		
-		stats = extract_event(driver, events_away_xpath, stats, False)
+		stats = extract_event(driver, events_away_xpath, stats, id_mapping, False)
 
 		# retrieve the assists of the home side
 		assists_home_xpath = "//div[@class='assists']/div[@class='matchAssistsContainer']/div[@class='home']/div[@class='event']"
 		
-		stats = extract_event(driver, assists_home_xpath, stats, True)
+		stats = extract_event(driver, assists_home_xpath, stats, id_mapping, True)
 
 		# retrieve the assists of the away side
 		assists_away_xpath = "//div[@class='assists']/div[@class='matchAssistsContainer']/div[@class='away']/div[@class='event']"
 
-		stats = extract_event(driver, assists_away_xpath, stats, False)
+		stats = extract_event(driver, assists_away_xpath, stats, id_mapping, False)
 		print(stats)
 
 
@@ -481,18 +490,9 @@ def results_retrieve_2(driver, result_row):
 	if len(club_names) != 0:
 		club_names_return = club_names
 
-	# call the retrive_3 function to get the line_ups and player stats of the match
-	line_ups, club_names = results_retrieve_3(driver)
 	# print(line_ups)
 	if len(club_names_return) == 0:
 		club_names_return = club_names
-	# print('*****************************************************************')
-
-	# call results_retrieve_3 function to get the team stats of the match
-	team_stats = results_retrieve_4(driver)
-	# print(team_stats)
-	# print('*****************************************************************')	
-	
 
 	# go back to the previous page
 	driver.execute_script("window.history.go(-1)")
@@ -541,13 +541,6 @@ def results_retrieve_3(driver):
 
 	print(formation_home + ' : ' + formation_away)
 
-	# get all the players from both squads, then check whether the players are in the db
-	#	if not, call !!! another function !!! to click on the player and insert the player
-	#	info.
-	# !!! Filter players both by club and by year to get all the players in player_scraper 
-	# player_buttons = WebDriverWait(driver, 5).until(
-	# 	EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList']/li[@class='player']/a"))
-	# )
 
 	player_home_ids = WebDriverWait(driver, 5).until(
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList home']/li[@class='player']/a/img"))
@@ -557,8 +550,26 @@ def results_retrieve_3(driver):
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList']/li[@class='player']/a/img"))
 	)
 
+	# The website also uses a link id, which is used to get to a specific player's page
+	# This id is also unique, so we can get this id, and map it with the other id, later
+	#		to be added to the player_stats dict as a key
+	player_home_link_ids = WebDriverWait(driver, 5).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList home']/li[@class='player']/a"))
+	)
+
+	player_away_link_ids = WebDriverWait(driver, 5).until(
+		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList']/li[@class='player']/a"))
+	)
+
+
+	link_player_id_mapping_home = map_ids(player_home_link_ids, player_home_ids)
+	link_player_id_mapping_away = map_ids(player_away_link_ids, player_away_ids)
+
+
 	line_ups_home = extract_player_information(squad_home_number, squad_home_info, True, player_home_ids)
 	line_ups_away = extract_player_information(squad_away_number, squad_away_info, False, player_away_ids)
+
+
 
 	# extend the line_ups home with the line_ups_away to get both teams' line-ups of the match
 	line_ups_home.update(line_ups_away)
@@ -580,57 +591,67 @@ def results_retrieve_3(driver):
 	club_names.append(home_club_name)
 	club_names.append(away_club_name)
 
-	return line_ups_home, club_names
+	# line_ups_home has line_ups_away appended to it
+	# link_player_id_mapping_home has link_player_id_mapping_away appended to it.
+	link_player_id_mapping_home.update(link_player_id_mapping_away)
+
+	return line_ups_home, club_names, link_player_id_mapping_home
 
 # get the team stats
-def results_retrieve_4(driver):
+# @parameters
+#	season is used to skip the club stats if it is < 2006/07 to save time
+def results_retrieve_4(driver, season):
 	# put the entire function into try-catch block with TimeoutException as the
 	#		older matches have no stats section
-	try:
-		# get the stats tab on the screen
-		stats_tab = WebDriverWait(driver, 5).until(
-			EC.presence_of_element_located((By.XPATH, "//div[@class='centralContent']/div[@class='mcTabsContainer']/div[@class='wrapper col-12']/div[@class='tabLinks matchNav']/div[@class='tabs']/ul[@class='tablist']/li[@data-tab-index='2']"))
-		)
-		# click on the stats botton
-		driver.execute_script("arguments[0].click();", stats_tab)
+	if season < '2006/07':
+		try:
+			# get the stats tab on the screen
+			stats_tab = WebDriverWait(driver, 5).until(
+				EC.presence_of_element_located((By.XPATH, "//div[@class='centralContent']/div[@class='mcTabsContainer']/div[@class='wrapper col-12']/div[@class='tabLinks matchNav']/div[@class='tabs']/ul[@class='tablist']/li[@data-tab-index='2']"))
+			)
+			# click on the stats botton
+			driver.execute_script("arguments[0].click();", stats_tab)
 
-		# get the stats table on the screen
-		teams_stats = WebDriverWait(driver, 5).until(
-			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='mcStatsTab statsSection season-so-far wrapper col-12 active']/table/tbody[@class='matchCentreStatsContainer']/tr"))
-		)
+			# get the stats table on the screen
+			teams_stats = WebDriverWait(driver, 5).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='mcStatsTab statsSection season-so-far wrapper col-12 active']/table/tbody[@class='matchCentreStatsContainer']/tr"))
+			)
 
-		# append the statistics into a list
-		stats_list = []
+			# append the statistics into a list
+			stats_list = []
 
-		# The format of the stats is:
-		# 28.8 Possession % 51.2
-		# 3 Shots on target 5
-		# 		 ....
-		# 11 Fouls conceded 12
-		for team_stats in teams_stats:
-			stats_list.append(team_stats.text)
-		
+			# The format of the stats is:
+			# 28.8 Possession % 51.2
+			# 3 Shots on target 5
+			# 		 ....
+			# 11 Fouls conceded 12
+			for team_stats in teams_stats:
+				stats_list.append(team_stats.text)
+			
 
-		stats_dict = {}
+			stats_dict = {}
 
-		
-		# convert the stats_list into a dictionary, where the keys are the types of
-		#	the statistic along with home/away, and the values are the numbers
-		#	e.g. {... 'Shots on target home': '3', 'Shots on target away': '5'}
-		for i in range(0, len(stats_list)):
-			first_space = stats_list[i].index(' ')
-			if i == 0:
-				percent_sign = stats_list[i].rindex('%')	
-				type_of_stat = stats_list[i][first_space+1:percent_sign - 1]
-			else:
-				last_space = stats_list[i].rindex(' ')
-				type_of_stat = stats_list[i][first_space + 1:last_space]
+			
+			# convert the stats_list into a dictionary, where the keys are the types of
+			#	the statistic along with home/away, and the values are the numbers
+			#	e.g. {... 'Shots on target home': '3', 'Shots on target away': '5'}
+			for i in range(0, len(stats_list)):
+				first_space = stats_list[i].index(' ')
+				if i == 0:
+					percent_sign = stats_list[i].rindex('%')	
+					type_of_stat = stats_list[i][first_space+1:percent_sign - 1]
+				else:
+					last_space = stats_list[i].rindex(' ')
+					type_of_stat = stats_list[i][first_space + 1:last_space]
 
-			stats_splitted = stats_list[i].split()
-			stats_dict[type_of_stat + ' home'] = stats_splitted[0]
-			stats_dict[type_of_stat + ' away'] = stats_splitted[len(stats_splitted) - 1]
-	except TimeoutException:
-		print('The match has no stats info.')
+				stats_splitted = stats_list[i].split()
+				stats_dict[type_of_stat + ' home'] = stats_splitted[0]
+				stats_dict[type_of_stat + ' away'] = stats_splitted[len(stats_splitted) - 1]
+		except TimeoutException:
+			print('The match has no stats info.')
+			stats_dict = {}
+	else:
+		print('No stats for ' + season)
 		stats_dict = {}
 
 	return stats_dict
@@ -643,6 +664,8 @@ def extract_player_information(squad_number, squad_info, is_home_side, ids):
 	squad_dict = {}
 
 	starting_11_counter = 1
+
+
 	
 	# extract the player performance (such as substition on/off, yellow/red cards, etc)
 	#	from the line-ups table on the screen
@@ -672,16 +695,6 @@ def extract_player_information(squad_number, squad_info, is_home_side, ids):
 		except IndexError:
 			temp_dict['Shirt Number'] = 'Null'
 		
-		
-
-		for inf in info:
-			print('**********************************')
-			print(inf)
-			print('**********************************')
-
-		# !!! check if the player is already in db. If not, click on the player and
-		#		retrieve his information
-
 		# Fill in the dictionary to be added to squad_home_dict
 		if starting_11_counter <= 11:
 			temp_dict['Starting 11'] = True
@@ -722,10 +735,30 @@ def extract_player_information(squad_number, squad_info, is_home_side, ids):
 	return(squad_dict)
 
 
+# map link id to player id, with the key being the link id, and the value being the
+#		player id
+def map_ids(link_ids, player_ids):
+	link_player_id_dict = {}
+
+	for link_id, player_id in zip(link_ids, player_ids):
+		player_id = player_id.get_attribute('data-player')
+		link_id = link_id.get_attribute('href')
+		
+		# print(link_id)
+		
+		link_id = link_id.split('players/', 1)[1]
+		link_id = link_id.split('/')[0]
+		
+		# print(link_id + '    ' + player_id)
+		# print('------------------------------')
+
+		link_player_id_dict[link_id] = player_id
+
+	return link_player_id_dict
+
 # Check whether the row with the given id has already been appeared on the page
 def is_row_new(list_of_ids, id):
 	try:
-		# print(id)
 		x = list_of_ids.index(id)
 		return False
 	except ValueError:
@@ -735,8 +768,13 @@ def is_row_new(list_of_ids, id):
 # Find the space preceding the first digit (minute) in the string so that we can truncate 
 #	the name of the goal scorer from the string that contains the name of the scorer and
 #	the minute in which the goal was scored
+# @parameters
+#	string_array contains the particular event of a player with the given link_id. 
+#  	player_link_id is the id that the website uses in the link of the player's page
+# 	id_mapping is the dictionary with the keys being the link_id of the player (e.g. 222),
+#		and the value being the player_id (e.g. p1882)
 # Returns the index of the space after the name of the player
-def process_events_data(string_array, is_home):
+def process_events_data(string_array, player_id, is_home):
 	# string_array[0] is the player name and the time of the event
 	#	which can also include (pen), (og)
 	# string_array[1] is the type of the event, such as Goal, Own Goal, 
@@ -802,7 +840,7 @@ def process_events_data(string_array, is_home):
 				minute = minute.strip()
 				min_array.append(minute)
 				
-			stats[scorer_name] = min_array
+			stats[player_id] = min_array
 
 			return stats
 
@@ -815,17 +853,33 @@ def process_events_data(string_array, is_home):
 #			with the key being the player name
 #		is_home: Boolean - is the player for the home or away side. Added to the
 #			array of event data
-def extract_event(driver, xpath, stats, is_home):
+def extract_event(driver, xpath, stats, id_mapping, is_home):
 	try:
 		# retrieve the events of the home side, which include goals (by penalty), 
 		#	own goals, and red cards
 		events = WebDriverWait(driver, 5).until(
 			EC.presence_of_all_elements_located((By.XPATH, xpath))
 		)
-		for event in events:
+
+		link_id_xpath = xpath + '/a'
+
+		link_ids = WebDriverWait(driver, 5).until(
+			EC.presence_of_all_elements_located((By.XPATH, link_id_xpath))
+		)
+
+		for event, link_id in zip(events, link_ids):
 			event = event.text.splitlines()
 
-			processed_events_data_dict = process_events_data(event, is_home)
+
+			player_link_id = link_id.get_attribute('href')		
+			
+			player_link_id = player_link_id.split('players/', 1)[1]
+			player_link_id = player_link_id.split('/')[0]
+			
+			# print(link_id)
+			player_id = id_mapping[player_link_id]
+
+			processed_events_data_dict = process_events_data(event, player_id, is_home)
 			
 			# check whether the player name is already in the dictionary.
 			# When the player name is already a key in the dict, e.g. if 
@@ -836,19 +890,21 @@ def extract_event(driver, xpath, stats, is_home):
 			#	already in the dictionary corresponding to the player name key,
 			#   instead of adding the player name key to the dict.
 			player_name = list(processed_events_data_dict.keys())[0]
+			
+
 
 			# If the player is already in the dictionary for another type of event,
 			#		append the current event array to the existing array of arrays
-			if player_name in stats.keys():
-				stats[player_name].append(processed_events_data_dict[player_name])
+			if player_id in stats.keys():
+				stats[player_id].append(processed_events_data_dict[player_id])
 			# If the player has no event data yet, create a temporary array and
 			#	append the current event array to it, making an array of arrays,
 			#	then adding to the dictionary with the key being the player's name.
 			else:
 				temp_array = []
 				temp_dict = {}
-				temp_array.append(processed_events_data_dict[player_name])
-				temp_dict[player_name] = temp_array
+				temp_array.append(processed_events_data_dict[player_id])
+				temp_dict[player_id] = temp_array
 				stats.update(temp_dict)
 
 		return stats
@@ -857,5 +913,11 @@ def extract_event(driver, xpath, stats, is_home):
 		# If an event is not found, still return the original stats dictionary
 		#		as the following statements in the calling funciton rely on it.
 		return stats
+
+# uses the name of the player to get his id. The reason we do this is that under the events section,
+#	the player elements do not have data-player attribute (which contains their id). So we must use their
+#	name to get their id that we have obtained from the squad list. 
+# @returns player_stats with the keys being the player_ids instead of player_names
+
 
 # results_retrieve_1([])
