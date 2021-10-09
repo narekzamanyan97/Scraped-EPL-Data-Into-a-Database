@@ -87,7 +87,7 @@ def populate_player_table():
 #		and player_performance tables
 def populate_match_table():
 	# iterate over the seasons and get their results
-	for j in range(3, 4):
+	for j in range(9, len(all_seasons) - 2):
 		all_match_ids_in_db = db.get_all_match_ids_inserted()
 
 		all_stadiums_and_cities_list_of_dicts = db.get_stadiums()

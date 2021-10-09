@@ -338,6 +338,9 @@ class database:
 		away_club_name = match_basic_info_dict['away']
 		season = match_basic_info_dict['season']
 
+		print(home_club_name)
+		print(away_club_name)
+
 		# get the home and away team ids
 		home_club_id = self.get_id(home_club_name, 'club')
 		away_club_id = self.get_id(away_club_name, 'club')
