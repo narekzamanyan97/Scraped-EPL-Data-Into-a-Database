@@ -97,6 +97,7 @@ def player_duplicate_check(season_index):
 
 				player_row_text_list = player_row_text.splitlines()
 				player_name = player_row_text_list[0]
+				player_position_and_country = player_row_text_list[1]
 		
 
 				player_id = player_id_el[player_index]
@@ -104,12 +105,112 @@ def player_duplicate_check(season_index):
 				# get the id of the player from the row
 				player_id = player_id.get_attribute('data-player')
 
-				print(player_name + '            ' + str(player_id))
+				print(player_name + '            ' + str(player_id) + '     ' + str(player_position_and_country))
 				
 				players_dict[player_id] = player_name
 
 				player_index += 1
 	return players_dict
+
+
+def player_get_the_correct_country_and_position(season_index):
+	driver = set_up_driver(urls['url_1'])
+
+	players_dict = {}
+
+	# iterate over the seasons
+	for j in range(season_index, season_index + 1):
+		if all_seasons[j] < '1995/96':
+			number_of_clubs = 22
+		else:
+			number_of_clubs = 20
+
+
+		# iterate over the clubs
+		for i in range(0, number_of_clubs):
+			# select the appropriate season from the dropdown
+			filter_season = WebDriverWait(driver, 5).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + all_seasons[j]  + "']"))
+			)
+
+			# choose the appropriate season from the dropdown list
+			driver.execute_script("arguments[0].click();", filter_season[0])
+			
+			time.sleep(5)
+
+			filter_club = WebDriverWait(driver, 5).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList' and @data-dropdown-list='clubs']/li[@role='option' and @data-option-index=\"" + str(i) + "\"]"))
+			)
+
+			# choose the next club from the season
+			driver.execute_script("arguments[0].click();", filter_club[0])
+			time.sleep(5)
+
+			# get the player rows and links for the details after the page
+			#	update
+			player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
+
+			# get the player_rows for the for loop, so we can count the
+			#	number of players
+			player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=all_seasons[j], is_by_season_and_club=True)
+			time.sleep(5)
+
+
+			# get the player_id (data-player) provided by the website
+			player_id_el = WebDriverWait(driver, 15).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img"))
+			)
+			
+
+			player_index = 0
+
+			last_index = len(player_rows)
+
+			# loop through the player rows and obtain player data
+			while player_index < last_index:
+				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, player_index, season=all_seasons[j], is_by_season_and_club=True)
+
+
+				# get the text from the player row.
+				player_row_text = player_row.text
+
+				player_row_text_list = player_row_text.splitlines()
+
+				player_position_and_country = player_row_text_list[1]
+						
+				player_country = ''
+				player_position = ''
+
+				# truncate the position
+				if 'Goalkeeper' in player_position_and_country:
+					player_country = player_position_and_country.replace('Goalkeeper', '').strip()
+					player_position = 'Goalkeeper'
+				elif 'Defender' in player_position_and_country:
+					player_country = player_position_and_country.replace('Defender', '').strip()
+					player_position = 'Defender'
+				elif 'Midfielder' in player_position_and_country:
+					player_country = player_position_and_country.replace('Midfielder', '').strip()
+					player_position = 'Midfielder'
+				elif 'Forward' in player_position_and_country:
+					player_country = player_position_and_country.replace('Forward', '').strip()
+					player_position = 'Forward'
+				else:
+					player_country = player_position_and_country.strip()
+					player_position = ''
+					
+					
+				player_id = player_id_el[player_index]
+
+				# get the id of the player from the row
+				player_id = player_id.get_attribute('data-player')
+
+				print(str(player_id) + '-------------' + str(player_country) + '---------------')
+				
+				players_dict[player_id] = player_country
+
+				player_index += 1
+	return players_dict
+
 
 def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 	driver = set_up_driver(urls['url_1'])
@@ -306,6 +407,7 @@ def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):
 				players_list_of_dicts.append(temp_dict)
 				player_index += 1
 
+	print(players_list_of_dicts)
 	return players_list_of_dicts
 
 # @parameters:
