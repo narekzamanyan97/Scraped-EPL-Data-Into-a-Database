@@ -125,7 +125,6 @@ def player_get_the_correct_country_and_position(season_index):
 		else:
 			number_of_clubs = 20
 
-
 		# iterate over the clubs
 		for i in range(0, number_of_clubs):
 			# select the appropriate season from the dropdown
@@ -199,16 +198,30 @@ def player_get_the_correct_country_and_position(season_index):
 					player_position = ''
 					
 					
-				player_id = player_id_el[player_index]
+				player_info = player_id_el[player_index]
 
 				# get the id of the player from the row
-				player_id = player_id.get_attribute('data-player')
-
-				print(str(player_id) + '-------------' + str(player_country) + '---------------')
+				player_id = player_info.get_attribute('data-player')
 				
-				players_dict[player_id] = player_country
+				# get the small image url of the player
+				player_40x40_img_url = player_info.get_attribute('src')
+				
+				# get the large 250x250 image url of the player by replacing the 40x40 found in the url
+				#		with 250x250
+				player_250x250_img_url = player_40x40_img_url.replace('40x40', '250x250')
+
+
+				player_list = []
+				player_list.append(player_country)
+				player_list.append(player_position)
+				player_list.append(player_40x40_img_url)
+				player_list.append(player_250x250_img_url)
+				print(str(player_id) + '-------------' + str(player_list) + '-------' + str(player_250x250_img_url))
+
+				players_dict[player_id] = player_list
 
 				player_index += 1
+
 	return players_dict
 
 
@@ -425,6 +438,8 @@ def player_retrieve_1(player_club_list, start_range):
 		print(all_seasons[j])
 		season_counter += 1
 
+
+
 		# set up the driver
 		driver = set_up_driver(urls['url_1'])
 
@@ -440,7 +455,7 @@ def player_retrieve_1(player_club_list, start_range):
 			
 		# click on the close button
 		driver.execute_script("arguments[0].click();", ad_close_button)
-
+		
 		# get the player rows to start the for loop
 		player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
 		stale_element_exception_occurred = True
@@ -468,7 +483,7 @@ def player_retrieve_1(player_club_list, start_range):
 
 		original_row_amount = 0
 
-		starting_counter = len(player_rows)
+		starting_counter = 52
 
 		last_index = len(player_rows)
 
@@ -604,15 +619,30 @@ def player_retrieve_1(player_club_list, start_range):
 			#		player data		 	
 			unique_player_ids.append(player_id)
 
-			player_position_and_country = player_row_text_list[1].split()
-			player_position = player_position_and_country[0]
+			player_position_and_country = player_row_text_list[1]
+			# player_position = player_position_and_country[0]
 			
-			# get the country of the player: some player rows are missing the 
-			#	country column
-			try:
-				player_country = player_position_and_country[1]
-			except IndexError:
-				player_country = 'Null'
+			# truncate the position
+			if 'Goalkeeper' in player_position_and_country:
+				player_country = player_position_and_country.replace('Goalkeeper', '').strip()
+				player_position = 'Goalkeeper'
+			elif 'Defender' in player_position_and_country:
+				player_country = player_position_and_country.replace('Defender', '').strip()
+				player_position = 'Defender'
+			elif 'Midfielder' in player_position_and_country:
+				player_country = player_position_and_country.replace('Midfielder', '').strip()
+				player_position = 'Midfielder'
+			elif 'Forward' in player_position_and_country:
+				player_country = player_position_and_country.replace('Forward', '').strip()
+				player_position = 'Forward'
+			else:
+				player_country = player_position_and_country.strip()
+				player_position = ''
+
+			print("********************************************")
+			print(player_country)
+			print(player_position)
+			print("********************************************")
 			
 			temp_dict = {}
 

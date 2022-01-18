@@ -51,7 +51,7 @@ def populate_manager_table():
 def populate_player_table():
 	# using the player_retrive_1 function to scrape player rows, filtering based on
 	#			season only
-	for j in range(22, 28):
+	for j in range(23, 24):
 		# retrieve all the rows from player_clubs table corresponding to the given season
 		season = all_seasons[j]
 		print(season)
@@ -61,8 +61,20 @@ def populate_player_table():
 		#  	print(dict_)
 	
 		# player_list_of_dicts = player_retrieve_by_season_and_club(player_club_list_of_dicts, j)
-		player_list_of_dicts = player_get_the_correct_country_and_position(j)
+		# call the new function to get the correct country and position info
 		
+		
+		player_dict_of_lists = player_retrieve_1(player_club_list_of_dicts, j)
+
+		# player_dict_of_lists = player_get_the_correct_country_and_position(j)
+		# Updating (fixing) the country and position of players
+		for player_id, country_and_position in player_dict_of_lists.items():
+			# print(player_id + '--------' + str(country_and_position))
+			country = country_and_position[0]
+			position = country_and_position[1]
+
+			db.update_player_country_and_club(player_id, country, position)
+
 		# for player_dict in player_list_of_dicts:
 		# 	db.insert_players(player_dict)
 

@@ -1,0 +1,5 @@
+United
+
+
+
+select p.player_id, p.player_name, country, p.position, c.club_name, p_c.season from player as p inner join player_club as p_c on p.player_id=p_c.player_id inner join club as c on p_c.club_id=c.club_id where p.country='Null';

@@ -211,6 +211,17 @@ class database:
 		if len(club_names) == 0:
 			print(player_name + ' has no clubs in the career table.')
 	
+	def update_player_country_and_club(self, player_id, country, position):
+		
+		update_statement = "UPDATE player SET country=\"" + str(country) + "\", "
+		update_statement += "position=\"" + str(position) + "\" "
+		update_statement += "WHERE player_id=\"" + str(player_id) + "\";"
+			
+		self.cursor.execute(update_statement)
+		self.conn.commit()
+
+
+
 	# This is a test function to insert player_id and player_name into a test table and see if there are
 	#		any players that share the same first and last names
 	def insert_into_duplicate_players(self, player_id, player_name):
