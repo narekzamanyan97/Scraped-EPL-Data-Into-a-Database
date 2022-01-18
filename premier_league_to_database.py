@@ -665,6 +665,21 @@ class database:
 
 		return list_of_player_names
 	
+	# get all the player ids
+	def get_list_of_all_player_ids(self):
+		query = "SELECT player_id FROM player;"
+
+		self.cursor.execute(query)
+		player_ids = self.cursor.fetchall()
+
+		list_of_player_ids = []
+
+		for player_id_tuple in player_ids:
+			player_id = player_id_tuple[0]
+			list_of_player_ids.append(player_id)
+
+		return list_of_player_ids
+
 	# @parameters
 	#		accepts the dictionary for the match stats and the key to look for.
 	# @returns the values found corresponding to the keys

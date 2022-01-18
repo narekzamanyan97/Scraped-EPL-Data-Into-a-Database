@@ -16,6 +16,8 @@ from player_row_scraper import *
 
 from helper_functions import *
 
+import requests
+
 
 # from premier_league_to_database import *
 # from connect_to_database import *
@@ -223,6 +225,134 @@ def player_get_the_correct_country_and_position(season_index):
 				player_index += 1
 
 	return players_dict
+
+
+def player_get_image_url(season_index):
+	driver = set_up_driver(urls['url_1'])
+
+	players_dict = {}
+
+	# iterate over the seasons
+	for j in range(season_index, season_index + 1):
+		if all_seasons[j] < '1995/96':
+			number_of_clubs = 22
+		else:
+			number_of_clubs = 20
+
+		# iterate over the clubs
+		for i in range(0, number_of_clubs):
+			# select the appropriate season from the dropdown
+			filter_season = WebDriverWait(driver, 5).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + all_seasons[j]  + "']"))
+			)
+
+			# choose the appropriate season from the dropdown list
+			driver.execute_script("arguments[0].click();", filter_season[0])
+			
+			time.sleep(5)
+
+			filter_club = WebDriverWait(driver, 5).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList' and @data-dropdown-list='clubs']/li[@role='option' and @data-option-index=\"" + str(i) + "\"]"))
+			)
+
+			# choose the next club from the season
+			driver.execute_script("arguments[0].click();", filter_club[0])
+			time.sleep(5)
+
+			# get the player rows and links for the details after the page
+			#	update
+			player_rows_xpath = "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr"
+
+			# get the player_rows for the for loop, so we can count the
+			#	number of players
+			player_rows = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, -1, season=all_seasons[j], is_by_season_and_club=True)
+			time.sleep(5)
+
+
+			# get the player_id (data-player) provided by the website
+			player_id_el = WebDriverWait(driver, 15).until(
+				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-12']/div[@class='table playerIndex']/table/tbody[@class='dataContainer indexSection']/tr/td/a/img"))
+			)
+			
+
+			player_index = 0
+
+			last_index = len(player_rows)
+
+			# loop through the player rows and obtain player data
+			while player_index < last_index:
+				player_row = presence_of_all_el_located(driver, player_rows_xpath, SECONDS_TO_WAIT, player_index, season=all_seasons[j], is_by_season_and_club=True)
+
+
+				# get the text from the player row.
+				player_row_text = player_row.text
+
+				player_row_text_list = player_row_text.splitlines()			
+					
+				player_info = player_id_el[player_index]
+
+				# get the id of the player from the row
+				player_id = player_info.get_attribute('data-player')
+				
+				# get the small image url of the player
+				player_40x40_img_url = player_info.get_attribute('src')
+				
+				# get the large 250x250 image url of the player by replacing the 40x40 found in the url
+				#		with 250x250
+				player_250x250_img_url = player_40x40_img_url.replace('40x40', '250x250')
+
+				player_list = []
+				player_list.append(player_40x40_img_url)
+				player_list.append(player_250x250_img_url)
+				print(str(player_id) + '-------------' + str(player_list) + '-------' + str(player_250x250_img_url))
+
+				players_dict[player_id] = player_list
+
+				player_index += 1
+
+	return players_dict
+
+
+# Since the image url of each player follows the same format, e.g.
+#	https://resources.premierleague.com/premierleague/photos/players/250x250/p56981.png
+#	with the only difference being the last part (before .png) that represents the player_id, and
+#	the size of the image (either 40x40 or 250x250: if one exists, the other one also exists),
+#	we can generate the url of images without scraping the premier league website.
+#	Also, if a player has no image, then we have:
+#		https://resources.premierleague.com/premierleague/photos/players/250x250/Photo-Missing.png
+#	that is, we have Photo-Missing instead of the player_id at the end of the url string.
+# @parameters:
+#		list_of_player_ids = all the player_ids from player table
+# @return
+#		a list of dictionary with the elements being a dict of player id as the key and
+#		the 40x40 and 250x250 image urls as the values
+def player_generate_img_url(list_of_player_ids):
+	player_id_img_dict = {}
+
+	url_40x40_no_image = 'https://resources.premierleague.com/premierleague/photos/players/40x40/Photo-Missing.png'
+	url_250x250_no_image = 'https://resources.premierleague.com/premierleague/photos/players/250x250/Photo-Missing.png'
+
+	for player_id in list_of_player_ids:
+		temp_list = []
+
+		url_40x40 = 'https://resources.premierleague.com/premierleague/photos/players/40x40/' + player_id + '.png'
+		url_250x250 = 'https://resources.premierleague.com/premierleague/photos/players/250x250/' + player_id + '.png'
+		print('********************************************************************')
+		response = requests.get(url_40x40)
+		if response.status_code == 200:
+			print('url exists')
+			print(url_40x40)
+			print(url_250x250)
+			temp_list.append(url_40x40)
+			temp_list.append(url_250x250)
+		else:
+			print('url does not exists')
+			print(url_40x40)
+			print(url_250x250)
+			temp_list.append(url_40x40_no_image)
+			temp_list.append(url_250x250_no_image)
+
+		player_id_img_dict[player_id] = temp_list
 
 
 def player_retrieve_by_season_and_club(player_club_list=[], season_index=0):

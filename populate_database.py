@@ -57,24 +57,29 @@ def populate_player_table():
 		print(season)
 		player_club_list_of_dicts = db.get_player_clubs(season)
 		
-		# for dict_ in player_club_list_of_dicts:
-		#  	print(dict_)
-	
+
 		# player_list_of_dicts = player_retrieve_by_season_and_club(player_club_list_of_dicts, j)
 		# call the new function to get the correct country and position info
 		
 		
-		player_dict_of_lists = player_retrieve_1(player_club_list_of_dicts, j)
+		# player_dict_of_lists = player_retrieve_1(player_club_list_of_dicts, j)
 
+		# *****************************************************************************
+		# get the correct country and position names for each player
 		# player_dict_of_lists = player_get_the_correct_country_and_position(j)
-		# Updating (fixing) the country and position of players
-		for player_id, country_and_position in player_dict_of_lists.items():
-			# print(player_id + '--------' + str(country_and_position))
-			country = country_and_position[0]
-			position = country_and_position[1]
+		# # Updating (fixing) the country and position of players
+		# for player_id, country_and_position in player_dict_of_lists.items():
+		# 	# print(player_id + '--------' + str(country_and_position))
+		# 	country = country_and_position[0]
+		# 	position = country_and_position[1]
 
-			db.update_player_country_and_club(player_id, country, position)
+		# 	db.update_player_country_and_club(player_id, country, position)
+		# *****************************************************************************
 
+		list_of_player_ids = db.get_list_of_all_player_ids()
+		generated_urls = player_generate_img_url(list_of_player_ids)
+
+		print(generated_urls)
 		# for player_dict in player_list_of_dicts:
 		# 	db.insert_players(player_dict)
 
@@ -83,7 +88,7 @@ def populate_player_table():
 
 	# # Iterate over the seasons, and after a season's data is scraped, insert that data
 	# #		into the database, and move on to the next iteration.
-	# # !!! do j = 4 again (1996/97)
+	# # !!! do j = 4 again (1996/97) does not work
 	# for j in range(5, len(all_seasons)):
 	# 	season = all_seasons[j]
 	# 	player_club_list_of_dicts = db.get_player_clubs(season)
