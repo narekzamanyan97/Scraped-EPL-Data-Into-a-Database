@@ -667,7 +667,7 @@ class database:
 	
 	# get all the player ids
 	def get_list_of_all_player_ids(self):
-		query = "SELECT player_id FROM player;"
+		query = "SELECT player_id FROM player ORDER BY player_id asc limit 30;"
 
 		self.cursor.execute(query)
 		player_ids = self.cursor.fetchall()
@@ -679,6 +679,27 @@ class database:
 			list_of_player_ids.append(player_id)
 
 		return list_of_player_ids
+
+	# @parameters:
+	#		img_urls_dict_of_lists is a dictionary of lists, where the key is the
+	#		id of the player and its value is a list that contains both the 40x40 and
+	#		250x250 image url of the player.
+	# updates the player table with the img url of the players whose ids are in the 
+	#		parameter
+	def insert_player_img_urls(self, img_urls_dict_of_lists):
+		# iterate over the input dictionary, where the key is the 
+		for player_id, url_list in img_urls_dict_of_lists.items():
+
+			# get the 40x40 image from the list value
+			img_url_40x40 = url_list[0]
+			img_url_250x250 = url_list[1]
+
+			insert_img_url_statement = "UPDATE player SET "
+			insert_img_url_statement += "img_40x40_url=\"" + img_url_40x40 + "\", "
+			insert_img_url_statement += "img_250x250_url=\"" + img_url_250x250 + "\";"
+
+			self.cursor.execute(insert_img_url_statement)
+			self.conn.commit()
 
 	# @parameters
 	#		accepts the dictionary for the match stats and the key to look for.

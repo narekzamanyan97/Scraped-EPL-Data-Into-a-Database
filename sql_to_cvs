@@ -1,0 +1,3 @@
+select 'player_id', 'player_name', 'player_number', 'position', 'country', 'date_of_birth', 'height' union all select player_id, player_name, player_number, position, country, date_of_birth, height from player into outfile 'player_1.csv' fields terminated by ',' enclosed by '"' lines terminated by '\n';
+
+# to fix the names (some chars are not recognized), open the csv file, click on data, then from text/csv icon, and load the rows from the csv file that has distorted chars. The new csv file will have correct (utf8) chars.

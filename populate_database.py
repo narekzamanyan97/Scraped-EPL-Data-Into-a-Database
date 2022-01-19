@@ -76,10 +76,6 @@ def populate_player_table():
 		# 	db.update_player_country_and_club(player_id, country, position)
 		# *****************************************************************************
 
-		list_of_player_ids = db.get_list_of_all_player_ids()
-		generated_urls = player_generate_img_url(list_of_player_ids)
-
-		print(generated_urls)
 		# for player_dict in player_list_of_dicts:
 		# 	db.insert_players(player_dict)
 
@@ -100,6 +96,21 @@ def populate_player_table():
 
 	# close the connection
 	connection.close()
+
+def update_img_url_for_players():
+	for j in range(23, 24):
+		# retrieve all the rows from player_clubs table corresponding to the given season
+		season = all_seasons[j]
+		print(season)
+		player_club_list_of_dicts = db.get_player_clubs(season)
+		
+
+		# get the list of all players
+		list_of_player_ids = db.get_list_of_all_player_ids()
+		# generate the image urls for each player
+		generated_urls = player_generate_img_url(list_of_player_ids)
+
+		print(generated_urls)
 
 # gets match data using the scraper functions and inserts them into the match_, club_stats, player_stats,
 #		and player_performance tables
