@@ -205,20 +205,10 @@ def player_get_the_correct_country_and_position(season_index):
 				# get the id of the player from the row
 				player_id = player_info.get_attribute('data-player')
 				
-				# get the small image url of the player
-				player_40x40_img_url = player_info.get_attribute('src')
-				
-				# get the large 250x250 image url of the player by replacing the 40x40 found in the url
-				#		with 250x250
-				player_250x250_img_url = player_40x40_img_url.replace('40x40', '250x250')
-
-
 				player_list = []
 				player_list.append(player_country)
 				player_list.append(player_position)
-				player_list.append(player_40x40_img_url)
-				player_list.append(player_250x250_img_url)
-				print(str(player_id) + '-------------' + str(player_list) + '-------' + str(player_250x250_img_url))
+				print(str(player_id) + '-------------' + str(player_list))
 
 				players_dict[player_id] = player_list
 
@@ -245,12 +235,21 @@ def player_generate_img_url(list_of_player_ids):
 	url_40x40_no_image = 'https://resources.premierleague.com/premierleague/photos/players/40x40/Photo-Missing.png'
 	url_250x250_no_image = 'https://resources.premierleague.com/premierleague/photos/players/250x250/Photo-Missing.png'
 
-	counter = 1
+	counter = 0
 
 	for player_id in list_of_player_ids:
+		# clear the temporary list to be used in this iteration
 		temp_list = []
 
 		print(counter)
+
+		if counter < 0:
+			counter += 1
+			continue
+
+		elif counter > 100:
+			break
+
 		counter = counter + 1
 
 		url_40x40 = 'https://resources.premierleague.com/premierleague/photos/players/40x40/' + player_id + '.png'
@@ -261,16 +260,20 @@ def player_generate_img_url(list_of_player_ids):
 			print('url exists')
 			print(url_40x40)
 			print(url_250x250)
+			
+			# add the urls to the temporary list
 			temp_list.append(url_40x40)
 			temp_list.append(url_250x250)
+
+			player_id_img_dict[player_id] = temp_list
 		else:
 			print('url does not exists')
 			print(url_40x40)
 			print(url_250x250)
-			temp_list.append(url_40x40_no_image)
-			temp_list.append(url_250x250_no_image)
+			# temp_list.append(url_40x40_no_image)
+			# temp_list.append(url_250x250_no_image)
 
-		player_id_img_dict[player_id] = temp_list
+		
 
 	return player_id_img_dict
 
