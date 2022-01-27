@@ -58,14 +58,18 @@ def populate_player_table():
 		player_club_list_of_dicts = db.get_player_clubs(season)
 		
 
+		# # scrape the player info
 		# player_list_of_dicts = player_retrieve_by_season_and_club(player_club_list_of_dicts, j)
-		# call the new function to get the correct country and position info
-		
-		
 		# player_dict_of_lists = player_retrieve_1(player_club_list_of_dicts, j)
 
+		# # iterate over the scraped list of dictionaries of players and insert
+		# # 	each item into the database
+		# for player_dict in player_list_of_dicts:
+		# 	db.insert_players(player_dict)
+
 		# *****************************************************************************
-		# get the correct country and position names for each player
+		# # get the correct country and position names for each player
+		# # call the new function to get the correct country and position info
 		# player_dict_of_lists = player_get_the_correct_country_and_position(j)
 		# # Updating (fixing) the country and position of players
 		# for player_id, country_and_position in player_dict_of_lists.items():
@@ -76,23 +80,21 @@ def populate_player_table():
 		# 	db.update_player_country_and_club(player_id, country, position)
 		# *****************************************************************************
 
-		# for player_dict in player_list_of_dicts:
-		# 	db.insert_players(player_dict)
 
 	# using the player_retrieve_by_season_and_club function to filter based on
 	#			season and club
 
-	# # Iterate over the seasons, and after a season's data is scraped, insert that data
-	# #		into the database, and move on to the next iteration.
-	# # !!! do j = 4 again (1996/97) does not work
-	# for j in range(5, len(all_seasons)):
-	# 	season = all_seasons[j]
-	# 	player_club_list_of_dicts = db.get_player_clubs(season)
+	# Iterate over the seasons, and after a season's data is scraped, insert that data
+	#		into the database, and move on to the next iteration.
+	# !!! do j = 4 again (1996/97) does not work
+	for j in range(5, len(all_seasons)):
+		season = all_seasons[j]
+		player_club_list_of_dicts = db.get_player_clubs(season)
 
-	# 	player_list_of_dicts = player_retrieve_by_season_and_club(player_club_list_of_dicts, j)
+		player_list_of_dicts = player_retrieve_by_season_and_club(player_club_list_of_dicts, j)
 		
-	# 	for player_dict in player_list_of_dicts:
-	# 		db.insert_players(player_dict)
+		for player_dict in player_list_of_dicts:
+			db.insert_players(player_dict)
 
 	# close the connection
 	connection.close()
@@ -110,7 +112,7 @@ def update_img_url_for_players():
 #		and player_performance tables
 def populate_match_table():
 	# iterate over the seasons and get their results
-	for j in range(9, len(all_seasons) - 2):
+	for j in range(16, 17):
 		all_match_ids_in_db = db.get_all_match_ids_inserted()
 
 		all_stadiums_and_cities_list_of_dicts = db.get_stadiums()
@@ -168,8 +170,8 @@ def populate_match_table():
 # populate_stadium_and_club_tables()
 # populate_manager_table()
 # populate_player_table()
-update_img_url_for_players()
-# populate_match_table()
+# update_img_url_for_players()
+populate_match_table()
 
 # for j in range(1, 5):
 # 	players_dict = player_duplicate_check(j)

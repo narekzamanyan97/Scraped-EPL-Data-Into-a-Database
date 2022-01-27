@@ -59,7 +59,7 @@ def results_retrieve_1(all_match_ids, season_index):
 			results_list_of_list_of_dicts = []
 
 			# iterate over the clubs
-			for club_index in range(3, number_of_clubs):				
+			for club_index in range(0, number_of_clubs):				
 				# filter using the next club
 				filter_club = WebDriverWait(driver, 15).until(
 					EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList' and @data-dropdown-list='teams']/li[@role='option' and @data-option-index=\"" + str(club_index) + "\"]"))
@@ -584,11 +584,6 @@ def results_retrieve_3(driver):
 		)
 	
 	print(558)
-	
-	# !!! dr. Fred Lim fax number
-	# 818 244 5122 
-	# 100a suite
-	# October 6, 9:00 AM WEDNESDAY  Breath center and cancer center suite 100a
 
 	print(formation_home + ' : ' + formation_away)
 
@@ -597,18 +592,17 @@ def results_retrieve_3(driver):
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList home']/li[@class='player']/a/img"))
 	)
 
-	print(586)
-
+	print('595')
 	try:
 		player_away_ids = WebDriverWait(driver, 10).until(
-			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-4-m ']/div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList home']/li[@class='player']/a/img"))
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-4-m right']/div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList']/li[@class='player']/a/img"))
 		)
+		print('600')
 	except:
 		player_away_ids = WebDriverWait(driver, 10).until(
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-4-m right']/div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList ']/li[@class='player']/a/img"))
 		)
-		print(610)
-	print(611)
+	print('605')
 
 	# The website also uses a link id, which is used to get to a specific player's page
 	# This id is also unique, so we can get this id, and map it with the other id, later
@@ -616,7 +610,8 @@ def results_retrieve_3(driver):
 	player_home_link_ids = WebDriverWait(driver, 10).until(
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList home']/li[@class='player']/a"))
 	)
-	print(619)
+
+	print('613')
 	try:
 		player_away_link_ids = WebDriverWait(driver, 10).until(
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList']/li[@class='player']/a"))
@@ -626,13 +621,13 @@ def results_retrieve_3(driver):
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList ']/li[@class='player']/a"))
 		)
 
-	print(624)
 
 	link_player_id_mapping_home = map_ids(player_home_link_ids, player_home_ids)
 	link_player_id_mapping_away = map_ids(player_away_link_ids, player_away_ids)
 
-
+	print('line ups home')
 	line_ups_home = extract_player_information(squad_home_number, squad_home_info, True, player_home_ids)
+	print('line ups away')
 	line_ups_away = extract_player_information(squad_away_number, squad_away_info, False, player_away_ids)
 
 
@@ -753,6 +748,9 @@ def extract_player_information(squad_number, squad_info, is_home_side, ids):
 		temp_dict['player name'] = player_name
 		temp_dict['Is Home Side'] = is_home_side
 		
+		print(player_name + "   " + player_id)
+
+
 		# Some players in the old results have no number
 		try:
 			# get the player's number

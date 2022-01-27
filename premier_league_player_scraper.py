@@ -243,11 +243,12 @@ def player_generate_img_url(list_of_player_ids):
 
 		print(counter)
 
-		if counter < 0:
+		# This if/else block will help us complete the task in seperate occasions.
+		#		so we don't have to complete all of the 6600+ updates in one setting.
+		if counter < 3000:
 			counter += 1
 			continue
-
-		elif counter > 100:
+		elif counter > len(list_of_player_ids):
 			break
 
 		counter = counter + 1

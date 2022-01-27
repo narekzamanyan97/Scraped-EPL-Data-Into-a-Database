@@ -700,6 +700,7 @@ class database:
 			insert_img_url_statement += "img_250x250_url=\"" + img_url_250x250 + "\" "
 			insert_img_url_statement += "WHERE player_id=\"" + player_id + "\";";
 			
+			print(insert_img_url_statement)
 			self.cursor.execute(insert_img_url_statement)
 			self.conn.commit()
 
@@ -815,6 +816,18 @@ class database:
 		for dict_ in list_of_dicts:
 			print(dict_)
 
+# This works. Now need to understand why some matches are missing
+#		and then get the club name
+# select m.season, count(m.season) from player_stats as p_s inner join match_ as m on m.match_id=p_s.match_id where player_id='p3897' and (p_s.is_in_starting_11=1 or p_s.substitution_on!='Null') group by season order by m.season desc;
+# 2006/07 Nicola Anelka (player_id='p3897') is missing one game (34 instead of 35)
+
+# This works. Gets the match_date, club_names, is_in_startin_11 and substitution_on for a given player in a given sesason
+# select m.match_date, c_h.club_name, c_a.club_name, p_s.is_in_starting_11, p_s.substitution_on from player_stats as p_s inner join match_ as m on m.match_id=p_s.match_id inner join club as c_h on m.home_team_id=c_h.club_id inner join club as c_a on m.away_team_id=c_a.club_id where player_id='p3897' and season='2006/07';
+
+# ??? Do this to check which matches have missing info
+#  select count(*) as num_of_players from player_stats group by match_id having num_of_players<22;
+# select match_id, count(*) as num_of_players from player_stats group by match_id order by count(*) having count(*)<22;
+# works:  select m.season, count(*) as num_of_players, m.match_date, m.home_team_id, m.away_team_id from player_stats as p_s inner join match_ as m on m.match_id=p_s.match_id where m.season='2019/20' group by p_s.match_id having num_of_players<22;
 
 	def convert_from_tuple_list_to_dict(self, tuple_list):
 		if len(tuple_list) > 0:
