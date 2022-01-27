@@ -59,7 +59,7 @@ def results_retrieve_1(all_match_ids, season_index):
 			results_list_of_list_of_dicts = []
 
 			# iterate over the clubs
-			for club_index in range(0, number_of_clubs):				
+			for club_index in range(8, 9):				
 				# filter using the next club
 				filter_club = WebDriverWait(driver, 15).until(
 					EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList' and @data-dropdown-list='teams']/li[@role='option' and @data-option-index=\"" + str(club_index) + "\"]"))
@@ -163,6 +163,8 @@ def results_retrieve_1(all_match_ids, season_index):
 						EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
 					)
 
+
+					
 					# if j == 1:
 					# 	last_index = len(results)
 					# else:
@@ -217,9 +219,10 @@ def results_retrieve_1(all_match_ids, season_index):
 						if is_row_new(all_match_ids, id) != True:
 							duplicate_result_flag = True
 		
-						print('***********************************************j = ' + str(j))
-						print('i = ' + str(i))
-						print('last index = ' + str(last_index))
+						# print('***********************************************j = ' + str(j))
+						# print('i = ' + str(i))
+						# print('last index = ' + str(last_index))
+						print('club index = ' + str(club_index))
 						if i < original_len_results and i < last_index:
 							i += 1
 							print(i)
@@ -289,9 +292,44 @@ def results_retrieve_1(all_match_ids, season_index):
 
 						results_list_of_dicts.append(result_dict)
 						
+
+						# get the date of the match if season <= 2006/07. Otherwise, the date will be found in the result page
+						print(all_seasons[j])
+						match_date = {}
+						if all_seasons[j] < '2006/07':
+							result_parent = results[i].find_element_by_xpath('../../../../..')
+							match_date = result_parent.get_attribute('data-competition-matches-list')
+
+							match_date_list = match_date.split()
+
+							weekday = match_date_list[0]
+							day = match_date_list[1]
+							month = match_date_list[2]
+							year = match_date_list[3]
+
+							match_date = {}
+							match_date['weekday'] = weekday
+							match_date['day'] = day
+							match_date['month'] = month
+							match_date['year'] = year
+
 						# call results_retrieve_2 to get the match details, such as scorers and assists, 
 						#	red cards, penalty scorers, own goals, etc.
-						team_names, player_stats, match_date, line_ups, team_stats = results_retrieve_2(driver, div_ids[i], all_seasons[j])
+						team_names, player_stats, match_date_, line_ups, team_stats = results_retrieve_2(driver, div_ids[i], all_seasons[j])
+
+						# if the season is 2006/07 or more recent, then results_retrieve_2 was able to retrieve the match date.
+						match_date.update(match_date_)
+						
+						print('*********************************')
+						print('*********************************')
+						print(match_date)
+						print(match_date_)
+						print('*********************************')
+						print('*********************************')
+
+					
+
+
 
 						# # if the team names returned is empty, add the names from the result row.
 						# if bool(team_names) == False:
@@ -424,40 +462,42 @@ def results_retrieve_2(driver, result_row, season):
 		stats = extract_event(driver, assists_away_xpath, stats, id_mapping, False)
 		print(stats)
 
+		if season >= '2006/07':
+			match_date = WebDriverWait(driver, 10).until(
+					EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchDate renderMatchDateContainer']"))
+			)
 
-		match_date = WebDriverWait(driver, 10).until(
-				EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchDate renderMatchDateContainer']"))
-		)
+			match_date = match_date[0].text
 
-		match_date = match_date[0].text
+			match_date_list = match_date.split()
 
-		match_date_list = match_date.split()
+			weekday = match_date_list[0]
+			if weekday == 'Mon':
+				weekday = 'Monday'
+			elif weekday == 'Tuesday':
+				weekday = 'Tuesday'
+			elif weekday == 'Wednesday':
+				weekday = 'Wednesday'
+			elif weekday == 'Thursday':
+				weekday = 'Thursday'
+			elif weekday == 'Friday':
+				weekday = 'Friday'
+			elif weekday == 'Saturday':
+				weekday = 'Saturday'
+			elif weekday == 'Sunday':
+				weekday = 'Sunday'
+			day = match_date_list[1]
+			month = match_date_list[2]
+			year = match_date_list[3]
 
-		weekday = match_date_list[0]
-		if weekday == 'Mon':
-			weekday = 'Monday'
-		elif weekday == 'Tuesday':
-			weekday = 'Tuesday'
-		elif weekday == 'Wednesday':
-			weekday = 'Wednesday'
-		elif weekday == 'Thursday':
-			weekday = 'Thursday'
-		elif weekday == 'Friday':
-			weekday = 'Friday'
-		elif weekday == 'Saturday':
-			weekday = 'Saturday'
-		elif weekday == 'Sunday':
-			weekday = 'Sunday'
-		day = match_date_list[1]
-		month = match_date_list[2]
-		year = match_date_list[3]
-
-		match_date = {}
-		match_date['weekday'] = weekday
-		match_date['day'] = day
-		match_date['month'] = month
-		match_date['year'] = year
-
+			match_date = {}
+			match_date['weekday'] = weekday
+			match_date['day'] = day
+			match_date['month'] = month
+			match_date['year'] = year
+		
+		else:
+			match_date = {}
 
 
 		# header[@class='mcHeader']/div[@class='dropDown']/

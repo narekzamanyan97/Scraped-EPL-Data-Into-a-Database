@@ -112,7 +112,7 @@ def update_img_url_for_players():
 #		and player_performance tables
 def populate_match_table():
 	# iterate over the seasons and get their results
-	for j in range(16, 17):
+	for j in range(4, 5):
 		all_match_ids_in_db = db.get_all_match_ids_inserted()
 
 		all_stadiums_and_cities_list_of_dicts = db.get_stadiums()
@@ -162,6 +162,7 @@ def populate_match_table():
 
 
 				db.insert_player_performance(match_info_list_of_dicts[2], match_id_and_club_names[0])
+				print(match_info_list_of_dicts[3])
 				db.insert_player_stats(match_info_list_of_dicts[3], match_id_and_club_names[0])
 				db.insert_club_stats(match_info_list_of_dicts[4], match_id_and_club_names)
 			except IntegrityError:

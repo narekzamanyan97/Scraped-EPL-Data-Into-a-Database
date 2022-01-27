@@ -530,6 +530,14 @@ class database:
 	#	outer dictionary being the name of the player
 	def insert_player_stats(self, player_stats_dict_of_dicts, match_id):
 		for player_id, player_stats_dict in player_stats_dict_of_dicts.items():
+			print(player_id)
+			# print(player_stats_dict)
+		print()
+		print()
+		print()
+		for player_id, player_stats_dict in player_stats_dict_of_dicts.items():
+			print(player_id)
+			# print(player_stats_dict)
 			player_name = player_stats_dict['player name']			
 			is_in_starting_11 = player_stats_dict['Starting 11']
 			substitution_on = player_stats_dict['Substitution On']
@@ -547,9 +555,11 @@ class database:
 			insert_statement += "\"" + str(red_card) + "\");"
 				
 			# print(insert_statement)
-			self.cursor.execute(insert_statement)
-			self.conn.commit()
-
+			try:
+				self.cursor.execute(insert_statement)
+				self.conn.commit()
+			except IntegrityError:
+				print('Duplicate Key Error ' + insert_statement)
 
 
 	def update_stadium_city(self, stadium_city_dict):
@@ -828,6 +838,13 @@ class database:
 #  select count(*) as num_of_players from player_stats group by match_id having num_of_players<22;
 # select match_id, count(*) as num_of_players from player_stats group by match_id order by count(*) having count(*)<22;
 # works:  select m.season, count(*) as num_of_players, m.match_date, m.home_team_id, m.away_team_id from player_stats as p_s inner join match_ as m on m.match_id=p_s.match_id where m.season='2019/20' group by p_s.match_id having num_of_players<22;
+
+# delete from match_ where match_id = (select match_id from match_ count(*)=
+# 		 select m.season, m.match_id, count(*) as num_of_players, m.match_date, c_h.club_name, c_a.club_name from player_stats as p_s inner join match_ as m on m.match_id=p_s.match_id inner join club as c_h on c_h.club_id=m.home_team_id inner join club as c_a on c_a.club_id=m.away_team_id where m.season='2013/14' group by p_s.match_id having num_of_players<22 order by season;)
+
+# inserting new players
+#  insert into player(player_id, player_name, player_number, position, country, date_of_birth, height, img_40x40_url, img_250x250_url) VALUES('p1222', 'David Kelly', NULL, 'Forward', 'Ireland', '25/11/1965', '180', 'https://resources.premierleague.com/premierleague/photos/players/40x40/Photo-Missing.png', 'https://resources.premierleague.com/premierleague/photos/players/250x250/Photo-Missing.png');
+# insert into player_club(player_id, club_id, season) values('p1222', 160, '1996/97');     
 
 	def convert_from_tuple_list_to_dict(self, tuple_list):
 		if len(tuple_list) > 0:
