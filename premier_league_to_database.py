@@ -828,7 +828,7 @@ class database:
 
 # This works. Now need to understand why some matches are missing
 #		and then get the club name
-# select m.season, count(m.season) from player_stats as p_s inner join match_ as m on m.match_id=p_s.match_id where player_id='p3897' and (p_s.is_in_starting_11=1 or p_s.substitution_on!='Null') group by season order by m.season desc;
+# select m.season, count(m.season) from player_stats as p_s inner join match_ as m on m.match_id=p_s.match_id where player_id='p3897' and (p_s.is_in_starting_11=1 or p_s.substitution_on!='Null') group by season order by m.season desc; 
 # 2006/07 Nicola Anelka (player_id='p3897') is missing one game (34 instead of 35)
 
 # This works. Gets the match_date, club_names, is_in_startin_11 and substitution_on for a given player in a given sesason
@@ -845,6 +845,22 @@ class database:
 # inserting new players
 #  insert into player(player_id, player_name, player_number, position, country, date_of_birth, height, img_40x40_url, img_250x250_url) VALUES('p1222', 'David Kelly', NULL, 'Forward', 'Ireland', '25/11/1965', '180', 'https://resources.premierleague.com/premierleague/photos/players/40x40/Photo-Missing.png', 'https://resources.premierleague.com/premierleague/photos/players/250x250/Photo-Missing.png');
 # insert into player_club(player_id, club_id, season) values('p1222', 160, '1996/97');     
+
+
+# get player name, season, and two clubs the player has played in a single season
+# select distinct p.player_name, p_c_1.season, c.club_name from player_club as p_c_1 inner join player_club as p_c_2 on p_c_1.player_id=p_c_2.player_id and p_c_1.season=p_c_2.season inner join player as p on p.player_id=p_c_1.player_id inner join club as c on c.club_id=p_c_1.club_id where p_c_1.club_id!=p_c_2.club_id order by season desc, p.player_name desc
+
+# working appearances 
+# SELECT m.season,  c.club_name, count(m.season), p_c.club_id
+# FROM player_stats as p_s 
+# INNER JOIN match_ as m on m.match_id=p_s.match_id 
+# INNER JOIN player_club as p_c on p_c.season=m.season
+# 	 and (p_c.player_id=p_s.player_id)
+# 	 and (p_c.club_id=m.home_team_id or p_c.club_id=m.away_team_id) 
+# INNER JOIN club as c on c.club_id=p_c.club_id 
+# WHERE p_s.player_id="p17500" AND (p_s.is_in_starting_11=1 or p_s.substitution_on!='Null')
+# GROUP BY m.season, p_c.club_id
+# ORDER BY m.season desc;
 
 	def convert_from_tuple_list_to_dict(self, tuple_list):
 		if len(tuple_list) > 0:

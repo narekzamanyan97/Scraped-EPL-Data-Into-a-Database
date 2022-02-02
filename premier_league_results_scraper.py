@@ -59,7 +59,7 @@ def results_retrieve_1(all_match_ids, season_index):
 			results_list_of_list_of_dicts = []
 
 			# iterate over the clubs
-			for club_index in range(8, 9):				
+			for club_index in range(0, 12):				
 				# filter using the next club
 				filter_club = WebDriverWait(driver, 15).until(
 					EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList' and @data-dropdown-list='teams']/li[@role='option' and @data-option-index=\"" + str(club_index) + "\"]"))

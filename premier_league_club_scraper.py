@@ -19,6 +19,46 @@ urls = {
 	'url_1': 'https://www.premierleague.com/clubs?se=363',
 }
 
+# scrape the logos of each club.
+def club_badge_retrieve():
+	# set up the driver
+	driver = set_up_driver(urls['url_1'])
+
+	try:
+
+		# get the club rows and links for the details
+		club_rows_name = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table']/table/tbody[@class='allTimeDataContainer']/tr/td[@class='team']/a/div[@class='nameContainer']"))
+		)
+		# get the club rows and links for the details
+		club_rows_badges = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='table']/table/tbody[@class='allTimeDataContainer']/tr/td[@class='team']/a/span[@class='badge badge-image-container u-hide-mob']/img"))
+		)
+
+
+		club_dict_of_badges = {}
+
+		for i in range(0, len(club_rows_name)):
+			
+			# get the club name
+			club_name = club_rows_name[i].text
+			# get the badge url
+			club_badge_link = club_rows_badges[i].get_attribute('src')
+			
+			# get the svg file from the 50x50 png file
+			club_badge_link = club_badge_link.replace('badges/50/', 'badges/')
+			club_badge_link = club_badge_link.replace('png', 'svg')
+			
+			club_dict_of_badges[club_name] = club_badge_link
+			# print(club_name)
+			# print(club_badge_link)
+			print('---------------------------')
+
+		return club_dict_of_badges
+
+	except TimeoutException as ex:
+		print(str(ex))
+
 # get the club's name and get the button to click to get the details
 def club_retrieve_1():
 	# set up the driver
@@ -185,4 +225,4 @@ def club_retrieve_3(driver):
 
 	return temp_dict
 
-# clubs = club_retrieve_1()
+club_badge_retrieve()

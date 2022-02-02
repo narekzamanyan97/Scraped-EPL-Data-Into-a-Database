@@ -108,11 +108,18 @@ def update_img_url_for_players():
 	print(generated_urls)
 	db.insert_player_img_urls(generated_urls)
 
+def update_badge_url_for_clubs():
+
+	# get the dictionary of club badges
+	dict_of_badges = club_badge_retrieve()
+
+	print(dict_of_badges)
+
 # gets match data using the scraper functions and inserts them into the match_, club_stats, player_stats,
 #		and player_performance tables
 def populate_match_table():
 	# iterate over the seasons and get their results
-	for j in range(4, 5):
+	for j in range(14, 15):
 		all_match_ids_in_db = db.get_all_match_ids_inserted()
 
 		all_stadiums_and_cities_list_of_dicts = db.get_stadiums()
@@ -172,7 +179,8 @@ def populate_match_table():
 # populate_manager_table()
 # populate_player_table()
 # update_img_url_for_players()
-populate_match_table()
+update_badge_url_for_clubs()
+# populate_match_table()
 
 # for j in range(1, 5):
 # 	players_dict = player_duplicate_check(j)
