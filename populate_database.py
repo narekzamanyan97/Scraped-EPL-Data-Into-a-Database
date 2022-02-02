@@ -179,7 +179,7 @@ def populate_match_table():
 # populate_manager_table()
 # populate_player_table()
 # update_img_url_for_players()
-update_badge_url_for_clubs()
+# update_badge_url_for_clubs()
 # populate_match_table()
 
 # for j in range(1, 5):

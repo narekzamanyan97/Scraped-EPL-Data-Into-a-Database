@@ -50,8 +50,27 @@ def club_badge_retrieve():
 			club_badge_link = club_badge_link.replace('png', 'svg')
 			
 			club_dict_of_badges[club_name] = club_badge_link
-			# print(club_name)
-			# print(club_badge_link)
+
+			# Now get the team number (found in the badge url) that is also used for the background stadium photo url
+			# 	e.g.
+			#		badge url for Reading: https://resources.premierleague.com/premierleague/badges/t108.svg
+			#		background stadium image url for Reading: https://www.premierleague.com/resources/prod/cb67a80-3796/i/stadiums/club-profile/t108.jpg
+			#	Note that both have the code 't108' at the end of the url name
+			#	Use this to get the url of the stadium images, as the website does not have them in the html (only the css)
+			
+			# remove the part of the url before the club code 
+			club_code = club_badge_link.split('https://resources.premierleague.com/premierleague/badges/', 1)[1]
+
+
+			# remove .svg from the code, and get the first half
+			club_code = club_code.split('.svg', 1)[0]
+
+			# form the background stadium image url from the club code
+			background_stadium_img_url = "https://www.premierleague.com/resources/prod/cb67a80-3796/i/stadiums/club-profile/" + club_code + ".jpg"
+
+			print(club_name)
+			print(club_badge_link)
+			print(background_stadium_img_url)
 			print('---------------------------')
 
 		return club_dict_of_badges
