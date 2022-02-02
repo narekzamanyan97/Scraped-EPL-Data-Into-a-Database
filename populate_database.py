@@ -105,7 +105,6 @@ def update_img_url_for_players():
 	# generate the image urls for each player
 	generated_urls = player_generate_img_url(list_of_player_ids)
 
-	print(generated_urls)
 	db.insert_player_img_urls(generated_urls)
 
 def update_badge_url_for_clubs():
@@ -113,7 +112,19 @@ def update_badge_url_for_clubs():
 	# get the dictionary of club badges
 	dict_of_badges = club_badge_retrieve()
 
-	print(dict_of_badges)
+	# print(dict_of_badges)
+
+	for club_name, url_list in dict_of_badges.items():
+		badge_url = url_list[0]
+		stadium_img_url = url_list[1]
+
+		print(club_name)
+		print(badge_url)
+		print(stadium_img_url)
+		
+		db.insert_club_badge_and_stadium(club_name, badge_url, stadium_img_url)
+		print('-----------------------------')
+
 
 # gets match data using the scraper functions and inserts them into the match_, club_stats, player_stats,
 #		and player_performance tables
@@ -179,7 +190,7 @@ def populate_match_table():
 # populate_manager_table()
 # populate_player_table()
 # update_img_url_for_players()
-# update_badge_url_for_clubs()
+update_badge_url_for_clubs()
 # populate_match_table()
 
 # for j in range(1, 5):

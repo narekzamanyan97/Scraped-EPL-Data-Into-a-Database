@@ -715,6 +715,25 @@ class database:
 			self.conn.commit()
 
 	# @parameters
+	#		club_name: name of the club record to be updates
+	# 		badge_url: the url of the badge to be set
+	#		stadium_image_url: the url of the background stadium image to be set
+	# updates the club table with the badge url and stadium url to be used in the website
+	def insert_club_badge_and_stadium(self, club_name, badge_url, stadium_image_url):
+		# use the name of the club to get its table id (club_id)
+		club_id = self.get_id(club_name, 'club')
+
+		update_statement = "UPDATE club "
+		update_statement += "SET badge_url=\"" + badge_url + "\", "
+		update_statement += "stadium_image_url=\"" + stadium_image_url + "\" "
+		update_statement += "WHERE club_id=" + str(club_id) + ";"
+
+		print(club_id)
+		self.cursor.execute(update_statement)
+		self.conn.commit()
+
+
+	# @parameters
 	#		accepts the dictionary for the match stats and the key to look for.
 	# @returns the values found corresponding to the keys
 	# 		if the results are not found, returns 0's
@@ -825,6 +844,7 @@ class database:
 		
 		for dict_ in list_of_dicts:
 			print(dict_)
+
 
 # This works. Now need to understand why some matches are missing
 #		and then get the club name

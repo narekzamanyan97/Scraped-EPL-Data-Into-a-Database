@@ -39,7 +39,8 @@ def club_badge_retrieve():
 		club_dict_of_badges = {}
 
 		for i in range(0, len(club_rows_name)):
-			
+			temp_urls_list = []
+
 			# get the club name
 			club_name = club_rows_name[i].text
 			# get the badge url
@@ -49,7 +50,7 @@ def club_badge_retrieve():
 			club_badge_link = club_badge_link.replace('badges/50/', 'badges/')
 			club_badge_link = club_badge_link.replace('png', 'svg')
 			
-			club_dict_of_badges[club_name] = club_badge_link
+			
 
 			# Now get the team number (found in the badge url) that is also used for the background stadium photo url
 			# 	e.g.
@@ -71,6 +72,11 @@ def club_badge_retrieve():
 			print(club_name)
 			print(club_badge_link)
 			print(background_stadium_img_url)
+
+			temp_urls_list.append(club_badge_link)
+			temp_urls_list.append(background_stadium_img_url)
+
+			club_dict_of_badges[club_name] = temp_urls_list
 			print('---------------------------')
 
 		return club_dict_of_badges
@@ -244,4 +250,4 @@ def club_retrieve_3(driver):
 
 	return temp_dict
 
-club_badge_retrieve()
+# club_badge_retrieve()
