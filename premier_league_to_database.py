@@ -850,6 +850,10 @@ class database:
 #		and then get the club name
 # select m.season, count(m.season) from player_stats as p_s inner join match_ as m on m.match_id=p_s.match_id where player_id='p3897' and (p_s.is_in_starting_11=1 or p_s.substitution_on!='Null') group by season order by m.season desc; 
 # 2006/07 Nicola Anelka (player_id='p3897') is missing one game (34 instead of 35)
+# get_appearances
+# SELECT m.season,  c.club_name, count(m.season) as appearances, p_c.club_id FROM player_stats as p_s INNER JOIN match_ AS m ON m.match_id=p_s.match_id INNER JOIN player_club AS p_c ON p_c.season=m.season  AND (p_c.player_id=p_s.player_id) AND (p_c.club_id=m.home_team_id or p_c.club_id=m.away_team_id) INNER JOIN club AS c ON c.club_id=p_c.club_id WHERE p_s.player_id='p3897' AND (p_s.is_in_starting_11=1 OR p_s.substitution_on!='Null') GROUP BY m.season, p_c.club_id ORDER BY m.season desc;
+# get subs (on only)
+# SELECT m.season,  c.club_name, count(m.season) as appearances, p_c.club_id FROM player_stats as p_s INNER JOIN match_ AS m ON m.match_id=p_s.match_id INNER JOIN player_club AS p_c ON p_c.season=m.season  AND (p_c.player_id=p_s.player_id) AND (p_c.club_id=m.home_team_id or p_c.club_id=m.away_team_id) INNER JOIN club AS c ON c.club_id=p_c.club_id WHERE p_s.player_id='p3897' AND (p_s.substitution_on!='Null') GROUP BY m.season, p_c.club_id ORDER BY m.season desc;
 
 # This works. Gets the match_date, club_names, is_in_startin_11 and substitution_on for a given player in a given sesason
 # select m.match_date, c_h.club_name, c_a.club_name, p_s.is_in_starting_11, p_s.substitution_on from player_stats as p_s inner join match_ as m on m.match_id=p_s.match_id inner join club as c_h on m.home_team_id=c_h.club_id inner join club as c_a on m.away_team_id=c_a.club_id where player_id='p3897' and season='2006/07';
@@ -881,6 +885,10 @@ class database:
 # WHERE p_s.player_id="p17500" AND (p_s.is_in_starting_11=1 or p_s.substitution_on!='Null')
 # GROUP BY m.season, p_c.club_id
 # ORDER BY m.season desc;
+
+
+# get number of goals of a player. ???Does not display 0 goals???
+#  select m.season, c.club_name, count(*) from player_performance as p_p inner join match_ as m on m.match_id=p_p.match_id inner join player_club as p_c on p_c.player_id=p_p.player_id and p_c.season=m.season inner join club as c on c.club_id=p_c.club_id and (m.home_team_id=p_c.club_id or m.away_team_id=p_c.club_id) where p_p.player_id='p3897' and (type_of_stat=1 or type_of_stat=2) group by m.season order by m.season desc;
 
 	def convert_from_tuple_list_to_dict(self, tuple_list):
 		if len(tuple_list) > 0:

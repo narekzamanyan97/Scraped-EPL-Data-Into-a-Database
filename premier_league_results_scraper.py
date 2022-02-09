@@ -59,7 +59,7 @@ def results_retrieve_1(all_match_ids, season_index):
 			results_list_of_list_of_dicts = []
 
 			# iterate over the clubs
-			for club_index in range(0, 12):				
+			for club_index in range(2, 3):				
 				# filter using the next club
 				filter_club = WebDriverWait(driver, 15).until(
 					EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList' and @data-dropdown-list='teams']/li[@role='option' and @data-option-index=\"" + str(club_index) + "\"]"))
@@ -320,17 +320,6 @@ def results_retrieve_1(all_match_ids, season_index):
 						# if the season is 2006/07 or more recent, then results_retrieve_2 was able to retrieve the match date.
 						match_date.update(match_date_)
 						
-						print('*********************************')
-						print('*********************************')
-						print(match_date)
-						print(match_date_)
-						print('*********************************')
-						print('*********************************')
-
-					
-
-
-
 						# # if the team names returned is empty, add the names from the result row.
 						# if bool(team_names) == False:
 						# 	team_names.append(home_club_name)
