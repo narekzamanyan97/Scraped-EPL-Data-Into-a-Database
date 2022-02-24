@@ -422,7 +422,7 @@ class database:
 		corners_home, corners_away = self.insert_club_stats_helper(club_stats_dict, 'Corners', season)
 		offsides_home, offsides_away = self.insert_club_stats_helper(club_stats_dict, 'Offsides', season)
 		fouls_conceded_home, fouls_conceded_away = self.insert_club_stats_helper(club_stats_dict, 'Fouls conceded', season)
-		yellow_cards_home, yellow_cards_away = self.insert_club_stats_helper(club_stats_dict, 'Fouls conceded', season)
+		yellow_cards_home, yellow_cards_away = self.insert_club_stats_helper(club_stats_dict, 'Yellow cards', season)
 		red_cards_home, red_cards_away = self.insert_club_stats_helper(club_stats_dict, 'Red cards', season)
 
 		# insert statement for the home side
@@ -544,15 +544,17 @@ class database:
 			substitution_off = player_stats_dict['Substitution Off']
 			yellow_card = player_stats_dict['Yellow Card']
 			red_card = player_stats_dict['Red Card']
+			is_home_side = player_stats_dict['Is Home Side']
 
-			insert_statement = "INSERT INTO player_stats(player_id, match_id, is_in_starting_11, substitution_on, substitution_off, yellow_card, red_card) "
+			insert_statement = "INSERT INTO player_stats(player_id, match_id, is_in_starting_11, substitution_on, substitution_off, yellow_card, red_card, is_home_side) "
 			insert_statement += "VALUES(\"" + str(player_id) + "\", "
 			insert_statement += str(match_id) + ", "
 			insert_statement += str(is_in_starting_11) + ", "
 			insert_statement += "\"" + str(substitution_on) + "\", "
 			insert_statement += "\"" + str(substitution_off) + "\", "
 			insert_statement += "\"" + str(yellow_card) + "\", "
-			insert_statement += "\"" + str(red_card) + "\");"
+			insert_statement += "\"" + str(red_card) + "\", "
+			insert_statement += str(is_home_side) + ");"
 				
 			# print(insert_statement)
 			try:
@@ -1102,6 +1104,31 @@ class database:
 			table_position += 1
 
 		self.print_table(table_list_of_dicts)
+
+	def insert_fixtures(self, fixture_id, fixture_dict):
+		print(fixture_id)
+		print(fixture_dict)
+
+		home_team_id = self.get_id(fixture_dict['home_team_name'], 'club')
+		away_team_id = self.get_id(fixture_dict['away_team_name'], 'club')
+		stadium_id = self.get_id(fixture_dict['stadium_name'], 'stadium')
+
+		insert_fixture_statement = "INSERT INTO fixture (fixture_id, home_club_id, away_club_id, stadium_id, season, time_, date_, weekday) "
+		insert_fixture_statement += "VALUES(" + str(fixture_id) + ", "
+		insert_fixture_statement += "" + str(home_team_id) + ", "
+		insert_fixture_statement += "" + str(away_team_id) + ", "
+		insert_fixture_statement += "" + str(stadium_id) + ", "
+		insert_fixture_statement += "\"" + str('2021/22') + "\", "
+		insert_fixture_statement += "\"" + str(fixture_dict['fixture_time']) + "\", "
+		insert_fixture_statement += "\"" + str(fixture_dict['fixture_date']) + "\", "
+		insert_fixture_statement += "\"" + str(fixture_dict['weekday']) + "\");"
+
+		try:
+			print(insert_fixture_statement)
+			self.cursor.execute(insert_fixture_statement)
+			self.conn.commit()
+		except IntegrityError:
+			print(str(fixture_id) + ' already in fixture.')
 
 	def print_table(self, table_list_of_dicts):
 		for row_dict in table_list_of_dicts:

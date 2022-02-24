@@ -181,3 +181,29 @@ create table player_club(
 		references club(club_id) on delete cascade
 			on update cascade
 );
+
+create table fixture(
+	fixture_id varchar(8) not null,
+	
+	home_club_id int(2) not null,
+	away_club_id int(2) not null,
+	stadium_id int(2),
+	season varchar(7) default '2021/22',
+	time_ Time default Null,
+	date_ Date default Null,
+	weekday varchar(9),
+
+
+
+	constraint FIXTURE_PK primary key (fixture_id),
+	constraint FIXTURE_HOME_CLUB_ID_FK foreign key (home_club_id)
+		references club(club_id) on delete cascade
+			on update cascade,
+	constraint FIXTURE_AWAY_CLUB_ID_FK foreign key (away_club_id)
+		references club(club_id) on delete cascade
+			on update cascade,
+
+	constraint FIXTURE_STADIUM_ID_FK FOREIGN KEY (stadium_id)
+		references stadium(stadium_id) on delete set null
+			on update cascade	
+)

@@ -3,6 +3,7 @@ from premier_league_club_scraper import *
 from premier_league_manager_scraper import *
 from premier_league_player_scraper import *
 from premier_league_results_scraper import *
+from premier_league_fixtures_scraper import *
 
 # initialize the connection
 connection = connect_to_database()
@@ -130,7 +131,7 @@ def update_badge_url_for_clubs():
 #		and player_performance tables
 def populate_match_table():
 	# iterate over the seasons and get their results
-	for j in range(5, 6):
+	for j in range(29, 30):
 		all_match_ids_in_db = db.get_all_match_ids_inserted()
 
 		all_stadiums_and_cities_list_of_dicts = db.get_stadiums()
@@ -186,12 +187,24 @@ def populate_match_table():
 			except IntegrityError:
 				print('Duplicate Key error raised from the insert_match_basic_info.')
 
+def populate_fixture_table():
+	fixtures_dict_of_dicts = fixtures_retrieve()
+
+	for fixture_id, fixture_dict in fixtures_dict_of_dicts.items():
+		print(fixture_id)
+		print(fixture_dict)
+
+		db.insert_fixtures(fixture_id, fixture_dict)
+
+		print('---------------------------------------------------')
+
 # populate_stadium_and_club_tables()
 # populate_manager_table()
 # populate_player_table()
 # update_img_url_for_players()
 # update_badge_url_for_clubs()
-populate_match_table()
+# populate_match_table()
+populate_fixture_table()
 
 # for j in range(1, 5):
 # 	players_dict = player_duplicate_check(j)

@@ -1,0 +1,2 @@
++ add the is_home_side to the player_performance
++ make sure yellow cards is not the same as fouls conceded

@@ -1,3 +1,8 @@
+# fixed from 2005/06 through 2020/21
+
+# deleted from 2005/06 through 2005/06
+# fixed from 
+
 # https://www.premierleague.com/results
 
 from selenium.common.exceptions import TimeoutException
@@ -19,6 +24,8 @@ urls = {
 	'url_1': 'https://www.premierleague.com/results?co=1&se=363&cl=-1',
 }
 
+SECONDS_TO_WAIT = 5
+
 # retrieve the team names, score, the stadium name, and its city
 # 	Argument:
 #		list of all the match_ids available in the table. This is to save time
@@ -26,9 +33,27 @@ urls = {
 def results_retrieve_1(all_match_ids, season_index):
 	driver = set_up_driver(urls['url_1'])
 
+
+	# exit accept all cookies prompt by accepting it
+	try:
+		advert_xpath = "//button[@class='_2hTJ5th4dIYlveipSEMYHH BfdVlAo_cgSVjDUegen0F js-accept-all-close']"
+		advert = presence_of_all_el_located(driver, advert_xpath, SECONDS_TO_WAIT, -2)
+		ad_close_button = advert[0]
+
+		# click on the close button
+		driver.execute_script("arguments[0].click();", ad_close_button)
+		print('clicked on close button')
+	
+	except TimeoutException:
+		print('There is no advertisement button. Moving on!')
+
+	
+	
 	# define a dictionary for the stadiums and their cities. The stadium name
 	#		is the key, and the city of the stadium is the value
 	stadium_city_dict = {}
+
+
 
 	# iterate over the seasons
 	for j in range(season_index, season_index + 1):
@@ -58,8 +83,34 @@ def results_retrieve_1(all_match_ids, season_index):
 			results_list_of_dicts = []
 			results_list_of_list_of_dicts = []
 
+			# exit accept all cookies prompt by accepting it
+			try:
+				advert_xpath = "//button[@class='_2hTJ5th4dIYlveipSEMYHH BfdVlAo_cgSVjDUegen0F js-accept-all-close']"
+				advert = presence_of_all_el_located(driver, advert_xpath, SECONDS_TO_WAIT, -2)
+				ad_close_button = advert[0]
+
+				# click on the close button
+				driver.execute_script("arguments[0].click();", ad_close_button)
+
+			except TimeoutException:
+				print('There is no advertisement button. Moving on!')
+
+
 			# iterate over the clubs
-			for club_index in range(2, 3):				
+			for club_index in range(0, 20):
+				# exit accept all cookies prompt by accepting it
+				try:
+					advert_xpath = "//button[@class='_2hTJ5th4dIYlveipSEMYHH BfdVlAo_cgSVjDUegen0F js-accept-all-close']"
+					advert = presence_of_all_el_located(driver, advert_xpath, SECONDS_TO_WAIT, -2)
+					ad_close_button = advert[0]
+	
+					# click on the close button
+					driver.execute_script("arguments[0].click();", ad_close_button)
+	
+				except TimeoutException:
+					print('There is no advertisement button. Moving on!')
+
+
 				# filter using the next club
 				filter_club = WebDriverWait(driver, 15).until(
 					EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList' and @data-dropdown-list='teams']/li[@role='option' and @data-option-index=\"" + str(club_index) + "\"]"))
@@ -106,17 +157,17 @@ def results_retrieve_1(all_match_ids, season_index):
 				number_of_results = len(div_ids)
 				original_len_results = len(results)
 							
-				while len(results) < number_of_matchweeks:
-					driver.refresh()
-					time.sleep(5)
-					print(len(results))
+				# while len(results) < number_of_matchweeks:
+				# 	driver.refresh()
+				# 	time.sleep(5)
+				# 	print(len(results))
 
-					# scroll down to the bottom of the page to include all the players
-					driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-					time.sleep(5)
-					results = WebDriverWait(driver, 5).until(
-						EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
-					)
+				# 	# scroll down to the bottom of the page to include all the players
+				# 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+				# 	time.sleep(5)
+				# 	results = WebDriverWait(driver, 5).until(
+				# 		EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
+				# 	)
 
 				original_len_results = len(results)
 				print('original results: ' + str(len(results)))				
@@ -234,6 +285,7 @@ def results_retrieve_1(all_match_ids, season_index):
 								break
 						else:
 							print('else')
+							break
 
 
 					if i < original_len_results and i < last_index:
