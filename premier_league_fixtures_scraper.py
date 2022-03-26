@@ -29,7 +29,7 @@ def fixtures_retrieve():
 	fixtures_dict_of_dicts = {}
 
 	# iterate over the clubs
-	for club_index in range(0, 1):
+	for club_index in range(10, 12):
 		# filter using the next club
 		filter_club = WebDriverWait(driver, 15).until(
 			EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList' and @data-dropdown-list='teams']/li[@role='option' and @data-option-index=\"" + str(club_index) + "\"]"))
@@ -59,15 +59,30 @@ def fixtures_retrieve():
 		)
 
 
-		for i in range(0, len(fixture_ids)):
+		for i in range(0, len(fixture_dates)):
 			temp_fixture_details_dict = {}
 
 
 			# get the fixtrue id
 			fixture_id = fixture_ids[i].get_attribute('data-matchid')
 
-			# get match date
+			# if there is at most one date to be confirmed rows
 			match_date = fixture_dates[i].text
+			
+			# if there are two date to be confirmed rows
+			# if i == 0:
+			# 	# get match date
+			# 	match_date = fixture_dates[i].text
+			# else:
+			# 	# get match date
+			# 	match_date = fixture_dates[i-1].text
+			# if there are 3 date to be confirmed rows
+			# if i <= 1:
+			# 	# get match date
+			# 	match_date = fixture_dates[0].text
+			# else:
+			# 	# get match date
+			# 	match_date = fixture_dates[i-2].text
 
 			# generate YYYY-MM-DD format for the date
 			match_date_list = match_date.split(' ')

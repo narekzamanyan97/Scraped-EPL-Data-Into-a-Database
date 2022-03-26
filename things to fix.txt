@@ -1,2 +1,30 @@
-+ add the is_home_side to the player_performance
-+ make sure yellow cards is not the same as fouls conceded
++++ add the is_home_side to the player_performance
++++ make sure yellow cards is not the same as fouls conceded
++ when a player scores a penalty goal and another goal (see match 3378, or 9526, or 7333), all the goals are 
+	counted as penalty goals. This does not happen often, so no need to rescrape every detail
+	of every match.
+	Modify the results scraper not to mix up goals and penalty goals when a player scores
+	both types of goals. Then use the penalty goals query to see which matches are affected
++ check the yellow cards and find out why is the total # of yellow cards different
++ check the red cards and find out why is it different from the club red cards found in their page
++ check own goals
+
+match_id = 66525 (this one seems ok?)
+--------------------------------------------------------------------
+				Scrape
++ the yellow_card minute from result timeline	
+	+ use https://www.premierleague.com/match/match_id to make it faster
++ attendace of the match.
+	
+	Player
++ + scrape player facebook, instagram, twitter account links
+	Club
++ scrape club social media links
++ scrape home/away/third kits of each club
++ scrape the club stats that cannot be retrieved from the matches in the db, such as crosses,
+	blocked shots, interceptions, clearances, areal battles, errors leading to goal.
++ scrape video links from clubs
+
+	Results
++ the large stadium background images for all the clubs, found in the result details page.
++ scrape the yellow-card minutes from the timeline.

@@ -185,8 +185,8 @@ create table player_club(
 create table fixture(
 	fixture_id varchar(8) not null,
 	
-	home_club_id int(2) not null,
-	away_club_id int(2) not null,
+	home_team_id int(2) not null,
+	away_team_id int(2) not null,
 	stadium_id int(2),
 	season varchar(7) default '2021/22',
 	time_ Time default Null,
@@ -196,14 +196,14 @@ create table fixture(
 
 
 	constraint FIXTURE_PK primary key (fixture_id),
-	constraint FIXTURE_HOME_CLUB_ID_FK foreign key (home_club_id)
+	constraint FIXTURE_HOME_TEAM_ID_FK foreign key (home_team_id)
 		references club(club_id) on delete cascade
 			on update cascade,
-	constraint FIXTURE_AWAY_CLUB_ID_FK foreign key (away_club_id)
+	constraint FIXTURE_AWAY_TEAM_ID_FK foreign key (away_team_id)
 		references club(club_id) on delete cascade
 			on update cascade,
 
 	constraint FIXTURE_STADIUM_ID_FK FOREIGN KEY (stadium_id)
 		references stadium(stadium_id) on delete set null
 			on update cascade	
-)
+);

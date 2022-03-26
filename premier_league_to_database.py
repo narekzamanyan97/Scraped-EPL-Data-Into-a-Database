@@ -1113,7 +1113,7 @@ class database:
 		away_team_id = self.get_id(fixture_dict['away_team_name'], 'club')
 		stadium_id = self.get_id(fixture_dict['stadium_name'], 'stadium')
 
-		insert_fixture_statement = "INSERT INTO fixture (fixture_id, home_club_id, away_club_id, stadium_id, season, time_, date_, weekday) "
+		insert_fixture_statement = "INSERT INTO fixture (fixture_id, home_team_id, away_team_id, stadium_id, season, time_, date_, weekday) "
 		insert_fixture_statement += "VALUES(" + str(fixture_id) + ", "
 		insert_fixture_statement += "" + str(home_team_id) + ", "
 		insert_fixture_statement += "" + str(away_team_id) + ", "

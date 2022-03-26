@@ -1,6 +1,9 @@
 select 'player_id', 'player_name', 'player_number', 'position', 'country', 'date_of_birth', 'height' union all select player_id, player_name, player_number, position, country, date_of_birth, height from player into outfile 'player_1.csv' fields terminated by ',' enclosed by '"' lines terminated by '\n';
 
-select 'player_id', 'match_id', 'is_in_starting_11', 'substitution_on', 'substitution_off', 'yellow_card', 'red_card' union all select player_id, match_id, is_in_starting_11, substitution_on, substitution_off, yellow_card, red_card from player_stats into outfile 'player_stats_1.csv' fields terminated by ',' enclosed by '"' lines terminated by '\n';
+select 'player_id', 'match_id', 'is_in_starting_11', 'substitution_on', 'substitution_off', 'yellow_card', 'red_card', 'is_home_side' union all select player_id, match_id, is_in_starting_11, substitution_on, substitution_off, yellow_card, red_card, is_home_side from player_stats into outfile 'player_stats_1.csv' fields terminated by ',' enclosed by '"' lines terminated by '\n';
+
+
+select 'match_id', 'club_id', 'possession', 'shots', 'shots_on_target', 'touches', 'passes', 'tackles', 'clearances', 'corners', 'offsides', 'offsides', 'fouls_conceded', 'yellow_cards', 'red_cards' union all select match_id, club_id, possession, shots, shots_on_target, touches, passes, tackles, clearances, corners, offsides, offsides, fouls_conceded, yellow_cards, red_cards from club_stats into outfile 'club_stats_1.csv' fields terminated by ',' enclosed by '"' lines terminated by '\n';
 
 select 'club_id', 'stadium_id', 'club_name', 'website' union all select club_id, stadium_id, club_name, website from club into outfile 'club_1.csv' fields terminated by ',' enclosed by '"' lines terminated by '\n';
 

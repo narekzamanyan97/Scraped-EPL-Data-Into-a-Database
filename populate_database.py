@@ -52,7 +52,7 @@ def populate_manager_table():
 def populate_player_table():
 	# using the player_retrive_1 function to scrape player rows, filtering based on
 	#			season only
-	for j in range(23, 24):
+	for j in range(8, 9):
 		# retrieve all the rows from player_clubs table corresponding to the given season
 		season = all_seasons[j]
 		print(season)
@@ -131,7 +131,7 @@ def update_badge_url_for_clubs():
 #		and player_performance tables
 def populate_match_table():
 	# iterate over the seasons and get their results
-	for j in range(29, 30):
+	for j in range(8, 9):
 		all_match_ids_in_db = db.get_all_match_ids_inserted()
 
 		all_stadiums_and_cities_list_of_dicts = db.get_stadiums()
@@ -203,8 +203,8 @@ def populate_fixture_table():
 # populate_player_table()
 # update_img_url_for_players()
 # update_badge_url_for_clubs()
-# populate_match_table()
-populate_fixture_table()
+populate_match_table()
+# populate_fixture_table()
 
 # for j in range(1, 5):
 # 	players_dict = player_duplicate_check(j)

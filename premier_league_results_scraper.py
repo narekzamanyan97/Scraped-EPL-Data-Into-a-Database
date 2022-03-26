@@ -1,7 +1,7 @@
-# fixed from 2005/06 through 2020/21
+# fixed from 2006/07 through 2020/21
 
-# deleted from 2005/06 through 2005/06
-# fixed from 
+# deleted from 2005/06 through 1992/93
+# fixed from 2005/06 through 1995/96
 
 # https://www.premierleague.com/results
 
@@ -97,7 +97,7 @@ def results_retrieve_1(all_match_ids, season_index):
 
 
 			# iterate over the clubs
-			for club_index in range(0, 20):
+			for club_index in range(4, 5):
 				# exit accept all cookies prompt by accepting it
 				try:
 					advert_xpath = "//button[@class='_2hTJ5th4dIYlveipSEMYHH BfdVlAo_cgSVjDUegen0F js-accept-all-close']"
@@ -110,6 +110,10 @@ def results_retrieve_1(all_match_ids, season_index):
 				except TimeoutException:
 					print('There is no advertisement button. Moving on!')
 
+				# select the appropriate season from the dropdown
+				filter_season = WebDriverWait(driver, 15).until(
+						EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + all_seasons[j]  + "']"))
+				)
 
 				# filter using the next club
 				filter_club = WebDriverWait(driver, 15).until(
@@ -146,17 +150,11 @@ def results_retrieve_1(all_match_ids, season_index):
 					EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']"))
 				)
 
-				number_of_results = len(results)
 				number_of_stadiums = len(stadiums)
-				print(number_of_results)
+				
 				
 				counter = 1
 
-				
-
-				number_of_results = len(div_ids)
-				original_len_results = len(results)
-							
 				# while len(results) < number_of_matchweeks:
 				# 	driver.refresh()
 				# 	time.sleep(5)
@@ -169,9 +167,6 @@ def results_retrieve_1(all_match_ids, season_index):
 				# 		EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
 				# 	)
 
-				original_len_results = len(results)
-				print('original results: ' + str(len(results)))				
-
 				num_of_unique_ids = 0
 
 				start_index = 0
@@ -182,7 +177,9 @@ def results_retrieve_1(all_match_ids, season_index):
 
 				# Iterating over the results to get the team names, scores, stadium names,
 				#	and then click at each result to get the details of the match
-				while i < last_index:
+				while i < last_index or i < number_of_matchweeks:
+					print('***************************************************************************************************')
+
 					# select the appropriate season from the dropdown
 					filter_season = WebDriverWait(driver, 20).until(
 							EC.presence_of_all_elements_located((By.XPATH, "//ul[@class='dropdownList']/li[@role='option' and text()='" + all_seasons[j]  + "']"))
@@ -208,39 +205,32 @@ def results_retrieve_1(all_match_ids, season_index):
 					time.sleep(5)
 					
 
-					# # make sure the script gets 380 (# of matches in a premier league season)
-					# #	results before proceeding
+					# results before proceeding
 					results = WebDriverWait(driver, 10).until(
 						EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
 					)
 
-
-					
-					# if j == 1:
-					# 	last_index = len(results)
-					# else:
-					# 	last_index = 120
 					
 					last_index = len(results)
 					
 					print('j = ' + str(j))
+					print('last_index = ' + str(last_index))
 
-					# while len(results) < number_of_matchweeks:
-					# 	driver.refresh()
-					# 	time.sleep(5)
 
-					# 	# print(len(results))
-					# 	# print(number_of_matchweeks)
-					# 	# scroll down to the bottom of the page to include all the players
-					# 	driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-					# 	time.sleep(5)
+					while len(results) < number_of_matchweeks:
+						driver.refresh()
+						time.sleep(5)
 
-					# 	stadiums = WebDriverWait(driver, 5).until(
-					# 		EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='stadiumName']"))
-					# 	)
-					# 	results = WebDriverWait(driver, 5).until(
-					# 		EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
-					# 	)
+						# scroll down to the bottom of the page to include all the players
+						driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+						time.sleep(5)
+
+						stadiums = WebDriverWait(driver, 5).until(
+							EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='stadiumName']"))
+						)
+						results = WebDriverWait(driver, 5).until(
+							EC.presence_of_all_elements_located((By.XPATH, "//li[@class='matchFixtureContainer']/div[@class='fixture postMatch']/span[@class='overview']/span[@class='teams']"))
+						)
 
 
 					# Since the page is updated (after clicking on a link and going back), we need to
@@ -266,7 +256,7 @@ def results_retrieve_1(all_match_ids, season_index):
 
 					# The rows of the page are being duplicated after the scrollTo
 					# So we check whether the row has already appeared on the page or not
-					while (is_row_new(unique_ids, id) != True or is_row_new(all_match_ids, id) != True) and i < last_index:
+					while (is_row_new(unique_ids, id) != True or is_row_new(all_match_ids, id) != True) and i < last_index and i < number_of_matchweeks:
 						if is_row_new(all_match_ids, id) != True:
 							duplicate_result_flag = True
 		
@@ -274,7 +264,7 @@ def results_retrieve_1(all_match_ids, season_index):
 						# print('i = ' + str(i))
 						# print('last index = ' + str(last_index))
 						print('club index = ' + str(club_index))
-						if i < original_len_results and i < last_index:
+						if i < number_of_matchweeks and i < last_index:
 							i += 1
 							print(i)
 							print(str(id) + ' exists.')
@@ -287,8 +277,9 @@ def results_retrieve_1(all_match_ids, season_index):
 							print('else')
 							break
 
-
-					if i < original_len_results and i < last_index:
+					print('i = ' + str(i))
+					print('last_index = ' + str(last_index))
+					if i < number_of_matchweeks and i < last_index:
 						# holds a result information
 						result_dict = {}
 						result_dict['match id'] = id
@@ -422,7 +413,8 @@ def results_retrieve_1(all_match_ids, season_index):
 							i = start_index
 						else:
 							i += 1
-
+					# else:
+					# 	i += 1
 
 			return results_list_of_list_of_dicts
 
@@ -465,20 +457,17 @@ def results_retrieve_2(driver, result_row, season):
 
 		print('###########################################################')
 
-		print('Calling the Lineups ***********************************')
 		# call the retrive_3 function to get the line_ups, player stats, and the
 		#		mapping of link_ids and player_ids 
 		line_ups, club_names_from_retrieve_3, id_mapping = results_retrieve_3(driver)
-		print('After calling the Lineups ***********************************')
-		
+
 		# if the scoresheet is not present on top of the page (at least one case)
 		if len(club_names) == 0:
 			club_names = club_names_from_retrieve_3
 
 		# call results_retrieve_3 function to get the team stats of the match
 		team_stats = results_retrieve_4(driver, season)
-		print('After calling the team_stats ***********************************')
-		# try:
+		
 		# retrieve the events of the home side, which include goals (by penalty), 
 		#	own goals, and red cards
 		events_home_xpath = "//div[@class='matchEvents matchEventsContainer']/div[@class='home']/div[@class='event']"
