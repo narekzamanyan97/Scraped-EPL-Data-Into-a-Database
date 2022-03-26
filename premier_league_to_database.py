@@ -838,16 +838,30 @@ class database:
 
 		self.cursor.execute(query)
 		tuple_list = self.cursor.fetchall()
-
-		tuple_list = convert_from_tuple_list_to_dict(tuple_list)
-		print(tuple_list)
 		
 		list_of_dicts = self.convert_from_tuple_list_to_dict(tuple_list)
 		
 		for dict_ in list_of_dicts:
 			print(dict_)
 
+	# query for all the match ids. R
+	# @return a list of those match_ids
+	def get_all_match_ids(self):
+		query = "select match_id from match_;"
 
+		self.cursor.execute(query)
+		tuple_list = self.cursor.fetchall()
+
+		match_ids = self.convert_from_tuple_list_to_dict(tuple_list)
+
+		list_of_all_match_ids = []
+
+		for match_id_dict in match_ids:
+			list_of_all_match_ids.append(match_id_dict['match_id'])
+		
+		print(len(list_of_all_match_ids))
+
+		return list_of_all_match_ids
 # This works. Now need to understand why some matches are missing
 #		and then get the club name
 # select m.season, count(m.season) from player_stats as p_s inner join match_ as m on m.match_id=p_s.match_id where player_id='p3897' and (p_s.is_in_starting_11=1 or p_s.substitution_on!='Null') group by season order by m.season desc; 
@@ -1130,6 +1144,8 @@ class database:
 		except IntegrityError:
 			print(str(fixture_id) + ' already in fixture.')
 
+
+
 	def print_table(self, table_list_of_dicts):
 		for row_dict in table_list_of_dicts:
 			print(row_dict['team_name'], end="  ")
@@ -1142,6 +1158,8 @@ class database:
 			print(row_dict['team_points'], end="  ")
 			print(row_dict['form'], end="  ")
 			print()
+
+
 
 # !!! get the missing players from from the player_stats and insert them into the
 #		players table

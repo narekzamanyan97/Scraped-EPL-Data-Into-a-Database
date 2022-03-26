@@ -75,6 +75,8 @@ create table match_(
 
 	season varchar(7) default '2020/21',
 
+	attendance varchar(7),
+
 	constraint MATCH_ID_PK PRIMARY KEY (match_id),
 	constraint MATCH_HOME_TEAM_ID FOREIGN KEY (home_team_id)
 		references club(club_id) on delete cascade

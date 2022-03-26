@@ -10,7 +10,6 @@ connection = connect_to_database()
 
 # initialize a database object
 db = database(connection)
-# db.delete_all_rows('stadium')
 
 # gets club and stadium data using the scraper functions and inserts them into the club and stadium tables
 def populate_stadium_and_club_tables():
