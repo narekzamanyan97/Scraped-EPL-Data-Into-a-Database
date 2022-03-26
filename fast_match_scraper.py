@@ -41,7 +41,8 @@ def yellow_card_detail_scraper(list_of_all_match_ids):
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='attendance hide-m']"))
 		)
 
-		attendance = attendance[0].text
+		# remove the Att from the string
+		attendance = attendance[0].text.replace('Att: ', '')
 
 		attendance_dict[match_id] = attendance
 		print(attendance)
@@ -89,6 +90,7 @@ def yellow_card_detail_scraper(list_of_all_match_ids):
 
 	# for match_id, yellow_card_list in yellow_card_dict_of_lists.items():
 	# 	print(str(match_id) + ': ' + str(yellow_card_list))
+	print(attendance_dict)
 	return attendance_dict, yellow_card_dict_of_lists
 
 # initialize the connection
@@ -99,4 +101,7 @@ db = database(connection)
 
 list_of_all_match_ids = db.get_all_match_ids()
 
-yellow_card_detail_scraper(list_of_all_match_ids)
+attendance_dict, yellow_card_dict_of_lists = yellow_card_detail_scraper(list_of_all_match_ids)
+
+db.update_yellow_card_minutes(yellow_card_dict_of_lists)
+db.update_attendance(attendance_dict)

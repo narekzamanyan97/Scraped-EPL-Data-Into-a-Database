@@ -847,7 +847,8 @@ class database:
 	# query for all the match ids. R
 	# @return a list of those match_ids
 	def get_all_match_ids(self):
-		query = "select match_id from match_;"
+		query = "select match_id from match_ "
+		query += "where match_id<5 and match_id>0 order by match_id;"
 
 		self.cursor.execute(query)
 		tuple_list = self.cursor.fetchall()
@@ -859,9 +860,36 @@ class database:
 		for match_id_dict in match_ids:
 			list_of_all_match_ids.append(match_id_dict['match_id'])
 		
-		print(len(list_of_all_match_ids))
+		print(list_of_all_match_ids)
 
 		return list_of_all_match_ids
+
+	# update the minute of the yellow card in player_stats table given the 
+	#		player_id and match_id
+	def update_yellow_card_minutes(self, yellow_card_dict_of_lists):
+		for match_id, yellow_card_list_of_dict in yellow_card_dict_of_lists.items():
+			for yellow_card_dict in yellow_card_list_of_dict:
+				minute = yellow_card_dict['minute']
+				player_id = yellow_card_dict['player_id']
+
+				update_yellow_card_minute = "update player_stats "
+				update_yellow_card_minute += "set yellow_card=\"" + minute + "\" "
+				update_yellow_card_minute += "where player_id=\"" + player_id + "\" "
+				update_yellow_card_minute += "and match_id=" + str(match_id) + "; "
+
+				self.cursor.execute(update_yellow_card_minute)
+				self.conn.commit()
+
+	# update the attendance of each match.
+	def update_attendance(self, attendance_dict):
+		for match_id, attendance in attendance_dict.items():
+			update_attendance = "update match_ "
+			update_attendance += "set attendance=\"" + attendance + "\" "
+			update_attendance += "where match_id=" + str(match_id) + ";"
+
+			self.cursor.execute(update_attendance)
+			self.conn.commit()
+
 # This works. Now need to understand why some matches are missing
 #		and then get the club name
 # select m.season, count(m.season) from player_stats as p_s inner join match_ as m on m.match_id=p_s.match_id where player_id='p3897' and (p_s.is_in_starting_11=1 or p_s.substitution_on!='Null') group by season order by m.season desc; 
