@@ -97,7 +97,7 @@ def results_retrieve_1(all_match_ids, season_index):
 
 
 			# iterate over the clubs
-			for club_index in range(4, 5):
+			for club_index in range(10, 11):
 				# exit accept all cookies prompt by accepting it
 				try:
 					advert_xpath = "//button[@class='_2hTJ5th4dIYlveipSEMYHH BfdVlAo_cgSVjDUegen0F js-accept-all-close']"
@@ -946,6 +946,13 @@ def process_events_data(string_array, player_id, is_home):
 			minutes = player_name_and_time[char_index:]
 			minutes = minutes.split(',')
 			
+			# penalty goals and regular goals are mixed together on the same
+			#		line. There may or may not be a non-penalty goal on the
+			#		same line. The default is that there is not. But
+			#		if the minute contains does not contain the substring
+			#		(pen), then the goal is a non-penalty goal.
+			is_there_regular_goal = False
+
 			if event_type == 'Goal':
 				min_array = [is_home, 'goal']
 			elif event_type == 'Own Goal':
@@ -959,9 +966,16 @@ def process_events_data(string_array, player_id, is_home):
 			elif event_type == 'Assist':
 				min_array = [is_home, 'assist']
 
-
-	
+			# ========================================================
+			# ========================================================
+			# !!! the player can score 2 goals, one of which is by penalty, and
+			#	 the other one not. So fix this to make sure that not all the
+			#		goals are counted as penalty.
+			# print('Minutes')
+			# print(minutes)
 			for minute in minutes:
+				is_penalty_goal = False
+
 				minute = minute.replace('\'', '')
 				# Remove the (og), (pen)
 				own_goal = '(og)'
@@ -970,11 +984,53 @@ def process_events_data(string_array, player_id, is_home):
 					minute = minute.replace(own_goal, '')
 				elif pen in minute:
 					minute = minute.replace(pen, '')
+					is_penalty_goal = True
+				# minute = minute.strip()
+				# min_array.append(minute)
 
-				minute = minute.strip()
-				min_array.append(minute)
-				
+
+				# if (pen) is not in the string, then the goal is not a penalty
+				#		goal.
+				# else:
+				# 	continue
+				if is_penalty_goal == False:
+					minute = minute.strip()
+					if event_type == 'label.penalty.scored':
+						
+						if is_there_regular_goal != True:
+							is_there_regular_goal = True
+							# min_array_2 is for non-penalty goals
+							min_array_2 = [is_home, 'goal']
+							min_array_2.append(minute)
+						else:
+							min_array_2.append(minute)
+
+					else:
+						min_array.append(minute)	
+				else:
+					minute = minute.strip()
+					min_array.append(minute)
+			
+			# if a non-penalty (regular) goal is among the penalty goals,
+			#		then combine the min_array (for penalty goals) with the
+			#		min_array_2 (for non-penalty goals), and the set min_array
+			#		to the combination of those arrays to be placed into the
+			#		stats['player_id']
+			if is_there_regular_goal == True:
+				pen_and_regular_goal_array = []
+				pen_and_regular_goal_array.append(min_array)
+				pen_and_regular_goal_array.append(min_array_2)
+				min_array = pen_and_regular_goal_array
+			print('min_array')
+			print(min_array)
 			stats[player_id] = min_array
+
+			return stats
+			# ==========================================================
+			# ==========================================================
+
+#	7333
+#	4042
 
 			return stats
 
@@ -1026,21 +1082,54 @@ def extract_event(driver, xpath, stats, id_mapping, is_home):
 			player_name = list(processed_events_data_dict.keys())[0]
 			
 
-
 			# If the player is already in the dictionary for another type of event,
 			#		append the current event array to the existing array of arrays
 			if player_id in stats.keys():
-				stats[player_id].append(processed_events_data_dict[player_id])
+
+				print('processed_events_data_dict[player_id] ')
+				print(processed_events_data_dict[player_id])
+				# if the array is an array of arrays, then iterate through
+				#		the arrays in that array (when both penalty goal(s)
+				#		and non-penalty goal(s) are scored by the same player)
+				if isinstance(processed_events_data_dict[player_id][0], str) == False:
+					for processed_event_array in processed_events_data_dict[player_id]:
+						stats[player_id].append(processed_event_array)
+				else:
+					stats[player_id].append(processed_events_data_dict[player_id])
 			# If the player has no event data yet, create a temporary array and
 			#	append the current event array to it, making an array of arrays,
 			#	then adding to the dictionary with the key being the player's name.
 			else:
 				temp_array = []
 				temp_dict = {}
-				temp_array.append(processed_events_data_dict[player_id])
+				print('processed_events_data_dict[player_id]')
+				print(processed_events_data_dict[player_id])
+				
+				if isinstance(processed_events_data_dict[player_id][0], str) == False:
+					print('vvvvvvvvvvvvvvvvvvvv')
+					print(processed_events_data_dict[player_id][0])
+					print(type(processed_events_data_dict[player_id][0]))
+					print(isinstance(type(processed_events_data_dict[player_id][0]), str))
+					for processed_event_array in processed_events_data_dict[player_id]:
+						print('appending')
+						print(processed_event_array)
+						temp_array.append(processed_event_array)
+						print('temp_array')
+						print(temp_array)
+				else:
+					temp_array.append(processed_events_data_dict[player_id])
+				print('temp_array')
+				print(temp_array)
+
+								
 				temp_dict[player_id] = temp_array
+
+				print('temp_dict')
+				print(temp_dict)
 				stats.update(temp_dict)
 
+			print('stats[player_id]')
+			print(stats[player_id])
 		return stats
 
 	except TimeoutException as ex:

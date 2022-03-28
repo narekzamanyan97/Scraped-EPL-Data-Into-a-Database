@@ -473,19 +473,6 @@ class database:
 
 		# iterate through the player performances
 		for player_id, performance_array_of_arrays in player_performance_dict.items():	
-			# # some players have not appeared in the player's page, and thus have
-			# #	no player_id
-			# if player_id == 'Null':
-			# 	print(player_name + ' has no player_id')
-
-			# 	# insert the player
-			# 	insert_player_statement = "INSERT INTO player(player_name) "
-			# 	insert_player_statement += "VALUES(\"" + player_name + "\");"
-
-			# 	self.cursor.execute(insert_statement)
-			# 	self.conn.commit()
-
-
 			# goal (goal) = 1
 			# goal penalty = 2
 			# assist (assist) = 3
