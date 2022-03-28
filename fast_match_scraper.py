@@ -114,46 +114,26 @@ def yellow_card_detail_scraper(list_of_all_match_ids):
 # 	@parameters:
 #	the list of match_ids to be scraped
 #	list_of_all_match_ids_and_seasons = [{'match_id': 22222, 'season': '2001/2002'}, {'match_id': 2222, 'season': '1995/1996'}, ... ]
-def fast_results_retrieve(list_of_all_match_ids_and_seasons):
+def fast_results_retrieve(list_of_all_match_ids):
 	driver = set_up_driver(urls['url_1'])
 
 	# holds all the results
 	results_list_of_dicts = []
 	results_list_of_list_of_dicts = []
 
-	# iterate over the clubs
-	for match_id_and_season_dict in list_of_all_match_ids_and_seasons:
-		match_id = match_id_and_season_dict['match_id']
-		season = match_id_and_season_dict['season']
+	counter = 0
 
+	# iterate over the clubs
+	for match_id in list_of_all_match_ids:
 		driver.get(urls['url_1'] + str(match_id))
 
-
-
-		time.sleep(2.22)
-		# exit accept all cookies prompt by accepting it
-		try:
-			advert_xpath = "//button[@class='_2hTJ5th4dIYlveipSEMYHH BfdVlAo_cgSVjDUegen0F js-accept-all-close']"
-			advert = presence_of_all_el_located(driver, advert_xpath, SECONDS_TO_WAIT, -2)
-			ad_close_button = advert[0]
-
-			# click on the close button
-			driver.execute_script("arguments[0].click();", ad_close_button)
-			print('clicked on close button')
-		
-		except TimeoutException:
-			print('There is no advertisement button. Moving on!')
-
+		counter += 1
 
 		print('***************************************************************************************************')
 
 		# holds a result information
 		result_dict = {}
 		result_dict['match id'] = match_id
-
-		# add the season to the result_dict
-		result_dict['season'] = season
-
 
 		scoreline = WebDriverWait(driver, 10).until(
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='teamsContainer']"))
@@ -210,7 +190,6 @@ def fast_results_retrieve(list_of_all_match_ids_and_seasons):
 		result_dict['stadium name'] = stadium_name
 		result_dict['city'] = city
 
-		results_list_of_dicts.append(result_dict)
 		
 		# get the date of the match, e.g. Tue 22 May 2022
 		match_date = WebDriverWait(driver, 10).until(
@@ -222,6 +201,14 @@ def fast_results_retrieve(list_of_all_match_ids_and_seasons):
 		match_date_json_dict = json.loads(match_date_json_string)
 
 		match_date_long = match_date_json_dict['kickoff']['label']
+
+		season = match_date_json_dict['gameweek']['compSeason']['label']
+
+		# add the season to the result_dict
+		result_dict['season'] = season
+
+
+		results_list_of_dicts.append(result_dict)
 
 		# extract the weekday, day, month, and year from the match_date
 	
@@ -237,6 +224,7 @@ def fast_results_retrieve(list_of_all_match_ids_and_seasons):
 		print(day)
 		print(month)
 		print(year)
+		print(season)
 
 		match_date = {}
 		match_date['weekday'] = weekday
@@ -245,6 +233,22 @@ def fast_results_retrieve(list_of_all_match_ids_and_seasons):
 		match_date['year'] = year
 
 
+
+		if counter == 1:
+			time.sleep(2.22)
+
+			# exit accept all cookies prompt by accepting it
+			try:
+				advert_xpath = "//button[@class='_2hTJ5th4dIYlveipSEMYHH BfdVlAo_cgSVjDUegen0F js-accept-all-close']"
+				advert = presence_of_all_el_located(driver, advert_xpath, SECONDS_TO_WAIT, -2)
+				ad_close_button = advert[0]
+
+				# click on the close button
+				driver.execute_script("arguments[0].click();", ad_close_button)
+				print('clicked on close button')
+			
+			except TimeoutException:
+				print('There is no advertisement button. Moving on!')
 
 		# call results_retrieve_2 to get the match details, such as scorers and assists, 
 		#	red cards, penalty scorers, own goals, etc.
@@ -293,26 +297,26 @@ def fast_results_retrieve(list_of_all_match_ids_and_seasons):
 	return results_list_of_list_of_dicts
 
 
-def get_match_ids_and_dates():
-	# get the date of the match if season <= 2006/07. Otherwise, the date will be found in the result page
-	print(all_seasons[j])
-	match_date = {}
-	if all_seasons[j] < '2006/07':
-		result_parent = results[i].find_element_by_xpath('../../../../..')
-		match_date = result_parent.get_attribute('data-competition-matches-list')
+# def get_match_ids_and_dates():
+# 	# get the date of the match if season <= 2006/07. Otherwise, the date will be found in the result page
+# 	print(all_seasons[j])
+# 	match_date = {}
+# 	if all_seasons[j] < '2006/07':
+# 		result_parent = results[i].find_element_by_xpath('../../../../..')
+# 		match_date = result_parent.get_attribute('data-competition-matches-list')
 
-		match_date_list = match_date.split()
+# 		match_date_list = match_date.split()
 
-		weekday = match_date_list[0]
-		day = match_date_list[1]
-		month = match_date_list[2]
-		year = match_date_list[3]
+# 		weekday = match_date_list[0]
+# 		day = match_date_list[1]
+# 		month = match_date_list[2]
+# 		year = match_date_list[3]
 
-		match_date = {}
-		match_date['weekday'] = weekday
-		match_date['day'] = day
-		match_date['month'] = month
-		match_date['year'] = year
+# 		match_date = {}
+# 		match_date['weekday'] = weekday
+# 		match_date['day'] = day
+# 		match_date['month'] = month
+# 		match_date['year'] = year
 
 # initialize the connection
 connection = connect_to_database()
@@ -320,11 +324,13 @@ connection = connect_to_database()
 # initialize a database object
 db = database(connection)
 
-list_of_all_match_ids = db.get_all_match_ids()
+# list_of_all_match_ids = db.get_all_match_ids()
 
-fast_results_retrieve([{'match_id': 7333, 'season': '2010/11'}])
+# db.get_match_ids_with_pen_goals()
 
-attendance_dict, yellow_card_dict_of_lists = yellow_card_detail_scraper(list_of_all_match_ids)
+# fast_results_retrieve([7333])
 
-db.update_yellow_card_minutes(yellow_card_dict_of_lists)
-db.update_attendance(attendance_dict)
+# attendance_dict, yellow_card_dict_of_lists = yellow_card_detail_scraper(list_of_all_match_ids)
+
+# db.update_yellow_card_minutes(yellow_card_dict_of_lists)
+# db.update_attendance(attendance_dict)

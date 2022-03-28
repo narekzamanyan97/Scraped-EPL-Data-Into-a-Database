@@ -877,6 +877,30 @@ class database:
 			self.cursor.execute(update_attendance)
 			self.conn.commit()
 
+	def get_match_ids_with_pen_goals(self):
+		query = "select match_id, count(*) as penalties "
+		query += "	from player_performance "
+		query += "	where type_of_stat=2 "
+		query += "	group by match_id "
+		query += "	having penalties>1 "
+		query += "	order by match_id;"
+
+		self.cursor.execute(query)
+		tuple_list = self.cursor.fetchall()
+
+		match_ids_list_of_dict = self.convert_from_tuple_list_to_dict(tuple_list)
+
+
+		match_ids_list = []
+
+		for dict_ in match_ids_list_of_dict:
+			match_ids_list.append(dict_['match_id'])
+
+		print(match_ids_list)
+
+	# def delete_matches_with_wrong_number_of_penalties():
+
+
 # This works. Now need to understand why some matches are missing
 #		and then get the club name
 # select m.season, count(m.season) from player_stats as p_s inner join match_ as m on m.match_id=p_s.match_id where player_id='p3897' and (p_s.is_in_starting_11=1 or p_s.substitution_on!='Null') group by season order by m.season desc; 

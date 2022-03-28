@@ -4,6 +4,7 @@ from premier_league_manager_scraper import *
 from premier_league_player_scraper import *
 from premier_league_results_scraper import *
 from premier_league_fixtures_scraper import *
+from fast_match_scraper import *
 
 # initialize the connection
 connection = connect_to_database()
@@ -169,7 +170,6 @@ def populate_match_table():
 						print('inserting the old stadium.')
 						db.insert_old_stadium(stadium_name, city)
 
-				# update the stadiums_and_cities_dict
 				db.insert_match_basic_info(match_info_list_of_dicts[0], match_info_list_of_dicts[1])
 
 				match_id_and_club_names = []
@@ -185,6 +185,31 @@ def populate_match_table():
 				db.insert_club_stats(match_info_list_of_dicts[4], match_id_and_club_names)
 			except IntegrityError:
 				print('Duplicate Key error raised from the insert_match_basic_info.')
+
+# gets match data using the scraper functions and inserts them into the match_, club_stats, player_stats,
+#		and player_performance tables
+def fast_populate_match_table():
+	match_info_list_of_list_of_dicts = fast_results_retrieve([7333])
+
+	for match_info_list_of_dicts in match_info_list_of_list_of_dicts:
+		try:
+			db.insert_match_basic_info(match_info_list_of_dicts[0], match_info_list_of_dicts[1])
+			
+			match_id_and_club_names = []
+			match_id_and_club_names.append(match_info_list_of_dicts[0]['match id'])
+			match_id_and_club_names.append(match_info_list_of_dicts[0]['home'])
+			match_id_and_club_names.append(match_info_list_of_dicts[0]['away'])
+			match_id_and_club_names.append(match_info_list_of_dicts[0]['season'])
+
+
+			db.insert_player_performance(match_info_list_of_dicts[2], match_id_and_club_names[0])
+			print(match_info_list_of_dicts[3])
+			db.insert_player_stats(match_info_list_of_dicts[3], match_id_and_club_names[0])
+			db.insert_club_stats(match_info_list_of_dicts[4], match_id_and_club_names)
+		except IntegrityError:
+			print('Duplicate Key error raised from the insert_match_basic_info.')
+
+
 
 def populate_fixture_table():
 	fixtures_dict_of_dicts = fixtures_retrieve()
@@ -202,7 +227,8 @@ def populate_fixture_table():
 # populate_player_table()
 # update_img_url_for_players()
 # update_badge_url_for_clubs()
-populate_match_table()
+# populate_match_table()
+fast_populate_match_table()
 # populate_fixture_table()
 
 # for j in range(1, 5):
