@@ -9,6 +9,8 @@ from selenium.webdriver.common.keys import Keys
 import time
 import re
 
+import json
+
 from set_up_driver import *
 
 from helper_functions import *
@@ -115,20 +117,6 @@ def yellow_card_detail_scraper(list_of_all_match_ids):
 def fast_results_retrieve(list_of_all_match_ids_and_seasons):
 	driver = set_up_driver(urls['url_1'])
 
-
-	# # exit accept all cookies prompt by accepting it
-	# try:
-	# 	advert_xpath = "//button[@class='_2hTJ5th4dIYlveipSEMYHH BfdVlAo_cgSVjDUegen0F js-accept-all-close']"
-	# 	advert = presence_of_all_el_located(driver, advert_xpath, SECONDS_TO_WAIT, -2)
-	# 	ad_close_button = advert[0]
-
-	# 	# click on the close button
-	# 	driver.execute_script("arguments[0].click();", ad_close_button)
-	# 	print('clicked on close button')
-	
-	# except TimeoutException:
-	# 	print('There is no advertisement button. Moving on!')
-
 	# holds all the results
 	results_list_of_dicts = []
 	results_list_of_list_of_dicts = []
@@ -140,19 +128,24 @@ def fast_results_retrieve(list_of_all_match_ids_and_seasons):
 
 		driver.get(urls['url_1'] + str(match_id))
 
-		print('***************************************************************************************************')
+
+
+		time.sleep(2.22)
+		# exit accept all cookies prompt by accepting it
+		try:
+			advert_xpath = "//button[@class='_2hTJ5th4dIYlveipSEMYHH BfdVlAo_cgSVjDUegen0F js-accept-all-close']"
+			advert = presence_of_all_el_located(driver, advert_xpath, SECONDS_TO_WAIT, -2)
+			ad_close_button = advert[0]
+
+			# click on the close button
+			driver.execute_script("arguments[0].click();", ad_close_button)
+			print('clicked on close button')
 		
-		# # exit 'Accept All Cookies' prompt by accepting it
-		# try:
-		# 	advert_xpath = "//button[@class='_2hTJ5th4dIYlveipSEMYHH BfdVlAo_cgSVjDUegen0F js-accept-all-close']"
-		# 	advert = presence_of_all_el_located(driver, advert_xpath, SECONDS_TO_WAIT, -2)
-		# 	ad_close_button = advert[0]
+		except TimeoutException:
+			print('There is no advertisement button. Moving on!')
 
-		# 	# click on the close button
-		# 	driver.execute_script("arguments[0].click();", ad_close_button)
 
-		# except TimeoutException:
-		# 	print('There is no advertisement button. Moving on!')	
+		print('***************************************************************************************************')
 
 		# holds a result information
 		result_dict = {}
@@ -211,50 +204,55 @@ def fast_results_retrieve(list_of_all_match_ids_and_seasons):
 
 		stadium_name = stadium[0]
 		city = stadium[1]
-		
-		counter += 1
 
 		result_dict['home goals'] = score_team_1
 		result_dict['away goals'] = score_team_2
 		result_dict['stadium name'] = stadium_name
 		result_dict['city'] = city
 
-		stadium_city_dict[stadium_name] = city
-
 		results_list_of_dicts.append(result_dict)
 		
+		# get the date of the match, e.g. Tue 22 May 2022
+		match_date = WebDriverWait(driver, 10).until(
+			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='mcTabsContainer']"))
+		)
 
-		# get the date of the match if season <= 2006/07. Otherwise, the date will be found in the result page
-		print(all_seasons[j])
+		match_date_json_string = match_date[0].get_attribute('data-fixture')
+
+		match_date_json_dict = json.loads(match_date_json_string)
+
+		match_date_long = match_date_json_dict['kickoff']['label']
+
+		# extract the weekday, day, month, and year from the match_date
+	
 		match_date = {}
-		if all_seasons[j] < '2006/07':
-			result_parent = results[i].find_element_by_xpath('../../../../..')
-			match_date = result_parent.get_attribute('data-competition-matches-list')
 
-			match_date_list = match_date.split()
+		match_date_list = match_date_long.split()
 
-			weekday = match_date_list[0]
-			day = match_date_list[1]
-			month = match_date_list[2]
-			year = match_date_list[3]
+		weekday = match_date_list[0]
+		day = match_date_list[1]
+		month = match_date_list[2]
+		year = match_date_list[3].replace(',', '')
+		print(weekday)
+		print(day)
+		print(month)
+		print(year)
 
-			match_date = {}
-			match_date['weekday'] = weekday
-			match_date['day'] = day
-			match_date['month'] = month
-			match_date['year'] = year
+		match_date = {}
+		match_date['weekday'] = weekday
+		match_date['day'] = day
+		match_date['month'] = month
+		match_date['year'] = year
+
+
 
 		# call results_retrieve_2 to get the match details, such as scorers and assists, 
 		#	red cards, penalty scorers, own goals, etc.
-		team_names, player_stats, match_date_, line_ups, team_stats = results_retrieve_2(driver, div_ids[i], all_seasons[j])
+		team_names, player_stats, match_date_, line_ups, team_stats = results_retrieve_2(driver, season)
 
 		# if the season is 2006/07 or more recent, then results_retrieve_2 was able to retrieve the match date.
 		match_date.update(match_date_)
 		
-		# # if the team names returned is empty, add the names from the result row.
-		# if bool(team_names) == False:
-		# 	team_names.append(home_club_name)
-		# 	team_names.append(away_club_name)
 
 		print(team_names[0] + " " + score_team_1 + "-" + score_team_2 + " " + team_names[1] + " @ " + str(stadium_name) + ", " + str(city))
 		
@@ -268,10 +266,8 @@ def fast_results_retrieve(list_of_all_match_ids_and_seasons):
 		results_list_of_dicts.append(player_stats)
 		results_list_of_dicts.append(line_ups)
 		results_list_of_dicts.append(team_stats)
-		results_list_of_dicts.append(stadium_city_dict)
+		# results_list_of_dicts.append(stadium_city_dict)
 
-		# reset the stadium_city_dict
-		stadium_city_dict = {}
 		
 
 		print('*****************************************************************')
@@ -293,17 +289,30 @@ def fast_results_retrieve(list_of_all_match_ids_and_seasons):
 		results_list_of_list_of_dicts.append(results_list_of_dicts)
 		results_list_of_dicts = []
 
-		# if there was a duplicate, start from the first result since
-		#		the scraper duplicates random results, and continuing
-		#		after duplication would cause the script to skip other
-		#		results
-		if duplicate_result_flag == True and i < last_index:
-			i = start_index
-		else:
-			i += 1
 
 	return results_list_of_list_of_dicts
 
+
+def get_match_ids_and_dates():
+	# get the date of the match if season <= 2006/07. Otherwise, the date will be found in the result page
+	print(all_seasons[j])
+	match_date = {}
+	if all_seasons[j] < '2006/07':
+		result_parent = results[i].find_element_by_xpath('../../../../..')
+		match_date = result_parent.get_attribute('data-competition-matches-list')
+
+		match_date_list = match_date.split()
+
+		weekday = match_date_list[0]
+		day = match_date_list[1]
+		month = match_date_list[2]
+		year = match_date_list[3]
+
+		match_date = {}
+		match_date['weekday'] = weekday
+		match_date['day'] = day
+		match_date['month'] = month
+		match_date['year'] = year
 
 # initialize the connection
 connection = connect_to_database()

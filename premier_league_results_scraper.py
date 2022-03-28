@@ -358,7 +358,7 @@ def results_retrieve_1(all_match_ids, season_index):
 
 						# call results_retrieve_2 to get the match details, such as scorers and assists, 
 						#	red cards, penalty scorers, own goals, etc.
-						team_names, player_stats, match_date_, line_ups, team_stats = results_retrieve_2(driver, div_ids[i], all_seasons[j])
+						team_names, player_stats, match_date_, line_ups, team_stats = results_retrieve_2(driver, all_seasons[j], div_ids[i])
 
 						# if the season is 2006/07 or more recent, then results_retrieve_2 was able to retrieve the match date.
 						match_date.update(match_date_)
@@ -429,11 +429,16 @@ def results_retrieve_1(all_match_ids, season_index):
 #	the name of the goal scorers, assists ...
 #	the dictionaries returned by results_retrieve_3/4, so that
 #	results_retrieve_1 can access them
-def results_retrieve_2(driver, result_row, season):
-	# click on the result row to open the details of the match
-	driver.execute_script("arguments[0].click();", result_row)
-	stats = {}
-
+def results_retrieve_2(driver, season, result_row=False):
+	# if result row is provided, then click on the row
+	if result_row:
+		# click on the result row to open the details of the match
+		driver.execute_script("arguments[0].click();", result_row)
+		stats = {}
+	# otherwise, this function is being called from fast_match_scraper, so we are already on the result detail page.
+	else:
+		stats = {}
+		
 	print('###########################################################')
 
 	# Blackburn Rovers vs Ipswich has no match info at the top
@@ -609,7 +614,7 @@ def results_retrieve_3(driver):
 
 	# click on the line-ups botton
 	driver.execute_script("arguments[0].click();", line_ups_tab[0])
-	print('528')
+
 	# get the formation of the home team
 	formation_home = WebDriverWait(driver, 10).until(
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='teamList mcLineUpContainter homeLineup active']/div[@class='col-4-m ']/header[@class='squadHeader']/div[@class='position']/strong[@class='matchTeamFormation']"))
@@ -620,25 +625,22 @@ def results_retrieve_3(driver):
 	formation_away = WebDriverWait(driver, 10).until(
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='teamList mcLineUpContainter awayLineup']/div[@class='col-4-m right']/header[@class='squadHeader']/div[@class='position']/strong[@class='matchTeamFormation']"))
 	)
-	print(539)
+
 	formation_away = formation_away[0].text
-	print(541)
+
 	# get the squads of the hosts and the guests (shirt numbers and player info)
 	squad_home_number = WebDriverWait(driver, 10).until(
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='teamList mcLineUpContainter homeLineup active']/div[@class='col-4-m ']/div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList home']/li[@class='player']/a/div[@class='number']"))
 	)
-	print(546)
 	squad_home_info = WebDriverWait(driver, 10).until(
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='teamList mcLineUpContainter homeLineup active']/div[@class='col-4-m ']/div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList home']/li[@class='player']/a/div[@class='info']"))
 	)
-	print(550)
 
 	# There is at least one result that has a space in ul[@class='startingLineUpContainer squadList ']
 	try:
 		squad_away_info = WebDriverWait(driver, 10).until(
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='teamList mcLineUpContainter awayLineup']/div[@class='col-4-m right']/div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList']/li[@class='player']/a/div[@class='info']"))
 		)
-		print(554)
 
 		squad_away_number = WebDriverWait(driver, 10).until(
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='teamList mcLineUpContainter awayLineup']/div[@class='col-4-m right']/div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList']/li[@class='player']/a/div[@class='number']"))
@@ -648,12 +650,10 @@ def results_retrieve_3(driver):
 		squad_away_info = WebDriverWait(driver, 10).until(
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='teamList mcLineUpContainter awayLineup']/div[@class='col-4-m right']/div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList ']/li[@class='player']/a/div[@class='info']"))
 		)
-		print(554)
 		squad_away_number = WebDriverWait(driver, 10).until(
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='teamList mcLineUpContainter awayLineup']/div[@class='col-4-m right']/div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList ']/li[@class='player']/a/div[@class='number']"))
 		)
 	
-	print(558)
 
 	print(formation_home + ' : ' + formation_away)
 
@@ -662,17 +662,14 @@ def results_retrieve_3(driver):
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList home']/li[@class='player']/a/img"))
 	)
 
-	print('595')
 	try:
 		player_away_ids = WebDriverWait(driver, 10).until(
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-4-m right']/div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList']/li[@class='player']/a/img"))
 		)
-		print('600')
 	except:
 		player_away_ids = WebDriverWait(driver, 10).until(
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='col-4-m right']/div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList ']/li[@class='player']/a/img"))
 		)
-	print('605')
 
 	# The website also uses a link id, which is used to get to a specific player's page
 	# This id is also unique, so we can get this id, and map it with the other id, later
@@ -681,7 +678,6 @@ def results_retrieve_3(driver):
 		EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList home']/li[@class='player']/a"))
 	)
 
-	print('613')
 	try:
 		player_away_link_ids = WebDriverWait(driver, 10).until(
 			EC.presence_of_all_elements_located((By.XPATH, "//div[@class='matchLineupTeamContainer']/ul[@class='startingLineUpContainer squadList']/li[@class='player']/a"))
