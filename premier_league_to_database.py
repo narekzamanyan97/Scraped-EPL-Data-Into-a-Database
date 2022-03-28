@@ -897,8 +897,17 @@ class database:
 			match_ids_list.append(dict_['match_id'])
 
 		print(match_ids_list)
+		return match_ids_list
 
-	# def delete_matches_with_wrong_number_of_penalties():
+	def delete_matches_with_wrong_number_of_penalties():
+		list_of_match_ids = self.get_match_ids_with_pen_goals()
+
+		for match_id in list_of_match_ids:
+			delete_statement = "delete from match_ where match_id="
+			delete_statement += str(match_id) + ';'
+
+			self.cursor.execute(delete_statement)
+			self.conn.commit()
 
 
 # This works. Now need to understand why some matches are missing

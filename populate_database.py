@@ -189,12 +189,17 @@ def populate_match_table():
 # gets match data using the scraper functions and inserts them into the match_, club_stats, player_stats,
 #		and player_performance tables
 def fast_populate_match_table():
+
+
+	matches = db.get_match_ids_with_pen_goals()
+	
+	
 	match_info_list_of_list_of_dicts = fast_results_retrieve([7333])
 
 	for match_info_list_of_dicts in match_info_list_of_list_of_dicts:
 		try:
 			db.insert_match_basic_info(match_info_list_of_dicts[0], match_info_list_of_dicts[1])
-			
+
 			match_id_and_club_names = []
 			match_id_and_club_names.append(match_info_list_of_dicts[0]['match id'])
 			match_id_and_club_names.append(match_info_list_of_dicts[0]['home'])
